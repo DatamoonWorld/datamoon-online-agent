@@ -1,6 +1,4 @@
-# NOCMOON.md
-
-# Nocmoon
+﻿# Nocmoon
 
 ## Classificação
 
@@ -12,11 +10,13 @@ Estágio Evolutivo: Code
 
 Tipo: Glitch
 
-Função Principal: Atacante (Glass Cannon)
+Função Principal: Atacante
+
+Subfunção: Glass cannon
 
 ---
 
-# Conceito
+## Conceito
 
 Nocmoon é um Datamoon inspirado em morcegos, ecolocalização e lendas vampíricas.
 
@@ -24,21 +24,21 @@ Sua existência representa a percepção através do invisível.
 
 Enquanto outras criaturas dependem da visão para compreender o mundo, Nocmoon utiliza vibrações sonoras para interpretar tudo ao seu redor.
 
-Sua natureza Glitch manifesta-se através de sua percepção incomum e comportamento imprevisível em combate.
+Sua natureza Glitch manifesta-se por meio de uma percepção incomum e de um comportamento imprevisível em combate.
 
 ---
 
-# Origem do Sonho
+## Origem do Sonho
 
 Base Natural:
 - Morcego
 
-Conceito:
+Conceitos Centrais:
 - Som
 - Ecolocalização
 - Percepção
 
-Influência Cultural:
+Influências Culturais:
 - Vampiros
 - Criaturas noturnas
 - Mistérios da noite
@@ -48,20 +48,20 @@ Tipo Fundamental:
 
 ---
 
-# Aparência
+## Aparência
 
 Nocmoon possui:
 
-- Corpo triangular;
-- Cabeça grande;
-- Estética "chibi";
-- Pelagem roxa;
-- Membranas rosadas;
-- Ausência de olhos;
-- Grandes orelhas direcionadas para frente;
-- Pequenas marcações sonoras nas orelhas;
-- Pequenos dentes pontiagudos;
-- Gema púrpura presa ao peito.
+- corpo triangular;
+- cabeça grande;
+- estética chibi;
+- pelagem roxa;
+- membranas rosadas;
+- ausência de olhos;
+- grandes orelhas direcionadas para frente;
+- pequenas marcações sonoras nas orelhas;
+- pequenos dentes pontiagudos;
+- gema púrpura presa ao peito.
 
 Suas orelhas funcionam como principal órgão sensorial.
 
@@ -69,161 +69,151 @@ A gema em seu peito atua como condensador de energia sonora.
 
 ---
 
-# Personalidade
+## Personalidade
 
 Nocmoon é naturalmente:
 
-- Tímido;
-- Inteligente;
-- Observador;
-- Curioso;
-- Cauteloso.
+- tímido;
+- inteligente;
+- observador;
+- curioso;
+- cauteloso.
 
 Apesar de evitar confrontos desnecessários, demonstra grande capacidade estratégica quando ameaçado.
 
 ---
 
-# Habitat
+## Habitat
 
 Regiões comuns:
 
-- Cavernas;
-- Ruínas antigas;
-- Florestas noturnas;
-- Regiões de baixa luminosidade;
-- Áreas com forte reverberação sonora.
+- cavernas;
+- ruínas antigas;
+- florestas noturnas;
+- regiões de baixa luminosidade;
+- áreas com forte reverberação sonora.
 
 ---
 
-# Papel Ecológico
+## Papel Ecológico
 
 Nocmoons atuam como exploradores naturais.
 
 São capazes de detectar:
 
-- Anomalias;
-- Cavernas ocultas;
-- Túneis;
-- Alterações ambientais;
-- Presença de outras criaturas.
+- anomalias;
+- cavernas ocultas;
+- túneis;
+- alterações ambientais;
+- presença de outras criaturas.
 
 Seu comportamento ajuda a manter o equilíbrio populacional de pequenas espécies noturnas.
 
 ---
 
-# Combate
+## Combate
 
-## Perfil
+### Perfil
 
 - Alto dano
 - Baixa resistência
 - Alta mobilidade
 
----
+### Ataque Básico
 
-## Ataque Básico
+Nome: Sonic Wave
 
-### Sonic Wave
+Descrição:
+- Dispara uma onda sonora em linha reta.
+- Funciona como principal forma de ataque à distância.
 
-Dispara uma onda sonora em linha reta.
+### Habilidade Confirmada
 
-Utilizada como principal forma de ataque à distância.
+Nome: Fang Strike
 
----
+Descrição:
+- Nocmoon avança rapidamente contra o alvo utilizando suas presas.
+- A habilidade possui temática de drenagem de energia.
 
-## Habilidade
+### Habilidade em Aberto
 
-### Fang Strike
-
-Nocmoon avança rapidamente contra o alvo utilizando suas presas.
-
-Possui temática baseada em drenagem de energia.
-
----
-
-## Habilidade
-
-### Não Definida
-
-Deve manter relação com:
-
-- Som;
-- Vampirismo;
-- Vibrações;
-- Eco;
-- Roubo de energia.
+Direção desejada:
+- som;
+- vampirismo;
+- vibrações;
+- eco;
+- roubo de energia.
 
 ---
 
-# Link
+## Link
 
 Nocmoon responde bem a jogadores exploradores.
 
 Seu desenvolvimento costuma acelerar quando:
 
-- Descobre novas regiões;
-- Explora áreas ocultas;
-- Investiga anomalias;
-- Participa de eventos noturnos.
+- descobre novas regiões;
+- explora áreas ocultas;
+- investiga anomalias;
+- participa de eventos noturnos.
 
 ---
 
-# Evolução
+## Evolução
 
-## Code
+Code:
+- Nocmoon
 
-Nocmoon
+Nex:
+- Kainemoon
 
----
+Omega:
+- Bathorymoon
 
-## Nex
-
-Não definido
-
----
-
-## Omega
-
-Não definido
+Linha oficial v1:
+- Nocmoon -> Kainemoon -> Bathorymoon
 
 ---
 
-# Influências Evolutivas
+## Influências Evolutivas
 
 Possíveis influências:
 
-- Anomalias sonoras;
-- Fragmentos lunares;
-- Eventos noturnos;
-- Regiões de eco;
-- Artefatos antigos.
+- anomalias sonoras;
+- fragmentos lunares;
+- eventos noturnos;
+- regiões de eco;
+- artefatos antigos.
 
 ---
 
-# Filosofia de Design
+## Filosofia de Design
 
 Nocmoon foi criado para representar:
 
-- Exploração;
-- Descoberta;
-- Percepção;
-- Mistério;
-- Inteligência.
+- exploração;
+- descoberta;
+- percepção;
+- mistério;
+- inteligência.
 
 Seu design deve sempre comunicar:
 
-- Fragilidade física;
-- Agilidade;
-- Natureza noturna;
-- Forte ligação com som;
-- Forte ligação com vampirismo.
+- fragilidade física;
+- agilidade;
+- natureza noturna;
+- forte ligação com som;
+- forte ligação com vampirismo.
 
 ---
 
-# Status
+## Status
 
 Estado: Ativo
 
 Canon: Sim
 
-Linha Evolutiva: Em Desenvolvimento
+Registro Evolutivo: Oficial
+
+Observações:
+- Forma base oficial da primeira linha evolutiva documentada em v1.

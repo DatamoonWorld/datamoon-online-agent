@@ -8,11 +8,22 @@ When deeper project context is needed, consult these files first:
 
 1. `ai/AGENT.md`
 2. `ai/CODE_RULES.md`
-3. `ai/DATAMOON_CREATION_RULES.md`
-4. `docs/DATAMOON_BIBLE.md`
-5. `docs/WORLD_BIBLE.md`
-6. `docs/LINK_SYSTEM.md`
-7. `docs/SPECIES_DESIGN_GUIDE.md`
+3. `ai/NETWORK_RULES.md`
+4. `ai/SERVER_ARCHITECTURE.md`
+5. `ai/DATABASE_RULES.md`
+6. `ai/GODOT_STANDARDS.md`
+7. `ai/DATAMOON_CREATION_RULES.md`
+8. `docs/DATAMOON_BIBLE.md`
+9. `docs/WORLD_BIBLE.md`
+10. `docs/LINK_SYSTEM.md`
+11. `docs/COMBAT_SYSTEM.md`
+12. `docs/ADVANTAGE_SYSTEM.md`
+13. `docs/ECONOMY.md`
+14. `docs/QUEST_DESIGN.md`
+15. `docs/DUNGEON_RULES.md`
+16. `docs/WORLD_EVENTS.md`
+17. `docs/SPECIES_DESIGN_GUIDE.md`
+18. `docs/DECISION_LOG.md`
 
 If this file is ever too brief for a decision, the files above win on detail.
 
