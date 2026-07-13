@@ -105,3 +105,56 @@ When creating Datamoons or related lore:
 - Separate conceptual guidance from implementation guidance when possible.
 - Ask follow-up questions only when the missing information materially changes the safest solution.
 - If a fast solution harms architecture, balance, MMO scalability, or project identity, say so and propose a better path.
+
+## Production Deploy Defaults
+
+When helping with production updates, assume the VM repositories live under:
+
+- `/opt/datamoon/datamoon-online-auth`
+- `/opt/datamoon/datamoon-online-gateway`
+- `/opt/datamoon/datamoon-online-mysqlapi`
+- `/opt/datamoon/datamoon-online-server`
+- `/opt/datamoon/datamoon-online-web`
+
+Known systemd units:
+
+- `datamoon-api.service` for `datamoon-online-mysqlapi`
+- `datamoon-auth.service` for `datamoon-online-auth`
+- `datamoon-gateway.service` for `datamoon-online-gateway`
+- `datamoon-server.service` for `datamoon-online-server`
+
+Default branch for deploy examples is `pbe` unless the user says otherwise.
+
+For Go services (`mysqlapi`, `auth`, `gateway`), use this pattern and adjust the repo/service/binary name:
+
+```bash
+cd /opt/datamoon/datamoon-online-mysqlapi
+git switch pbe
+git pull --ff-only origin pbe
+go build -o /opt/datamoon/datamoon-online-mysqlapi/datamoon-api ./cmd/api
+sudo systemctl restart datamoon-api
+sudo systemctl status datamoon-api --no-pager -l
+journalctl -u datamoon-api -n 50 --no-pager
+```
+
+For the Godot game server, always stop the service before pulling/importing, and always run the headless import before starting it again:
+
+```bash
+sudo systemctl stop datamoon-server
+cd /opt/datamoon/datamoon-online-server
+git switch pbe
+git pull --ff-only origin pbe
+/usr/local/bin/godot --headless --path . --import
+sudo systemctl start datamoon-server
+sudo systemctl status datamoon-server --no-pager -l
+journalctl -u datamoon-server -n 50 --no-pager
+```
+
+If a database schema shape changed but base migrations were edited instead of adding a new migration, give the user the explicit SQL to run manually on the server. Do not assume the migration runner will apply edits to already-applied migration files.
+
+Before telling the user a deploy is complete, verify:
+
+- `git pull` reached the expected commit.
+- The relevant service restarted successfully.
+- Recent `journalctl` logs do not show startup errors.
+- For Godot server deploys, the headless import completed before service start.
