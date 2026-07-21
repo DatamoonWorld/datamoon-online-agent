@@ -202,6 +202,80 @@ Avoid overusing:
 
 ---
 
+## Damage Formula Contract
+
+Basic attacks and skills share the same defensive damage baseline.
+
+The current baseline formula is:
+
+```text
+damage_before_modifiers = (power * 100) / ((DEF * 2.5) + 100)
+```
+
+### Basic attacks
+
+Basic attacks always use the standard combat formula.
+
+```text
+power = ATK
+damage = formula_base(power, DEF)
+damage *= type_advantage
+damage *= level_gap
+damage *= variance
+damage *= crit, if the basic attack crits
+```
+
+Critical chance and critical damage apply only to basic attacks.
+
+### Skills
+
+Every skill may define its own `damage_formula`.
+
+The skill first builds a `power` value, then sends that value through the same defensive formula.
+
+```text
+power = damage + damage_inc * skill_level
+power += ATK * atk_scale
+power += HP * hp_scale
+power += MP * mp_scale
+power += DEF * def_scale
+power += flat
+
+damage = formula_base(power, DEF)
+damage *= type_advantage
+damage *= level_gap
+damage *= variance
+damage *= 1.0 + skill_damage
+```
+
+If a skill has no `damage_formula`, it falls back to:
+
+```text
+power = damage + damage_inc * skill_level
+```
+
+Skills do not crit.
+
+`skill_damage` is a final float multiplier for skills. For example, `skill_damage = 1.5` means +150% final skill damage.
+
+Armor penetration is intentionally reserved for a future pass and is not part of the current beta formula.
+
+### Current beta examples
+
+Slimmoon:
+
+```text
+power = base skill damage + growth + ATK * 1.0 + HP * 0.1
+```
+
+Nocmoon:
+
+```text
+power = base skill damage + growth + ATK * 2.5
+```
+
+---
+
 ## Progression And Balance
 
 Combat growth should come from:
