@@ -121,7 +121,10 @@ Known systemd units:
 - `datamoon-api.service` for `datamoon-online-mysqlapi`
 - `datamoon-auth.service` for `datamoon-online-auth`
 - `datamoon-gateway.service` for `datamoon-online-gateway`
-- `datamoon-server.service` for `datamoon-online-server`
+- `datamoon-server@overworld.service` for the overworld game worker
+- `datamoon-server@dungeon-1.service` for the dungeon/instance game worker
+
+Production game workers should run through the templated `datamoon-server@...` units. Keep the non-templated `datamoon-server.service` stopped and disabled unless the user explicitly asks to use it for a local/single-process test.
 
 Default branch for deploy examples is `pbe` unless the user says otherwise.
 
@@ -137,17 +140,23 @@ sudo systemctl status datamoon-api --no-pager -l
 journalctl -u datamoon-api -n 50 --no-pager
 ```
 
-For the Godot game server, always stop the service before pulling/importing, and always run the headless import before starting it again:
+For the Godot game server, always stop the worker services before pulling/importing, and always run the headless import before starting them again:
 
 ```bash
 sudo systemctl stop datamoon-server
+sudo systemctl stop datamoon-server@overworld
+sudo systemctl stop datamoon-server@dungeon-1
 cd /opt/datamoon/datamoon-online-server
 git switch pbe
 git pull --ff-only origin pbe
 /usr/local/bin/godot --headless --path . --import
-sudo systemctl start datamoon-server
-sudo systemctl status datamoon-server --no-pager -l
-journalctl -u datamoon-server -n 50 --no-pager
+sudo systemctl disable datamoon-server
+sudo systemctl start datamoon-server@overworld
+sudo systemctl start datamoon-server@dungeon-1
+sudo systemctl status datamoon-server@overworld --no-pager -l
+sudo systemctl status datamoon-server@dungeon-1 --no-pager -l
+journalctl -u datamoon-server@overworld -n 50 --no-pager
+journalctl -u datamoon-server@dungeon-1 -n 50 --no-pager
 ```
 
 If a database schema shape changed but base migrations were edited instead of adding a new migration, give the user the explicit SQL to run manually on the server. Do not assume the migration runner will apply edits to already-applied migration files.
