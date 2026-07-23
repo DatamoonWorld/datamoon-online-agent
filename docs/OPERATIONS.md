@@ -11,10 +11,12 @@ machine-readable examples such as `.env.example` and systemd unit files.
 - `/opt/datamoon/datamoon-online-server`: Godot ENet workers.
 - `/opt/datamoon/datamoon-online-web`: web portal, loopback `3101`.
 
-Systemd units are `datamoon-api`, `datamoon-auth`, `datamoon-gateway`,
-`datamoon-server@overworld`, `datamoon-server@dungeon-1`,
-`datamoon-server@dungeon-2` and `datamoon-web`. The legacy non-templated
-`datamoon-server.service` must remain disabled.
+Active PBE systemd units are `datamoon-api`, `datamoon-auth`,
+`datamoon-gateway`, `datamoon-server@overworld`,
+`datamoon-server@dungeon-1` and `datamoon-web`. The legacy non-templated
+`datamoon-server.service` and `datamoon-server@dungeon-2` remain disabled to
+reduce resource usage during testing. The dungeon-2 environment template stays
+available for a future capacity increase.
 
 ## Required Security Configuration
 

@@ -59,7 +59,8 @@ nginx -t
 systemctl reload nginx
 systemctl daemon-reload
 systemctl disable --now datamoon-server.service 2>/dev/null || true
+systemctl disable --now datamoon-server@dungeon-2.service 2>/dev/null || true
 systemctl enable datamoon-api.service datamoon-auth.service datamoon-gateway.service \
   datamoon-server@overworld.service datamoon-server@dungeon-1.service \
-  datamoon-server@dungeon-2.service datamoon-web.service
+  datamoon-web.service
 echo "Connection configuration installed. Run datamoon-update to deploy and activate it."
