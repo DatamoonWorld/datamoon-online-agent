@@ -189,6 +189,26 @@ Prefer:
 - concise read and write paths;
 - indexed lookups for high-frequency entities.
 
+## Persistent Audit Rules
+
+Persistent audit is mandatory when a mutation changes player-owned value or
+security-sensitive state. Current examples are inventory movement and
+consumption, item grants, Bits or progression rewards, reward operations and
+future administrative actions. Record the actor, target, operation id, reason,
+delta, resulting value and UTC timestamp when those fields apply.
+
+Do not write frame, movement, combat tick, heartbeat, ordinary accepted chat,
+Party presence or worker health events to MySQL audit tables. Those belong in
+structured service logs and metrics. Never persist passwords, tokens, tickets or
+chat content in audit metadata.
+
+Audit and idempotency records use `DATAMOON_AUDIT_RETENTION_DAYS`, defaulting to
+180 days in every environment including PBE. Cleanup must run in bounded batches
+against a time index. Child audit rows must be removed before their parent
+operation rows. A new sensitive feature must define its audit event and retention
+behavior before release; operational state tables must never be added to cleanup
+merely because they contain timestamps.
+
 ---
 
 ## Failure Handling Rules

@@ -83,6 +83,11 @@ Use these defaults unless the code in the target folder clearly establishes a ne
 - Do not treat the database as the real-time authority for combat or movement.
 - Avoid per-frame or per-attack persistence patterns.
 - Prefer cache, batching, checkpoints, event-based saves, and auditable logs for sensitive systems.
+- Persist audit records for inventory, currency, rewards and administrative
+  mutations, with a 180-day default retention even in PBE. New sensitive
+  features must define audit and cleanup behavior before release.
+- Keep movement, combat ticks, presence, heartbeat and ordinary chat out of
+  database audits. Never record passwords, tokens, tickets or chat content.
 
 ## Implementation Checklist
 

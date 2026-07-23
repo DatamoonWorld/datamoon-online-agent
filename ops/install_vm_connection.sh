@@ -20,6 +20,8 @@ if ! id datamoon >/dev/null 2>&1; then
   useradd --system --home "$SERVER_STATE_DIR" --shell /usr/sbin/nologin datamoon
 fi
 install -d -m 0750 -o root -g datamoon "$ENV_DIR"
+install -d -m 0755 /etc/systemd/journald.conf.d
+install -m 0644 "$AGENT_ROOT/ops/systemd/journald-datamoon.conf" /etc/systemd/journald.conf.d/datamoon.conf
 install -d -m 0750 -o datamoon -g datamoon \
   "$SERVER_STATE_DIR" /var/lib/datamoon-auth /var/lib/datamoon-gateway \
   /var/lib/datamoon-web /var/lib/datamoon-web/storage
@@ -57,6 +59,7 @@ chmod 0755 /etc/letsencrypt/renewal-hooks/deploy/reload-nginx
 
 nginx -t
 systemctl reload nginx
+systemctl restart systemd-journald
 systemctl daemon-reload
 systemctl disable --now datamoon-server.service 2>/dev/null || true
 systemctl disable --now datamoon-server@dungeon-2.service 2>/dev/null || true

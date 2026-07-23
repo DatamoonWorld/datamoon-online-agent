@@ -108,5 +108,55 @@ There are no automated functional test files. Source gates are Godot headless
 import, Go formatting/vet/build, Node syntax and Bash syntax. Gameplay acceptance
 is manual and must be supported by structured event logs.
 
+## Logging And Audit Retention
+
+Runtime services emit structured logs only to stdout for collection by
+`journald`. Canonical environments use `DATAMOON_LOG_STDOUT=true`,
+`DATAMOON_LOG_FILES=false` and `DATAMOON_LOG_LEVEL=INFO`; do not re-enable JSONL
+files on the VM because they duplicate the journal. Full metrics snapshots are
+DEBUG-only and metrics remain available through each worker observability
+endpoint.
+
+Keep the journal compressed, capped at 200 MB, with 3 GB reserved for the system
+and seven days of retention. Use a drop-in at
+`/etc/systemd/journald.conf.d/datamoon.conf`, installed from
+`ops/systemd/journald-datamoon.conf`, rather than editing the packaged
+configuration. Verify that `systemd-analyze cat-config systemd/journald.conf`
+shows both the main file and the Datamoon drop-in.
+
+The MySQL API retains inventory, reward and value-change audit plus their
+idempotency operation records for 180 days by default. It starts cleanup with
+the API, runs daily and deletes indexed rows in batches of 1,000, up to 20
+batches per table per run.
+The canonical variables are:
+
+```env
+DATAMOON_AUDIT_RETENTION_DAYS=180
+DATAMOON_AUDIT_CLEANUP_INTERVAL_SECONDS=86400
+DATAMOON_AUDIT_CLEANUP_BATCH_SIZE=1000
+DATAMOON_AUDIT_CLEANUP_MAX_BATCHES=20
+```
+
+Chat retention is separate and remains seven days. Persistent audit is reserved
+for changes to inventory, currency, rewards and future administrative state.
+Party, Guild, handoff, login/logout and automated protection events are retained
+in structured logs unless they also change player-owned value. Never log chat
+content, passwords, tokens or tickets.
+
+Support can reconstruct item and balance changes using `operation_id` across
+`dm_inventory_audit`, `dm_inventory_ops`, `dm_reward_audit`,
+`dm_reward_operations` and `dm_value_audit`. Check table growth with:
+
+```sql
+SELECT table_name, table_rows,
+       ROUND((data_length + index_length) / 1024 / 1024, 2) AS total_mb
+FROM information_schema.tables
+WHERE table_schema = 'datamoon_game_server'
+  AND table_name IN ('dm_inventory_audit', 'dm_inventory_ops',
+                     'dm_reward_audit', 'dm_reward_operations',
+                     'dm_value_audit')
+ORDER BY total_mb DESC;
+```
+
 Third-party asset licenses and their bundled READMEs stay next to the assets and
 are not project documentation.
