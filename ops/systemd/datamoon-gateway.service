@@ -1,0 +1,28 @@
+[Unit]
+Description=Datamoons Online WebSocket gateway
+After=network-online.target datamoon-api.service datamoon-auth.service
+Wants=network-online.target
+Requires=datamoon-api.service datamoon-auth.service
+
+[Service]
+Type=simple
+User=datamoon
+Group=datamoon
+WorkingDirectory=/opt/datamoon/datamoon-online-gateway
+EnvironmentFile=/opt/datamoon/env/datamoon-gateway.env
+EnvironmentFile=/opt/datamoon/env/datamoon-gateway-secrets.env
+Environment=HOME=/var/lib/datamoon-gateway
+ExecStart=/usr/local/bin/godot --headless --path /opt/datamoon/datamoon-online-gateway
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/datamoon-gateway
+StateDirectory=datamoon-gateway
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

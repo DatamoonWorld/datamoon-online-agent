@@ -1,0 +1,27 @@
+[Unit]
+Description=Datamoons Online web portal
+After=network-online.target datamoon-api.service
+Wants=network-online.target
+Requires=datamoon-api.service
+
+[Service]
+Type=simple
+User=datamoon
+Group=datamoon
+WorkingDirectory=/opt/datamoon/datamoon-online-web
+EnvironmentFile=/opt/datamoon/env/datamoon-web.env
+EnvironmentFile=/opt/datamoon/env/datamoon-web-secrets.env
+ExecStart=/usr/bin/node /opt/datamoon/datamoon-online-web/src/server.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/datamoon-web
+StateDirectory=datamoon-web
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

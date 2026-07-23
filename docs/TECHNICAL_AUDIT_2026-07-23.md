@@ -1,5 +1,8 @@
 # Full Technical Audit - 2026-07-23
 
+> Historical point-in-time audit. Automated test references were superseded by
+> the manual, structured-log validation decision recorded later on 2026-07-23.
+
 ## Scope And Method
 
 Auth, Gateway, Server, Client and MySQL API were reviewed after fetch/prune on

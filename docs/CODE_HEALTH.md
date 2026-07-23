@@ -49,10 +49,10 @@ handlers do not depend on worker topology.
 
 Damage authority, target/space validation, action acknowledgements and projectile
 de-duplication are cohesive. Improve by moving formulas into immutable typed
-combat inputs/results, adding deterministic seeded simulations, and separating
-action lifecycle from damage math. Add tests for defense curves, level gaps,
-systems, buffs, AoE cadence and simultaneous death. Avoid adding more logic to
-`combat.gd` before this split.
+combat inputs/results and separating action lifecycle from damage math. Validate
+defense curves, level gaps, systems, buffs, AoE cadence and simultaneous death
+through controlled live scenarios with structured inputs/results in logs. Avoid
+adding more logic to `combat.gd` before this split.
 
 ### Guild
 
@@ -73,8 +73,8 @@ for beta but not for high-volume world chat.
 
 Outcomes are server/API authoritative and inventory mutations are transactional.
 Craft/Cooking should share an engine; Fishing needs deterministic session IDs and
-stronger timing/replay tests; Hatchery should expose explicit job state transitions
-and claim idempotency metrics. Never move result rolls to the Client.
+stronger timing/replay telemetry; Hatchery should expose explicit job state
+transitions and claim idempotency metrics. Never move result rolls to the Client.
 
 ### Party
 
@@ -88,8 +88,9 @@ state. Dungeon entry should freeze a versioned party roster for the run.
 Signed directed handoff, atomic lease replacement, fencing and acknowledgement are
 the correct foundation. Improve with an explicit transfer state machine shared by
 source/client/target, retry-safe acknowledgements, target readiness reservation,
-source rollback timeout, and integration tests that kill each component at every
-transition. Party handoff should reserve all members before moving the first one.
+source rollback timeout, and explicit logs for manually interrupting each
+component at every transition. Party handoff should reserve all members before
+moving the first one.
 
 ### Client
 
@@ -101,14 +102,21 @@ state with domain stores/signals where practical.
 ### MySQL API
 
 Transactions and domain routes are strong. Several handler files exceed 600-1400
-lines and should be split by aggregate/use case. Add generated route contract
-tests, repository interfaces for unit tests, service-scoped auth coverage and
-query-plan/load checks for chat, guild and inventory hot paths.
+lines and should be split by aggregate/use case. Add a generated route inventory,
+repository interfaces, service-scoped auth telemetry and manual query-plan/load
+checks for chat, guild and inventory hot paths.
+
+## Validation Policy
+
+Automated test files were removed by project decision on 2026-07-23. Functional
+validation is performed in the real PBE flow with structured logs. CI and deploy
+retain only Godot import, source formatting, static analysis, syntax checks and
+build verification. Manual scenarios live in the canonical Operations runbook.
 
 ## Rules For Reduction
 
 1. Reduce duplicated decisions, not merely formatting or line breaks.
 2. No cross-domain generic abstraction without at least two stable consumers.
-3. Every extraction keeps behavior tests and contract goldens green.
+3. Every extraction preserves RPC/API contracts and records a complete manual log trace.
 4. Large gameplay changes are separate commits from mechanical moves.
 5. Measure frame time, packet size, DB writes and API latency before/after.

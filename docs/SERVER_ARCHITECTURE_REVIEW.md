@@ -1,8 +1,9 @@
 # Review arquitetural do `datamoon-online-server`
 
-> Historical review retained for implementation context. Its deployment command
-> examples are superseded by `docs/OPERATIONS.md`, which is the only current VM
-> runbook.
+> Historical review retained for implementation context. Its deployment and
+> automated-test commands are superseded and must not be executed or restored.
+> `AGENTS.md` and `docs/OPERATIONS.md` define the current manual-validation and
+> VM procedures.
 
 Data da revisão: 2026-07-15
 Última atualização do plano: 2026-07-18

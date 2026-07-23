@@ -237,3 +237,13 @@ Decision:
   `AGENTS.md` files are mandatory pointers to the canonical index.
 - Third-party licenses and asset READMEs remain with their assets.
 - VM updates use the coordinated preflight/build/restart/rollback script.
+
+## 2026-07-23 - Manual functional validation
+
+Status: accepted
+
+Decision:
+- Automated functional/regression test files are removed from runtime repositories.
+- PBE behavior is validated manually through real Client/Gateway/Auth/API/worker flows.
+- Structured logs expose transitions, outcomes and correlation identifiers without credentials or tickets.
+- CI and deploy retain import, formatting, static analysis, syntax and build checks.

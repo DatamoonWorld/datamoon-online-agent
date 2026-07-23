@@ -114,6 +114,9 @@ When creating Datamoons or related lore:
 - Separate conceptual guidance from implementation guidance when possible.
 - Ask follow-up questions only when the missing information materially changes the safest solution.
 - If a fast solution harms architecture, balance, MMO scalability, or project identity, say so and propose a better path.
+- Functional validation is manual and log-driven by project decision. Do not add
+  automated test files or test-only runtime hooks; keep import, formatting,
+  static-analysis and build checks.
 
 ## Production Deploy Defaults
 

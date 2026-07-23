@@ -1,0 +1,28 @@
+[Unit]
+Description=Datamoons Online authentication service
+After=network-online.target datamoon-api.service
+Wants=network-online.target
+Requires=datamoon-api.service
+
+[Service]
+Type=simple
+User=datamoon
+Group=datamoon
+WorkingDirectory=/opt/datamoon/datamoon-online-auth
+EnvironmentFile=/opt/datamoon/env/datamoon-auth.env
+EnvironmentFile=/opt/datamoon/env/datamoon-auth-secrets.env
+Environment=HOME=/var/lib/datamoon-auth
+ExecStart=/usr/local/bin/godot --headless --path /opt/datamoon/datamoon-online-auth
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/datamoon-auth
+StateDirectory=datamoon-auth
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

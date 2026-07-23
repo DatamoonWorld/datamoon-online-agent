@@ -7,36 +7,60 @@ machine-readable examples such as `.env.example` and systemd unit files.
 
 - `/opt/datamoon/datamoon-online-mysqlapi`: Go persistence API, loopback `3000`.
 - `/opt/datamoon/datamoon-online-auth`: Godot Auth, loopback UDP `5200`.
-- `/opt/datamoon/datamoon-online-gateway`: Godot WebSocket gateway, public WSS.
+- `/opt/datamoon/datamoon-online-gateway`: Godot WebSocket gateway, loopback `5100`.
 - `/opt/datamoon/datamoon-online-server`: Godot ENet workers.
-- `/opt/datamoon/datamoon-online-web`: optional web portal, loopback `3101`.
+- `/opt/datamoon/datamoon-online-web`: web portal, loopback `3101`.
 
 Systemd units are `datamoon-api`, `datamoon-auth`, `datamoon-gateway`,
-`datamoon-server@overworld` and `datamoon-server@dungeon-1`. The legacy
-non-templated `datamoon-server.service` must remain disabled.
+`datamoon-server@overworld`, `datamoon-server@dungeon-1`,
+`datamoon-server@dungeon-2` and `datamoon-web`. The legacy non-templated
+`datamoon-server.service` must remain disabled.
 
 ## Required Security Configuration
 
 - MySQL API listens on `127.0.0.1:3000`.
 - Auth binds `127.0.0.1:5200`.
-- Gateway production uses a DNS name, valid certificate and `wss://`.
-- Client production sets `DATAMOON_GATEWAY_URL=wss://<gateway-domain>:5100`.
-- Gateway sets `DATAMOON_GATEWAY_REQUIRE_TLS=true`, bind `0.0.0.0`, certificate
-  and private-key paths. Local development may use `ws://127.0.0.1:5100`.
+- PBE uses `wss://gateway-pbe.datamoononline.com.br` on TCP `443`.
+- Nginx terminates TLS and proxies WebSocket to `ws://127.0.0.1:5100`.
+- Gateway binds `127.0.0.1`, sets `DATAMOON_GATEWAY_REQUIRE_TLS=false` and never
+  reads the certificate private key. Local development may also use loopback WS.
+- Nginx owns public connection/IP limits because proxied peers appear as
+  loopback to Godot. Gateway owns per-session login/register cooldown.
 - API uses unique `INTERNAL_API_AUTH_TOKEN`, `INTERNAL_API_GATEWAY_TOKEN`,
   `INTERNAL_API_SERVER_TOKEN` and `INTERNAL_API_WEB_TOKEN`.
   `INTERNAL_API_TOKEN` is only a rollout fallback.
 - Each Godot service receives only its corresponding token through
   `DATAMOON_INTERNAL_API_TOKEN`.
 - Database, API, Auth and observability ports are blocked from the public network.
+- Public ports are TCP `80/443` and worker UDP `5000/5010/5020`. Legacy Gateway
+  UDP `5100` is removed only after successful WSS validation.
+
+## First Connection Install
+
+The certificate and renewal timer must already be valid. Pull only the two
+repositories that contain the installer, then run it as root. It prompts for the
+current MySQL password and creates separate random tokens without printing them.
+
+```bash
+git -C /opt/datamoon/datamoon-online-agent switch main
+git -C /opt/datamoon/datamoon-online-agent pull --ff-only origin main
+git -C /opt/datamoon/datamoon-online-server switch pbe
+git -C /opt/datamoon/datamoon-online-server pull --ff-only origin pbe
+sudo /opt/datamoon/datamoon-online-agent/ops/install_vm_connection.sh
+```
+
+The installer writes root-owned `0640` runtime configuration and `0600` secret
+files under `/opt/datamoon/env`. Systemd injects only the secret file declared by
+each unit. It also installs units and the canonical Nginx proxy/rate limits,
+validates Nginx and leaves activation to the coordinated updater.
 
 ## Coordinated Update
 
 Install `ops/update_vm.sh` from the agent repository and invoke it through the
 provided oneshot unit. It performs an exclusive lock, remote fetch, clean-tree
-preflight, exact `origin/pbe` checkout for every VM repository, Godot imports,
-Web syntax checks, Go tests/vet/build, ordered restart, readiness checks and
-code/binary rollback on activation failure.
+preflight, exact branch checkout (`main` for Agent/Web and `pbe` for runtimes),
+Godot imports, Web syntax checks, Go formatting/vet/build, ordered restart,
+readiness checks and code/binary rollback on validation or activation failure.
 
 ```bash
 sudo install -m 0755 /opt/datamoon/datamoon-online-agent/ops/update_vm.sh /usr/local/sbin/datamoon-update
@@ -55,18 +79,32 @@ migration.
 1. Confirm every repository HEAD equals the intended remote commit.
 2. Confirm `/ready` succeeds before Auth/Gateway/workers start.
 3. Confirm every systemd unit is active and inspect recent journal errors.
-4. Confirm Gateway certificate validity and that remote `ws://` is rejected.
+4. Confirm Gateway certificate validity and that Client uses the PBE WSS domain.
 5. Exercise register, login, ticket consume, character join and one dungeon
    handoff before opening the deployment to players.
 6. Rotate leaked historical DB/API credentials before production promotion.
 
-## Local Validation
+## Manual Connection Validation
 
-- Godot: headless editor import for Auth, Gateway, Server and Client.
-- Server: `tools/run_quality_gates.ps1` with `GODOT_BIN` configured.
-- Client: `tests/p1_snapshot_client_test.tscn`.
-- API: `go test ./...`, `go vet ./...`, then `go build -trimpath ./cmd/api`.
-- Web: run Node syntax/tests defined by the repository package.
+Follow the real connection path while streaming structured logs:
+
+```bash
+sudo journalctl -f \
+  -u datamoon-api \
+  -u datamoon-auth \
+  -u datamoon-gateway \
+  -u datamoon-server@overworld
+```
+
+Expected sequence: `gateway_client_connected`, `auth_login_completed`,
+`gateway_login_answer_sent`, `game_route_selected` in the Client, ticket consume,
+character join and worker presence. Credentials and tickets must never appear.
+Use `sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log` for TLS and
+upgrade failures.
+
+There are no automated functional test files. Source gates are Godot headless
+import, Go formatting/vet/build, Node syntax and Bash syntax. Gameplay acceptance
+is manual and must be supported by structured event logs.
 
 Third-party asset licenses and their bundled READMEs stay next to the assets and
 are not project documentation.

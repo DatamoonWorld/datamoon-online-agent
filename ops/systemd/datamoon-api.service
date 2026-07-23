@@ -1,0 +1,24 @@
+[Unit]
+Description=Datamoons Online persistence API
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=datamoon
+Group=datamoon
+WorkingDirectory=/opt/datamoon/datamoon-online-mysqlapi
+EnvironmentFile=/opt/datamoon/env/datamoon-api.env
+EnvironmentFile=/opt/datamoon/env/datamoon-api-secrets.env
+ExecStart=/opt/datamoon/datamoon-online-mysqlapi/datamoon-api
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=20
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

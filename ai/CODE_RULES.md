@@ -447,7 +447,7 @@ Antes de implementar um sistema, o agente deve identificar:
 5. O sistema afeta combate, economia ou progressão?
 6. Existe risco de exploit?
 7. Precisa de logs?
-8. Precisa de testes?
+8. Quais cenários manuais e eventos de log validam o comportamento?
 9. Precisa alterar documentação?
 
 Nenhum sistema grande deve ser implementado sem responder essas perguntas.
@@ -473,7 +473,7 @@ Preferir:
 * interfaces claras;
 * extração de serviços;
 * documentação da alteração;
-* testes ou validações manuais registradas.
+* validações manuais registradas e logs estruturados correlacionáveis.
 
 ---
 
@@ -485,7 +485,7 @@ Quando o agente gerar código, deve informar:
 * responsabilidade de cada alteração;
 * impacto em Client/Server/API;
 * riscos;
-* como testar;
+* como validar manualmente e quais logs observar;
 * se precisa atualizar documentação.
 
 O agente deve evitar código “mágico” sem explicar onde encaixa.
