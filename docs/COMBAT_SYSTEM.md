@@ -206,10 +206,12 @@ Avoid overusing:
 
 Basic attacks and skills share the same defensive damage baseline.
 
-The current baseline formula is:
+The current live server baseline formula is:
 
 ```text
-damage_before_modifiers = (power * 100) / ((DEF * 2.5) + 100)
+DEFENSE_DAMAGE_SCALE = 1.0
+damage_before_modifiers = (power * 100) / ((DEF * DEFENSE_DAMAGE_SCALE) + 100)
+damage_before_modifiers = (power * 100) / (DEF + 100)
 ```
 
 ### Basic attacks
@@ -219,10 +221,10 @@ Basic attacks always use the standard combat formula.
 ```text
 power = ATK
 damage = formula_base(power, DEF)
-damage *= type_advantage
-damage *= level_gap
-damage *= variance
+damage *= system_multiplier
+damage *= level_difference_multiplier
 damage *= crit, if the basic attack crits
+damage *= variance
 ```
 
 Critical chance and critical damage apply only to basic attacks.
@@ -242,10 +244,10 @@ power += DEF * def_scale
 power += flat
 
 damage = formula_base(power, DEF)
-damage *= type_advantage
-damage *= level_gap
-damage *= variance
+damage *= system_multiplier
+damage *= level_difference_multiplier
 damage *= 1.0 + skill_damage
+damage *= variance
 ```
 
 If a skill has no `damage_formula`, it falls back to:
@@ -257,6 +259,8 @@ power = damage + damage_inc * skill_level
 Skills do not crit.
 
 `skill_damage` is a final float multiplier for skills. For example, `skill_damage = 1.5` means +150% final skill damage.
+
+The current live variance is +/-5%.
 
 Armor penetration is intentionally reserved for a future pass and is not part of the current beta formula.
 
