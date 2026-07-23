@@ -6,6 +6,7 @@ AGENT_ROOT="$ROOT/datamoon-online-agent"
 SERVER_ROOT="$ROOT/datamoon-online-server"
 ENV_DIR="$ROOT/env"
 SERVER_STATE_DIR="/var/lib/datamoon"
+WEB_STATE_DIR="/var/lib/datamoon-web"
 
 test "$(id -u)" -eq 0 || { echo "Run as root." >&2; exit 1; }
 for command in install nginx systemctl; do
@@ -15,16 +16,23 @@ test -d "$AGENT_ROOT/.git" || { echo "Missing $AGENT_ROOT" >&2; exit 1; }
 test -d "$SERVER_ROOT/.git" || { echo "Missing $SERVER_ROOT" >&2; exit 1; }
 test -f /etc/letsencrypt/live/gateway-pbe.datamoononline.com.br/fullchain.pem || { echo "Missing Gateway certificate." >&2; exit 1; }
 test -f /etc/letsencrypt/live/gateway-pbe.datamoononline.com.br/privkey.pem || { echo "Missing Gateway private key." >&2; exit 1; }
+test -f /etc/letsencrypt/live/datamoononline.com.br/fullchain.pem || { echo "Missing Web certificate." >&2; exit 1; }
+test -f /etc/letsencrypt/live/datamoononline.com.br/privkey.pem || { echo "Missing Web private key." >&2; exit 1; }
 
 if ! id datamoon >/dev/null 2>&1; then
   useradd --system --home "$SERVER_STATE_DIR" --shell /usr/sbin/nologin datamoon
+fi
+if ! id datamoon-web >/dev/null 2>&1; then
+  useradd --system --home "$WEB_STATE_DIR" --shell /usr/sbin/nologin datamoon-web
 fi
 install -d -m 0750 -o root -g datamoon "$ENV_DIR"
 install -d -m 0755 /etc/systemd/journald.conf.d
 install -m 0644 "$AGENT_ROOT/ops/systemd/journald-datamoon.conf" /etc/systemd/journald.conf.d/datamoon.conf
 install -d -m 0750 -o datamoon -g datamoon \
-  "$SERVER_STATE_DIR" /var/lib/datamoon-auth /var/lib/datamoon-gateway \
-  /var/lib/datamoon-web /var/lib/datamoon-web/storage
+  "$SERVER_STATE_DIR" /var/lib/datamoon-auth /var/lib/datamoon-gateway
+
+install -d -m 0700 -o datamoon-web -g datamoon-web \
+  "$WEB_STATE_DIR" "$WEB_STATE_DIR/storage"
 
 for service in api auth gateway server web; do
   install -m 0640 -o root -g datamoon \
@@ -53,7 +61,11 @@ install -m 0755 "$AGENT_ROOT/ops/update_vm.sh" /usr/local/sbin/datamoon-update
 
 install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-gateway-limits.conf" /etc/nginx/conf.d/datamoon-gateway-limits.conf
 install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-gateway.conf" /etc/nginx/sites-available/datamoon-gateway
+install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-web-limits.conf" /etc/nginx/conf.d/datamoon-web-limits.conf
+install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-web-proxy.conf" /etc/nginx/snippets/datamoon-web-proxy.conf
+install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-web.conf" /etc/nginx/sites-available/datamoon-web
 ln -sfn /etc/nginx/sites-available/datamoon-gateway /etc/nginx/sites-enabled/datamoon-gateway
+ln -sfn /etc/nginx/sites-available/datamoon-web /etc/nginx/sites-enabled/datamoon-web
 printf '#!/bin/sh\nsystemctl reload nginx\n' >/etc/letsencrypt/renewal-hooks/deploy/reload-nginx
 chmod 0755 /etc/letsencrypt/renewal-hooks/deploy/reload-nginx
 

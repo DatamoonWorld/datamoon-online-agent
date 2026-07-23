@@ -36,6 +36,20 @@ available for a future capacity increase.
 - Database, API, Auth and observability ports are blocked from the public network.
 - Public ports are TCP `80/443` and worker UDP `5000/5010/5020`. Legacy Gateway
   UDP `5100` is removed only after successful WSS validation.
+- Web binds only `127.0.0.1:3101`, talks only to the loopback MySQL API and must
+  never be exposed directly. Nginx terminates HTTPS, overwrites `X-Real-IP` and
+  applies public login/register request and connection limits.
+- Web runs as the dedicated `datamoon-web` Unix account, not as the gameplay
+  service account. Its systemd sandbox can read application code, write only its
+  private state directory and open only loopback network connections.
+- Web production startup requires `PUBLIC_ORIGIN` to exactly match its HTTPS
+  origin. Session cookies use the `__Host-` prefix and the service state under
+  `/var/lib/datamoon-web` contains encrypted, expiring server-side sessions.
+- The canonical Web virtual host is `datamoononline.com.br`; its certificate
+  must exist under `/etc/letsencrypt/live/datamoononline.com.br` before running
+  the connection installer. The canonical Nginx files are
+  `ops/nginx/datamoon-web.conf`, `datamoon-web-proxy.conf` and
+  `datamoon-web-limits.conf`.
 
 ## First Connection Install
 
