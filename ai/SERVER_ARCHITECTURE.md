@@ -195,3 +195,162 @@ Before implementing a cross-repo feature, answer:
 4. Does this require mirrored RPC changes?
 5. Does this require a new mysqlapi route?
 6. Does this preserve the current service boundaries?
+
+---
+
+## Audited Runtime Baseline (2026-07-23)
+
+The detailed evidence, findings and release gates supporting this baseline are
+recorded in `docs/TECHNICAL_AUDIT_2026-07-23.md`.
+
+```mermaid
+flowchart LR
+    C[Godot client] -->|ENet 5100| G[Gateway]
+    G -->|ENet 5200| A[Auth]
+    A -->|HTTP loopback| API[MySQL API]
+    G -->|HTTP loopback| API
+    C -->|ENet worker port| S[Game server]
+    S -->|HTTP loopback| API
+    API --> DB[(MySQL)]
+```
+
+## Security
+
+### Strengths
+
+- Passwords use bcrypt cost 12, generic failures and a dummy hash for failed
+  identity lookup.
+- Game tickets are signed, short-lived, audience-bound, nonce/JTI tracked and
+  consumed once in a database transaction.
+- Gameplay RPCs pass through admission state, payload validation and token-bucket
+  limits before domain handlers.
+- Persistent writes use domain routes, ownership checks, operation IDs/request
+  hashes, transactions, audit records and worker fencing.
+
+### Improvements Applied
+
+- Gateway/client required beta version defaults are aligned at `0.03`.
+- Gateway throttling combines a peer cooldown with a rolling per-address window
+  that survives reconnects.
+- Auth and Gateway fail closed if their ENet listener cannot start.
+- The obsolete Auth listener on port 5300 was removed.
+- Internal HTTP auth requires exact `Bearer` syntax and constant-time comparison.
+- API JSON rejects trailing documents, readiness hides raw database errors and
+  authenticated responses use `Cache-Control: no-store`.
+- The live `.env` is no longer tracked, while remaining available locally.
+
+### Recommendations
+
+1. Encrypt the public Client -> Gateway link before production. Login credentials
+   currently cross raw ENet and are observable/modifiable on-path.
+2. Bind Auth and MySQL API to loopback/private interfaces and enforce host
+   firewall rules. Auth trusts any peer that can reach port 5200.
+3. Rotate `MYSQL_PASSWORD` and `INTERNAL_API_TOKEN`; they exist in Git history.
+4. Replace the shared API bearer token with per-service identities and scopes.
+5. Add durable edge/account abuse controls; the in-memory limiter is only a first
+   layer.
+
+## Gameplay
+
+### Strengths
+
+- The client sends intent; the server validates movement, control, combat,
+  rewards, inventory, progression and transitions.
+- Worldstate uses interest by space/chunk, baselines, deltas, per-peer byte
+  budgets, deferred entities, reliable despawns and metrics.
+- Projectile/area hits are simulated by the server with faction, `space_id`,
+  combat-state and repeated-hit checks.
+- Persistent outcomes cross transactional API operations rather than trusting a
+  client-provided result.
+- Planned worker transitions use signed handoff tickets plus lease fencing.
+
+### Improvement Areas
+
+- Enemy perception scans all player Datamoons every 250 ms per hostile enemy,
+  producing O(hostile enemies x player Datamoons) growth.
+- Unexpected game-server disconnects return the client to login; same-worker
+  session resume is not implemented.
+- Known presentation defects remain around dungeon transition pull-back and a
+  small Datamoon snap at skill start/end.
+- Several social/runtime lookups still scan scene children.
+
+### Recommendations
+
+1. Reuse the worldstate chunk index for bounded enemy candidate queries and add
+   perception metrics/load tests.
+2. Implement reconnect with a separate short-lived, session/worker-bound resume
+   grant. Never make the original ticket reusable.
+3. Load-test snapshots, projectiles, enemy perception and API backpressure under
+   production-like entity counts, latency, packet loss and duplication.
+4. Keep prediction presentation-only; never accept client damage, reward,
+   inventory, teleport or cooldown outcomes.
+
+## Flow
+
+### Login And Connection
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant G as Gateway
+    participant A as Auth
+    participant P as MySQL API
+    participant S as Game server
+    C->>G: connect + client version
+    G->>G: version and rate checks
+    C->>G: credentials
+    G->>A: relay login/register
+    A->>P: internal auth operation
+    P-->>A: account result
+    A-->>G: auth result
+    G->>P: select worker + issue ticket
+    P-->>G: host, port, signed one-time ticket
+    G-->>C: game assignment
+    C->>S: connect + ticket
+    S->>P: consume ticket transactionally
+    P-->>S: bootstrap identity/state
+    S-->>C: admission + authoritative snapshots
+```
+
+The gateway routes but does not own gameplay. Auth orchestrates credentials; the
+API owns password/session persistence and ticket issuance/consumption.
+
+### Post-login Gameplay
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    participant P as MySQL API
+    participant D as MySQL
+    C->>S: action intent + input/control epoch
+    S->>S: admission, rate, state and rule validation
+    S->>S: authoritative simulation
+    opt Persistent result
+        S->>P: domain mutation + operation ID + fence
+        P->>D: ownership checks + transaction
+        D-->>P: committed snapshot
+        P-->>S: canonical result
+    end
+    S-->>C: snapshot/delta/event/UI result
+```
+
+### Worker Handoff
+
+```mermaid
+flowchart LR
+    S1[Source worker] -->|persist transition| API[MySQL API]
+    API -->|signed one-time handoff ticket| C[Client]
+    C -->|reconnect + ticket| S2[Target worker]
+    S2 -->|consume + acquire lease| API
+    API --> DB[(MySQL)]
+```
+
+### Failure Rules
+
+- A failed persistence operation must not be presented as committed gameplay.
+- Duplicate sensitive requests must return the idempotent result or a conflict.
+- Stale workers must lose write authority through lease/fence checks.
+- Invalid, expired or consumed tickets fail closed.
+- Snapshot pressure may defer low-priority state, but control state and reliable
+  despawns must remain coherent.

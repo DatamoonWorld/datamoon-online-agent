@@ -192,3 +192,33 @@ Repos affected:
 Notes:
 - Multi-line branching is still planned, but the first implementation target is a single linear line for Nocmoon.
 - Switching between different lines must require regression to `Code`.
+
+## 2026-07-23 - Full-stack audit hardening baseline
+
+Status: accepted
+
+Context:
+- A cross-repository audit followed authentication, connection, gameplay,
+  persistence, handoff, performance and dead-code paths.
+- Public credential transport and committed secrets were identified as the
+  highest operational risks.
+
+Decision:
+- Keep Gateway routing-only, Server gameplay-authoritative and MySQL API as the
+  sole persistence boundary.
+- Require strict internal HTTP authentication/parsing, strengthen Gateway login
+  throttling and remove the obsolete Auth port 5300 listener.
+- Treat encrypted public transport, secret rotation, private service listeners
+  and per-service API identities as release-priority work.
+
+Impact:
+- Canonical architecture now records trust boundaries and actual login,
+  gameplay and handoff flows.
+- Evidence and release gates live in `docs/TECHNICAL_AUDIT_2026-07-23.md`.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-auth`
+- `datamoon-online-gateway`
+- `datamoon-online-mysqlapi`
+- `datamoon-online-server`
