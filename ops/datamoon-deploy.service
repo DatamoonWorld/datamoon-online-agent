@@ -1,0 +1,12 @@
+[Unit]
+Description=Datamoons Online coordinated deployment
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/datamoon/datamoon-online-agent
+ExecStart=/usr/local/sbin/datamoon-update
+TimeoutStartSec=15min
+Nice=10

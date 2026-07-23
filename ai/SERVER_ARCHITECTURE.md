@@ -205,7 +205,7 @@ recorded in `docs/TECHNICAL_AUDIT_2026-07-23.md`.
 
 ```mermaid
 flowchart LR
-    C[Godot client] -->|ENet 5100| G[Gateway]
+    C[Godot client] -->|WSS 5100| G[Gateway]
     G -->|ENet 5200| A[Auth]
     A -->|HTTP loopback| API[MySQL API]
     G -->|HTTP loopback| API
@@ -241,12 +241,12 @@ flowchart LR
 
 ### Recommendations
 
-1. Encrypt the public Client -> Gateway link before production. Login credentials
-   currently cross raw ENet and are observable/modifiable on-path.
-2. Bind Auth and MySQL API to loopback/private interfaces and enforce host
-   firewall rules. Auth trusts any peer that can reach port 5200.
-3. Rotate `MYSQL_PASSWORD` and `INTERNAL_API_TOKEN`; they exist in Git history.
-4. Replace the shared API bearer token with per-service identities and scopes.
+1. Deploy Gateway with a valid DNS certificate and `wss://`; Client rejects
+   insecure remote WebSocket endpoints by default.
+2. Enforce host firewall rules in addition to the new Auth/API loopback defaults.
+3. Rotate `MYSQL_PASSWORD` and the historical shared API token.
+4. Configure unique Auth/Gateway/Server/Web API tokens; the shared token remains
+   only as a migration fallback.
 5. Add durable edge/account abuse controls; the in-memory limiter is only a first
    layer.
 
@@ -298,7 +298,7 @@ sequenceDiagram
     participant S as Game server
     C->>G: connect + client version
     G->>G: version and rate checks
-    C->>G: credentials
+    C->>G: credentials over certificate-validated WSS
     G->>A: relay login/register
     A->>P: internal auth operation
     P-->>A: account result

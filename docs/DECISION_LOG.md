@@ -222,3 +222,18 @@ Repos affected:
 - `datamoon-online-gateway`
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
+
+## 2026-07-23 - Secure login transport and centralized documentation
+
+Status: accepted
+
+Decision:
+- Public login/registration uses certificate-validated WebSocket TLS; gameplay
+  remains on ENet.
+- Internal API access is scoped to Auth, Gateway, Server or Web with separate
+  tokens and route-level permissions.
+- Auth and API default to loopback-only listeners.
+- Project documentation lives in `datamoon-online-agent`; repository-local
+  `AGENTS.md` files are mandatory pointers to the canonical index.
+- Third-party licenses and asset READMEs remain with their assets.
+- VM updates use the coordinated preflight/build/restart/rollback script.

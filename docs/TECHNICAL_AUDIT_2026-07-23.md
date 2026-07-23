@@ -16,23 +16,24 @@ persistence is isolated behind domain APIs, tickets are short-lived/single-use,
 sensitive writes are transactional/idempotent, and replication uses chunk
 interest, deltas and byte budgets.
 
-The largest remaining risk is transport security. Login credentials cross the
-public Client -> Gateway ENet connection without encryption. Production-like
-secrets also exist in MySQL API Git history. These require deployment and secret
-rotation work and cannot be completed safely with a source-only patch.
+The original largest risk was transport security. Source now uses WSS for public
+login and rejects insecure remote endpoints, but production still requires DNS
+and a valid certificate. Production-like secrets also exist in Git history and
+still require operational rotation.
 
 ## Findings
 
 ### Critical
 
-#### SEC-01 - Public credentials travel over raw ENet
+#### SEC-01 - Public credential transport lacked encryption (source resolved)
 
 - Reproduction: capture client/gateway traffic during login or registration.
 - Cause: no TLS/DTLS or reviewed encrypted application envelope.
 - Impact: an on-path attacker can read credentials or modify requests.
-- Fix: no unilateral patch; it would break the live protocol.
-- Recommendation: version and deploy an encrypted public transport with validated
-  server identity. Do not invent custom cryptography.
+- Fix: Client/Gateway login transport migrated to WebSocket TLS; non-local
+  `ws://` is rejected unless an explicit development override is set.
+- Deployment requirement: configure a DNS name, certificate/private key and
+  `DATAMOON_GATEWAY_REQUIRE_TLS=true` before promotion.
 
 #### SEC-02 - Secrets committed in `.env`
 
@@ -62,12 +63,13 @@ rotation work and cannot be completed safely with a source-only patch.
 - Recommendation: bind privately, firewall the port, then add a mutually
   authenticated channel or signed gateway request envelope.
 
-#### SEC-04 - Shared API token has broad authority
+#### SEC-04 - Shared API token had broad authority (source resolved)
 
 - Cause: all internal callers use one API-wide bearer token.
 - Impact: compromise of one runtime exposes unrelated persistence operations.
-- Recommendation: per-service credentials, route scopes, rotation overlap and
-  attributable audit records.
+- Fix: route scopes and Auth/Gateway/Server/Web identities/tokens were added. The
+  legacy token is retained only as a rollout fallback and must be removed after
+  unique production tokens are installed.
 
 #### FLOW-02 - No ordinary game-session resume
 
@@ -195,7 +197,7 @@ rotation work and cannot be completed safely with a source-only patch.
 | Priority | Work | Effort | Risk | Benefit | Dependency |
 |---|---|---:|---:|---:|---|
 | P0 | Rotate leaked DB/API secrets and audit use | S | Low | Critical | VM/DB/repo admin |
-| P0 | Encrypt Client -> Gateway transport | L | Medium | Critical | protocol/deployment |
+| P0 | Configure Gateway DNS/certificate and verify WSS | M | Medium | Critical | DNS/deployment |
 | P0 | Restrict Auth/API listener exposure | S | Low | High | firewall/systemd |
 | P1 | Per-service API identities/scopes | M | Medium | High | rollout plan |
 | P1 | Add safe session resume grants | M | Medium | High | cross-repo contract |

@@ -1,6 +1,10 @@
 # Datamoons Online Canonical Agent Instructions
 
-This file is the canonical project-wide base for agent behavior, technical decisions, and creative consistency across the Datamoons Online workspace.
+This file is the mandatory canonical entry point for every AI or automation
+working anywhere in the Datamoons Online workspace. Read it before inspecting or
+changing another repository, then read every thematic document relevant to the
+requested domain. Repository-local `AGENTS.md` files may add constraints but may
+not replace this index.
 
 ## Source Of Truth
 
@@ -24,6 +28,10 @@ When deeper project context is needed, consult these files first:
 16. `docs/WORLD_EVENTS.md`
 17. `docs/SPECIES_DESIGN_GUIDE.md`
 18. `docs/DECISION_LOG.md`
+19. `docs/TECHNICAL_AUDIT_2026-07-23.md`
+20. `docs/CODE_HEALTH.md`
+21. `docs/OPERATIONS.md`
+22. `docs/SERVER_ARCHITECTURE_REVIEW.md`
 
 If this file is ever too brief for a decision, the files above win on detail.
 
@@ -58,7 +66,8 @@ Use these defaults unless the code in the target folder clearly establishes a ne
 - Gateway handles initial connection flow and should not silently become game-logic authority.
 - Auth handles credentials, session rules, and token validation.
 - MySQL API handles controlled persistence and should expose game-specific operations instead of dangerous generic access.
-- Assume ENet multiplayer until the project formally changes that choice.
+- Use secure WebSocket (`wss://`) for public login/registration and ENet for
+  latency-sensitive gameplay unless a documented decision changes either path.
 
 ## World And Networking Rules
 
@@ -128,36 +137,12 @@ Production game workers should run through the templated `datamoon-server@...` u
 
 Default branch for deploy examples is `pbe` unless the user says otherwise.
 
-For Go services (`mysqlapi`, `auth`, `gateway`), use this pattern and adjust the repo/service/binary name:
+Use the coordinated deployment documented in `docs/OPERATIONS.md` and
+`ops/update_vm.sh`. Do not deploy services independently unless performing a
+documented incident rollback.
 
-```bash
-cd /opt/datamoon/datamoon-online-mysqlapi
-git switch pbe
-git pull --ff-only origin pbe
-go build -o /opt/datamoon/datamoon-online-mysqlapi/datamoon-api ./cmd/api
-sudo systemctl restart datamoon-api
-sudo systemctl status datamoon-api --no-pager -l
-journalctl -u datamoon-api -n 50 --no-pager
-```
-
-For the Godot game server, always stop the worker services before pulling/importing, and always run the headless import before starting them again:
-
-```bash
-sudo systemctl stop datamoon-server
-sudo systemctl stop datamoon-server@overworld
-sudo systemctl stop datamoon-server@dungeon-1
-cd /opt/datamoon/datamoon-online-server
-git switch pbe
-git pull --ff-only origin pbe
-/usr/local/bin/godot --headless --path . --import
-sudo systemctl disable datamoon-server
-sudo systemctl start datamoon-server@overworld
-sudo systemctl start datamoon-server@dungeon-1
-sudo systemctl status datamoon-server@overworld --no-pager -l
-sudo systemctl status datamoon-server@dungeon-1 --no-pager -l
-journalctl -u datamoon-server@overworld -n 50 --no-pager
-journalctl -u datamoon-server@dungeon-1 -n 50 --no-pager
-```
+Treat `docs/OPERATIONS.md` as the only source of deploy commands. Agents must
+read this `AGENTS.md` file before changing that runbook or executing a release.
 
 If a database schema shape changed but base migrations were edited instead of adding a new migration, give the user the explicit SQL to run manually on the server. Do not assume the migration runner will apply edits to already-applied migration files.
 
