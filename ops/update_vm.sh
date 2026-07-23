@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+export GODOT_SILENCE_ROOT_WARNING=1
 
 ROOT="${DATAMOON_ROOT:-/opt/datamoon}"
 GODOT="${GODOT_BIN:-/usr/local/bin/godot}"
@@ -72,7 +73,7 @@ while IFS= read -r -d '' javascript_file; do
 done < <(find "$ROOT/datamoon-online-web/src" -type f -name '*.js' -print0)
 
 pushd "$API_REPO" >/dev/null
-test -z "$(gofmt -l .)" || { echo "Go files require gofmt." >&2; exit 1; }
+test -z "$(gofmt -l .)" || { echo "Go files require gofmt." >&2; false; }
 go vet ./...
 go build -trimpath -o "$BACKUP_DIR/datamoon-api.next" ./cmd/api
 popd >/dev/null
