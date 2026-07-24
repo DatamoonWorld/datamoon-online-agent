@@ -309,6 +309,10 @@ Decision:
   `equipment_stats` metadata generator instead of a parallel `unscan_result`.
 - Equipment stat curves and upgrade chances are catalog data. Item descriptions
   and new player-facing UI/feedback strings use Client language keys.
+- Upgrade and Alternate live in a dedicated NPC terminal. Its UI slots hold
+  disposable inventory row references only; operations lock the selected
+  equipment and exact material stack transactionally, and equipped targets are
+  rejected by the backend.
 
 Repos affected:
 - `datamoon-online-agent`

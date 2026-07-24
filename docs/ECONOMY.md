@@ -256,8 +256,8 @@ sentences do not belong in Server or API catalogs.
 
 ### Alternate Chip
 
-The planned `Alternate Chip` is a consumable reroll item. Its concrete catalog
-item will be created separately.
+The `Alternate Chip` is the consumable reroll material used by the equipment
+terminal.
 
 Using it should:
 
@@ -274,7 +274,7 @@ and display the result, but it must not choose or submit the resulting stat.
 
 ### Equipment NPC
 
-The equipment NPC opens one TAB window with two tabs:
+The equipment NPC opens a dedicated window with two tabs:
 
 - `Upgrade`: accepts equipment plus the configured upgrade materials and submits
   a server-authoritative attempt using the target-level chance table;
@@ -283,6 +283,21 @@ The equipment NPC opens one TAB window with two tabs:
 
 The client may preview cost, chance, current stats, and possible pool entries.
 It must never decide success, consume materials locally, or generate a stat.
+
+Both tabs show one equipment slot and one material slot. Clicking a compatible
+inventory item stores only its `inventory_item_id` and renders a local visual
+reference; it does not move, reserve, or remove the item. Selecting another item
+for the same role replaces that reference, and closing the window clears every
+reference. This keeps disconnects and abandoned interactions lossless.
+
+Upgrade and Alternate requests include the selected equipment and material
+inventory row IDs. The backend locks both rows transactionally, verifies their
+character ownership and catalog IDs, consumes exactly the selected material
+stack, and returns a refreshed inventory snapshot. The target equipment must be
+unequipped; the Client filters it and the MySQL API independently rejects an
+equipped row. Alternate presents the three generated stat entries as mutually
+exclusive checkboxes and submits only the selected index. The backend remains
+the sole authority for the replacement result.
 
 ---
 
