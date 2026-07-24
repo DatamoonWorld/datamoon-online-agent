@@ -90,6 +90,16 @@ The updater intentionally aborts on dirty repositories. Schema migrations must
 remain backward-compatible because code rollback cannot undo a destructive DB
 migration.
 
+The beta dungeon day resets at midnight in Brasilia (`03:00 UTC`). Existing VM
+environment files override application defaults, so both
+`datamoon-api.env` and `datamoon-server.env` must contain:
+
+```env
+DATAMOON_SERVER_RESET_HOUR_UTC=3
+```
+
+Restart through the coordinated updater after changing this value.
+
 ### Choosing The Deployment Path
 
 Use the coordinated deployment above whenever a release changes more than the
@@ -231,6 +241,13 @@ The following controls are intentionally deferred, not considered complete:
 - OS/runtime patching: Ubuntu, Node.js and Nginx updates remain manual for beta.
   Record the installed versions, review security advisories, take/verify a
   backup, patch in a maintenance window and run the release verification list.
+- Admin application: expose scoped, paginated audit queries for inventory,
+  rewards, Guild and moderation without granting generic database access.
+- Online index scaling: replace deeper local character scans only when measured
+  concurrency shows the current lookup cost is material.
+- Production edge hardening: external alert delivery, reviewed Fail2ban or
+  equivalent temporary blocking, WAF/rate limiting and shared limiter state
+  remain production work.
 
 Internal API tokens are high-entropy bearer secrets that identify Auth,
 Gateway, Server and Web to the loopback MySQL API. They are not player login

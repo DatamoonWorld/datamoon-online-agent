@@ -1267,7 +1267,8 @@ Still pending after this cut:
 
 - migrate client/UI naming to `animation_speed`, `attack_speed`, `skill_damage` and `crit_damage` if any old labels remain outside the server;
 - expose in-combat state to UI/debug if needed;
-- implement projectile runtime with hit dedupe and a test-only projectile skill;
+- add final Client projectile/area visuals and telegraphs; the authoritative
+  linear/area runtime, range/duration expiry and hit dedupe are implemented;
 - revisit controlled-Datamoon skill snap later if a dedicated mobile/dash/channel action runtime is introduced.
 
 ### 16.12 Movement policy experiment rollback

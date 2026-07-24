@@ -149,6 +149,19 @@ Bosses should feel structurally different from regular enemies through:
 - reward importance;
 - instance completion significance.
 
+Bosses reuse the regular species scene, sprites and animations. Their encounter
+definition applies server-authoritative multipliers after normal species/level
+stats are resolved. Do not fork a second Datamoon scene only to increase stats.
+
+The Client receives only the resulting boss identity and authoritative state.
+Its centered top HUD is presentation: it appears while the tracked boss is
+alive, in the same space and within configured range, and disappears when those
+conditions stop being true.
+
+The beta daily reset is midnight in Brasilia (`03:00 UTC`). Dungeon return
+handoff must preserve a safe point adjacent to the entry portal so returning
+players do not immediately retrigger it.
+
 ---
 
 ## Completion Rules

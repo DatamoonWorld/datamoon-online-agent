@@ -396,6 +396,64 @@ Estes pontos nao bloqueiam automaticamente o beta se estiverem raros e pequenos,
 - blur no editor pode depender do zoom do viewport, mas runtime deve ficar limpo;
 - input pode segurar por alguns segundos em troca de worker se houver latencia.
 
+## Validacao Manual Concluida
+
+Validado em PBE em 2026-07-24, sem bugs visiveis:
+
+- Web atualizado e Smithesyzer validada em login, cadastro e conta;
+- Client `95f3d8e` validado em janelas, HUD, nomes e tooltips;
+- Party entre overworld e dungeon;
+- HUD de membro remoto acinzentada, sem texto `OFFLINE`;
+- remocao de Party depois de desconexao definitiva;
+- reserva integral da Party e rollback de handoff;
+- antispam na quinta mensagem em dois segundos e feedback do tempo restante;
+- mute/unmute e slow/normal mode persistentes;
+- Fishing protegido contra replay/timing;
+- Hatchery idempotente;
+- motor compartilhado de Craft/Cooking;
+- Guild preservada entre reconnects.
+
+Esses fluxos saem da fila de implementacao principal. Devem continuar no roteiro
+de regressao manual sempre que networking, persistencia ou UI social mudarem.
+
+## Roteiro De Bosses Do Beta
+
+Bosses reutilizam a cena, sprites e animacoes da especie normal. A identidade de
+boss pertence aos dados do encontro, nao a uma copia da cena do Datamoon.
+
+Ordem de implementacao:
+
+1. adicionar ao JSON da dungeon um bloco `boss.modifiers` com multiplicadores de
+   HP, ataque, defesa e resistencia;
+2. aplicar os multiplicadores somente na instancia criada como boss, depois dos
+   stats normais por especie e level;
+3. identificar a entidade no worldstate com `is_boss`, `boss_id` e nome
+   localizado, sem tornar o Client autoridade;
+4. criar uma HUD unica de boss no centro superior da tela;
+5. mostrar a HUD somente quando o boss estiver vivo, no mesmo `space_id` e
+   dentro da distancia configurada; ocultar ao afastar, morrer, sair da dungeon
+   ou trocar de worker;
+6. manter HUD local comum dos inimigos regulares e impedir duas HUDs de boss
+   simultaneas no mesmo Client;
+7. concluir a dungeon pela morte da instancia rastreada, nunca apenas pelo tipo
+   da especie;
+8. validar boss solo e em Party, reconnect, reset de combate, morte simultanea e
+   handoff de retorno.
+
+Os multiplicadores finais de Slimmoon/Nocmoon permanecem pendentes junto do
+balanceamento, sprites, animacoes, skills e drops do beta. O reset diario ocorre
+a meia-noite de Brasilia, correspondente a `03:00 UTC`. O retorno deve usar um
+ponto seguro adjacente ao portal de entrada, persistido no handoff, e nunca a
+posicao exata sobre o trigger do portal.
+
+## Pixel Crisp
+
+`Pixel crisp` significa preservar a grade de pixels sem interpolacao ou
+posicionamento fracionario. Sprites, fontes e HUDs devem usar filtro `nearest`,
+escala inteira quando possivel e coordenadas alinhadas a pixels inteiros. O
+resultado esperado e ausencia de blur, bordas tremidas, seams entre tiles e
+mudanca de nitidez durante movimento ou zoom.
+
 ---
 
 ## Ordem Recomendada de Execucao
@@ -454,7 +512,7 @@ Estes pontos nao bloqueiam automaticamente o beta se estiverem raros e pequenos,
 - [ ] Nocmoon finalizado para beta.
 - [ ] Dungeon diaria funcional.
 - [ ] Rewards de dungeon marcando completude.
-- [ ] Guild creation bloqueada por item indisponivel.
+- [x] Guild creation bloqueada pelo item `Guild Deploy Drive`.
 - [ ] Client sem blur relevante em runtime.
 - [ ] Server, gateway, auth e mysqlapi atualizados em `pbe`.
 - [ ] Overworld e dungeon-1 ativos na VM.
@@ -475,7 +533,7 @@ Ainda precisamos definir antes ou durante a execucao:
 - skill final de Slimmoon e Nocmoon;
 - boss da dungeon: especie, level, HP, ataque e reward;
 - duracao do reset diario da dungeon, provavelmente por dia calendario do servidor;
-- nome do item necessario para criar guild no futuro;
+- origem/drop futuro do item `Guild Deploy Drive`;
 - se a dungeon pode ser feita solo no beta ou se party sera recomendada.
 
 ---
