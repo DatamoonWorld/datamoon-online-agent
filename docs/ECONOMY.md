@@ -164,6 +164,66 @@ Bad sinks feel like taxes with no strategic value.
 
 ---
 
+## Planned Equipment Progression
+
+This section is a design specification and is not implemented yet. The current
+live bracelet can be equipped, but it has no generated stats, upgrade level,
+stat-pool enforcement, or reroll operation.
+
+### Main item upgrades
+
+For the current beta target, upgradeable items stop at `+5`. Dungeon rewards
+provide the item resources used to improve the main item. Resource ids, costs,
+and success rules remain to be defined before implementation.
+
+Each item type owns an explicit pool of stats it may roll. A generated item
+must not contain the same stat more than once, and a roll may select at most one
+entry for each eligible pool slot.
+
+The planned stat values by upgrade level are:
+
+| Stat | +0 | +1 | +2 | +3 | +4 | +5 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Attack | 50 | 70 | 90 | 110 | 130 | 180 |
+| Defense | 12 | 17 | 22 | 27 | 32 | 44 |
+| Critical chance | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 | 0.08 |
+| Skill damage | 0.10 | 0.15 | 0.20 | 0.25 | 0.30 | 0.40 |
+| HP | 700 | 1100 | 1500 | 1900 | 2300 | 3000 |
+| MP | 90 | 150 | 210 | 270 | 330 | 420 |
+
+The table represents cumulative values. Upgrades `+1` through `+4` add the
+regular increment; `+5` adds the larger final increment.
+
+### Bracelet generation
+
+A bracelet should receive three random stats when it is first scanned or when
+its reward box is opened. The exact trigger is intentionally undecided and must
+be selected before implementation. Generation must happen once on the
+authoritative backend and persist the result in the individual inventory
+item's metadata.
+
+The three stats must be valid for that bracelet's configured pool and must not
+contain duplicates.
+
+### Alternate Chip
+
+The planned `Alternate Chip` is a consumable reroll item. Its concrete catalog
+item will be created separately.
+
+Using it should:
+
+- select one existing stat on the target item;
+- replace that stat with a random eligible stat from the item's pool;
+- exclude stats already present on the item;
+- consume the chip only in the same successful transaction as the reroll;
+- preserve upgrade level and all stats not selected for replacement;
+- persist an auditable, idempotent inventory operation.
+
+The server/mysqlapi must perform the roll. The client may select the target item
+and display the result, but it must not choose or submit the resulting stat.
+
+---
+
 ## Reward Design Rules
 
 ### 1. Reward the intended behavior

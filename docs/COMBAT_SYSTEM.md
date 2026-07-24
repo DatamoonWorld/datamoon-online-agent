@@ -209,9 +209,9 @@ Basic attacks and skills share the same defensive damage baseline.
 The current live server baseline formula is:
 
 ```text
-DEFENSE_DAMAGE_SCALE = 1.0
+DEFENSE_DAMAGE_SCALE = 2.5
 damage_before_modifiers = (power * 100) / ((DEF * DEFENSE_DAMAGE_SCALE) + 100)
-damage_before_modifiers = (power * 100) / (DEF + 100)
+damage_before_modifiers = (power * 100) / ((DEF * 2.5) + 100)
 ```
 
 ### Basic attacks
@@ -260,9 +260,22 @@ Skills do not crit.
 
 `skill_damage` is a final float multiplier for skills. For example, `skill_damage = 1.5` means +150% final skill damage.
 
-The current live variance is +/-5%.
+The current live variance is +/-10%.
 
 Armor penetration is intentionally reserved for a future pass and is not part of the current beta formula.
+
+### Formula fallback contract
+
+The skill formula and the shared defensive formula are separate concerns:
+
+- a basic attack uses `ATK` as its power;
+- a skill uses its own `damage`, `damage_inc`, and optional `damage_formula`;
+- a skill without `damage_formula` does not fall back to `ATK`;
+- both paths still use the shared defense, system advantage, level difference,
+  and variance calculations.
+
+Equipment stats are not yet included in the live stat calculation. They are a
+planned extension described in `ECONOMY.md`.
 
 ### Current beta examples
 

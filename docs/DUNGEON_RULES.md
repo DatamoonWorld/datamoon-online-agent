@@ -178,6 +178,24 @@ Dungeon rewards should justify:
 
 Do not let dungeon rewards trivialize overworld progression.
 
+### Planned equipment progression rewards
+
+This section is a design specification and is not implemented yet.
+
+Dungeons should provide one or more auditable item resources used to upgrade
+the player's main equipment item. The exact item ids, drop rates, dungeon
+tiers, and required quantities remain content decisions.
+
+These resources must follow the normal dungeon completion protection:
+
+- rewards are granted per eligible character completion;
+- entry alone does not grant the resource;
+- replay and duplicate reward requests must be idempotent;
+- inventory-capacity failures must be explicit and recoverable;
+- drop configuration must remain data-driven.
+
+The equipment upgrade and reroll rules are defined in `ECONOMY.md`.
+
 ---
 
 ## Failure Rules
