@@ -261,6 +261,33 @@ There are no automated functional test files. Source gates are Godot headless
 import, Go formatting/vet/build, Node syntax and Bash syntax. Gameplay acceptance
 is manual and must be supported by structured event logs.
 
+### Manual social validation
+
+For Chat and Party changes, validate at minimum:
+
+- the fifth message in two seconds is blocked with a two-second timeout and a
+  remaining-seconds message;
+- slow mode allows one message every two seconds and reports the remaining wait;
+- mute persists through reconnect/restart and unmute restores sending;
+- a normal disconnect removes party membership after the configured lifecycle;
+- an overworld-to-dungeon handoff preserves membership and shows remote members
+  gray without an `OFFLINE` label;
+- handoff failure logs identify reservation, source, target, session, party version
+  and rollback outcome without exposing tickets or tokens.
+
+The game database owns account administrator status. After migration `029` is
+applied, grant or revoke access by username; never identify administrators by a
+character name or environment allowlist:
+
+```sql
+UPDATE dm_users SET is_admin = 1 WHERE username = 'YOUR_ACCOUNT';
+UPDATE dm_users SET is_admin = 0 WHERE username = 'YOUR_ACCOUNT';
+```
+
+Available in-game commands are `/mute Player duration_ms|permanent [reason]`,
+`/unmute Player`, `/slow channel [milliseconds]`, and `/normal channel`. Every
+command is re-authorized by the MySQL API against `dm_users.is_admin` and audited.
+
 ## Logging And Audit Retention
 
 Runtime services emit structured logs only to stdout for collection by
@@ -277,10 +304,10 @@ and seven days of retention. Use a drop-in at
 configuration. Verify that `systemd-analyze cat-config systemd/journald.conf`
 shows both the main file and the Datamoon drop-in.
 
-The MySQL API retains inventory, reward and value-change audit plus their
-idempotency operation records for 180 days by default. It starts cleanup with
-the API, runs daily and deletes indexed rows in batches of 1,000, up to 20
-batches per table per run.
+The MySQL API retains inventory, reward, value-change, Chat moderation and Guild
+audit plus inventory/reward idempotency records for 180 days by default. It
+starts cleanup with the API, runs daily and deletes indexed rows in batches of
+1,000, up to 20 batches per table per run.
 The canonical variables are:
 
 ```env
@@ -307,7 +334,8 @@ FROM information_schema.tables
 WHERE table_schema = 'datamoon_game_server'
   AND table_name IN ('dm_inventory_audit', 'dm_inventory_ops',
                      'dm_reward_audit', 'dm_reward_operations',
-                     'dm_value_audit')
+                     'dm_value_audit', 'dm_chat_moderation_audit',
+                     'dm_guild_audit')
 ORDER BY total_mb DESC;
 ```
 

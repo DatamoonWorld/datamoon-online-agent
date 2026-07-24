@@ -164,21 +164,58 @@ Bad sinks feel like taxes with no strategic value.
 
 ---
 
-## Planned Equipment Progression
+## Equipment Progression
 
-This section is a design specification and is not implemented yet. The current
-live bracelet can be equipped, but it has no generated stats, upgrade level,
-stat-pool enforcement, or reroll operation.
+This specification is implemented in the PBE codebase. Generated equipment,
+upgrade and alternate mutations are authoritative, transactional, idempotent,
+and inventory-audited. Equipment is character-owned, but
+its combat bonuses apply to whichever Datamoon is currently active. Switching
+the active Datamoon must remove the bonuses from the previous active Datamoon
+and apply them to the new one immediately.
+
+### Equipment roles and stat pools
+
+Every generated equipment item has exactly three stat entries. Repeated stats
+are allowed only up to the cap declared by that equipment's pool. For example,
+a Bracelet may roll `ATK` twice but never three times.
+
+| Equipment | Role | Allowed stat entries |
+| --- | --- | --- |
+| Bracelet | Primary battle equipment; the active Datamoon cannot attack without one | `ATK x2`, `CRIT x1`, `SKILL_DAMAGE x1`, `HP x2`, `MP x2` |
+| Hood | Offensive equipment | `ATK x2`, `CRIT x1`, `SKILL_DAMAGE x1`, `HP x1` |
+| Shoes | Defensive equipment | `DEF x2`, `HP x2`, `MP x1` |
+
+Generation uses weighted random selection without exceeding the per-stat cap.
+`ATK`, `DEF`, `HP`, and `MP` use the common/high-weight category. `CRIT` and
+`SKILL_DAMAGE` use the rare/low-weight category. Concrete numeric weights remain
+data-driven balance values and must not be hard-coded in gameplay handlers.
+Stat curves and target-level upgrade chances also belong to the equipment item
+catalog. Client and Server must read those values from item data rather than
+maintaining mirrored constants in scripts.
+
+There is no equipment rarity or quality system. Critical Damage and Attack Speed
+are not valid equipment stats in this version and are reserved for a future pass.
+
+Equipment changes are blocked while the character is in combat. Outside combat,
+equipping, unequipping, or switching an item recalculates the active Datamoon's
+effective stats immediately.
 
 ### Main item upgrades
 
-For the current beta target, upgradeable items stop at `+5`. Dungeon rewards
-provide the item resources used to improve the main item. Resource ids, costs,
-and success rules remain to be defined before implementation.
+For the current beta target, upgradeable equipment stops at `+5`. An `Upgrade
+Chip` is the dungeon material used for an upgrade attempt. Every attempt consumes
+one chip. Failure leaves the equipment at its current level and never destroys or
+downgrades it.
 
-Each item type owns an explicit pool of stats it may roll. A generated item
-must not contain the same stat more than once, and a roll may select at most one
-entry for each eligible pool slot.
+Upgrade success is rolled by the authoritative backend using the target level:
+
+| Target level | Success chance |
+| --- | ---: |
+| `+1` | 100% |
+| `+2` | 90% |
+| `+3` | 80% |
+| `+4` | 70% |
+| `+5` | 60% |
 
 The planned stat values by upgrade level are:
 
@@ -192,18 +229,30 @@ The planned stat values by upgrade level are:
 | MP | 90 | 150 | 210 | 270 | 330 | 420 |
 
 The table represents cumulative values. Upgrades `+1` through `+4` add the
-regular increment; `+5` adds the larger final increment.
+regular increment; `+5` adds the larger final increment. Every stat entry uses
+the full value for the item's current upgrade level, and one successful upgrade
+advances all three entries together. Therefore, two `ATK` entries at `+2` grant
+`90 + 90 = 180 ATK`.
 
-### Bracelet generation
+### Unscan equipment boxes
 
-A bracelet should receive three random stats when it is first scanned or when
-its reward box is opened. The exact trigger is intentionally undecided and must
-be selected before implementation. Generation must happen once on the
-authoritative backend and persist the result in the individual inventory
-item's metadata.
+Equipment enters the economy as a box item with the same display name and sprite
+as the resulting equipment, prefixed with `[UNSCAN]`. Using the box consumes it
+and creates the corresponding equipment with three server-generated stat entries.
 
-The three stats must be valid for that bracelet's configured pool and must not
-contain duplicates.
+Unscan boxes use the normal container contract. Their `guaranteed_rewards`
+contains one item reward with `metadata_generator: equipment_stats`; do not add
+a parallel `unscan_result` field. The metadata generator is an authoritative API
+registry key, while target item, amount, stat pool, curves and chances remain
+catalog data.
+
+Generation happens once on the authoritative backend. The result, stat order,
+upgrade level, and unique item identity are persisted as instance metadata. The
+operation must be transactional, idempotent, and auditable so retrying a request
+cannot duplicate either the box or the generated equipment.
+
+Every `description.text` in item JSON is a Client language key. Raw player-facing
+sentences do not belong in Server or API catalogs.
 
 ### Alternate Chip
 
@@ -212,15 +261,28 @@ item will be created separately.
 
 Using it should:
 
-- select one existing stat on the target item;
-- replace that stat with a random eligible stat from the item's pool;
-- exclude stats already present on the item;
+- let the player select one existing stat entry on the target item;
+- remove that entry from the cap calculation before rolling its replacement;
+- replace it with a random eligible stat from the item's weighted pool without
+  exceeding any per-stat cap;
 - consume the chip only in the same successful transaction as the reroll;
 - preserve upgrade level and all stats not selected for replacement;
 - persist an auditable, idempotent inventory operation.
 
 The server/mysqlapi must perform the roll. The client may select the target item
 and display the result, but it must not choose or submit the resulting stat.
+
+### Equipment NPC
+
+The equipment NPC opens one TAB window with two tabs:
+
+- `Upgrade`: accepts equipment plus the configured upgrade materials and submits
+  a server-authoritative attempt using the target-level chance table;
+- `Alternate`: accepts equipment plus an `Alternate Chip`, lets the player select
+  the stat entry to replace, and displays the server-generated result.
+
+The client may preview cost, chance, current stats, and possible pool entries.
+It must never decide success, consume materials locally, or generate a stat.
 
 ---
 

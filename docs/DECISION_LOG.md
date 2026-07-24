@@ -247,3 +247,71 @@ Decision:
 - PBE behavior is validated manually through real Client/Gateway/Auth/API/worker flows.
 - Structured logs expose transitions, outcomes and correlation identifiers without credentials or tickets.
 - CI and deploy retain import, formatting, static analysis, syntax and build checks.
+
+## 2026-07-24 - Generated equipment progression contract
+
+Status: accepted
+
+Decision:
+- Bracelet, Hood and Shoes generate exactly three stat entries from capped,
+  weighted pools; a stat may repeat only up to its equipment-specific cap.
+- Equipment enters through `[UNSCAN]` box items and generation is authoritative,
+  transactional, idempotent and audited.
+- Equipment bonuses belong to the character loadout and apply to the active
+  Datamoon. Equipment changes are blocked in combat and recalculate immediately
+  outside combat.
+- Upgrade progression stops at `+5`, uses target-level chances of 100%, 90%, 80%,
+  70% and 60%, and Alternate Chip replaces one player-selected stat entry with a
+  server-generated eligible result.
+- The current dungeon grants one Upgrade Chip and has a 5% chance to grant one
+  Alternate Chip on eligible completion.
+
+Repos affected:
+- `datamoon-online-agent`
+- future Client, Server and MySQL API implementation
+
+Notes:
+- Every attempt consumes one chip; failure never destroys or downgrades equipment.
+- Common stats use weight 10 and Crit/Skill Damage use weight 3.
+- Equipment has no rarity or quality; Critical Damage and Attack Speed are future
+  stats.
+
+## 2026-07-24 - Chat moderation and party lifecycle scope
+
+Status: accepted
+
+Decision:
+- Chat moderation uses account-level administrators, with authority inherited by
+  every character on the account.
+- Supported staff controls are mute/unmute and persistent channel slow/normal
+  mode. Chat-ban and message reports are not part of this scope.
+- The fifth message in two seconds is blocked and applies a 2,000 ms timeout.
+- Moderation expiry is stored in UTC with millisecond precision and blocked sends
+  show remaining seconds to the player.
+- Definitive offline state removes party membership; worker handoff preserves it.
+  Remote-worker members remain gray in the HUD without an `OFFLINE` label.
+
+Notes:
+- Implemented in PBE with account admin identity, in-game commands,
+  millisecond-expiry persistence and automatic timeout audit.
+
+## 2026-07-24 - Data-driven dungeon selection and equipment presentation
+
+Status: accepted
+
+Decision:
+- Dungeon Concourse portals remain Server-instantiated from the shared portal
+  scene and world JSON; their Client selection shell is an authored `.tscn`.
+- Dungeon templates have no overworld `entry_portal`. Selection stores the
+  current character position as the return destination, while `exit_portal`
+  remains per-instance runtime content.
+- Generated equipment boxes use `guaranteed_rewards` with the registered
+  `equipment_stats` metadata generator instead of a parallel `unscan_result`.
+- Equipment stat curves and upgrade chances are catalog data. Item descriptions
+  and new player-facing UI/feedback strings use Client language keys.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-mysqlapi`
+- `datamoon-online-server`

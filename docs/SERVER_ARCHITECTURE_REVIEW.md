@@ -1324,6 +1324,12 @@ Implemented social hardening:
 - if the target is on the same worker, private message delivery is direct only and is not also published to the cross-worker relay;
 - if the target is online on another worker, delivery uses the DB relay scoped to the target character id;
 - world/private chat normalizes whitespace, clamps message length and drops empty sanitized messages.
+- the fifth message inside two seconds is blocked and applies an automatic
+  two-second timeout;
+- persistent mute state, persistent per-channel slow mode, duplicate-message
+  protection and moderation audit storage exist in the MySQL API;
+- blocked sends return remaining-time feedback without storing chat content in
+  operational logs.
 
 Party state:
 
@@ -1331,8 +1337,23 @@ Party state:
 - worker handoff preserves the durable lease and avoids marking character presence offline during the transition;
 - party snapshots use persistent presence heartbeat with a short freshness window to show remote members as online across workers;
 - explicit leave/kick still removes party membership immediately.
+- definitive disconnect removes membership, while worker handoff preserves it;
+- party snapshots carry a canonical version and invites expire persistently;
+- dungeon transfer reserves the versioned party roster before moving members;
+- remote-worker members remain gray in the HUD without an `OFFLINE` label.
 
-Still deferred:
+Completed in the current PBE code:
 
-- staff moderation tools, mutes/bans, report flow and audit UI;
+- account-level administrator identity authorizes all characters belonging to
+  that account;
+- in-game `mute`, `unmute`, slow-mode and normal-mode commands use UTC Unix
+  milliseconds and persistent audit;
+- stale worker presence enters a short Party grace period and is then removed;
+- keep chat-ban and message reports out of scope by product decision;
+- the Party HUD keeps remote members gray and contains no `OFFLINE` text.
+
+Remaining operational work:
+
+- add administrative audit queries to a future admin application;
+- complete manual multi-worker HUD and worker-crash validation;
 - deeper online character index optimization if player counts make local lookups expensive.

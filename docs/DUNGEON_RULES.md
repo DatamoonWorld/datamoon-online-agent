@@ -21,7 +21,7 @@ The project already has a live dungeon template pattern.
 Current implementation includes:
 
 - data-driven dungeon templates in server JSON;
-- dungeon entry and exit portals;
+- data-driven overworld selector portals and per-instance exit portals;
 - per-instance space ids;
 - instance timers;
 - party-aware instance reuse;
@@ -71,6 +71,16 @@ The client must not own dungeon truth.
 ---
 
 ## Entry Rules
+
+Dungeon templates do not own physical overworld entry portals. A world portal
+with kind `dungeon_selector` lists its configured `template_ids`; an empty list
+means every enabled dungeon template. The Server creates that portal from the
+shared portal scene plus world JSON. The Client selector shell is an authored
+`.tscn` scene and creates only the variable option rows at runtime.
+
+Selecting an option stores the character's current authoritative position as
+the return destination before handoff. Do not add `entry_portal` to a dungeon
+template or duplicate one overworld portal per dungeon merely to enter it.
 
 Dungeon entry should validate:
 
@@ -178,13 +188,14 @@ Dungeon rewards should justify:
 
 Do not let dungeon rewards trivialize overworld progression.
 
-### Planned equipment progression rewards
+### Equipment progression rewards
 
-This section is a design specification and is not implemented yet.
+This reward configuration is implemented for `training_cavern`.
 
-Dungeons should provide one or more auditable item resources used to upgrade
-the player's main equipment item. The exact item ids, drop rates, dungeon
-tiers, and required quantities remain content decisions.
+The current dungeon grants one `Upgrade Chip` on eligible completion and rolls
+an independent 5% chance to grant one `Alternate Chip`. These materials are
+dungeon-only drops in the current design. Their catalog ids are `upgrade_chip`
+and `alternate_chip`.
 
 These resources must follow the normal dungeon completion protection:
 
@@ -223,7 +234,6 @@ Prefer explicit template fields such as:
 
 - `id`
 - `display_name`
-- `entry_portal`
 - `instance_spawn`
 - `completion_rewards`
 - `enemies`

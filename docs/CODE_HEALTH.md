@@ -14,27 +14,23 @@ rules rather than optimize only for line count.
 
 ### Recipe Activities
 
-`crafting.gd` and `cooking.gd` duplicate catalog normalization, ingredient/result
-decoration, result construction and API error mapping. Introduce one reusable
-recipe activity service parameterized by activity kind, route, source and status
-mapping. Keep thin Craft/Cooking facades for RPC/UI semantics. Expected reduction:
-roughly 150-220 lines across Client/Server without changing recipes.
+Crafting and Cooking now share reusable recipe activity infrastructure while
+retaining thin domain facades for RPC/UI semantics. Future recipes should extend
+the shared engine instead of restoring duplicated catalog and result handling.
 
 ### Social Runtime
 
-Party and Guild duplicate online-character lookup, client resolution, invite
-delivery, feedback, relay scopes and snapshot fan-out. Extract a social directory
-and relay adapter. Do not merge Party/Guild domain rules: leadership, persistence,
-reward sharing and dungeon binding remain separate. Expected reduction: 200-350
-lines plus lower risk of cross-worker behavior drifting.
+Party and Guild now use a shared social directory for online-character and client
+resolution. Their leadership, persistence, reward-sharing and dungeon-binding
+rules remain separate. A dedicated relay/pub-sub adapter is still a future scale
+improvement; database relay remains acceptable for PBE.
 
 ### Inventory And Rewards
 
-Server `inventory.gd` mixes inventory access, mutation orchestration, usable-item
-reward rolls, rollback, logging and operation-token formatting. Split into
-inventory repository facade, item-use/reward service and operation-context helper.
-Preserve API transactions as the actual atomic boundary. This is primarily a
-readability/testability refactor, not a gameplay rewrite.
+Inventory operation context has been extracted and persistent mutations retain
+the MySQL API transaction as the atomic boundary. Item use, generated equipment,
+upgrade and alternate operations should move into focused services rather than
+expanding the inventory facade again.
 
 ### Dungeon And Portals
 
@@ -64,10 +60,12 @@ dedicated relay/pub-sub channel.
 
 ### Chat
 
-Payload bounds, sanitization, scope separation and retention exist. Missing
-production controls include account-level mute/ban, slow mode, duplicate/spam
-fingerprints, report workflow and moderator audit. Database polling is acceptable
-for beta but not for high-volume world chat.
+Payload bounds, sanitization, scope separation, duplicate/spam protection,
+persistent mute state, persistent channel slow mode, account-level administrator
+authorization, in-game moderation commands, millisecond UTC expiry and moderation
+audit storage exist. Chat-ban and reports are intentionally out of scope. A future
+admin application still needs query UI. Database polling is acceptable for beta
+but not high-volume world chat.
 
 ### Craft, Cooking, Fishing And Hatchery
 
@@ -78,10 +76,13 @@ transitions and claim idempotency metrics. Never move result rolls to the Client
 
 ### Party
 
-Reward sharing, presence, invites and cross-worker relay are implemented, but the
-single file owns too many caches and transport details. Introduce a canonical
-party state/version from the API, explicit invite expiry and a reconnect grace
-state. Dungeon entry should freeze a versioned party roster for the run.
+Reward sharing, canonical party versioning, persistent invite expiry, cross-worker
+presence, offline membership removal and handoff preservation are implemented.
+Remote-worker members remain represented in the HUD without an `OFFLINE` label.
+Worker-crash cleanup now marks stale heartbeat presence and applies a short grace
+period before membership removal. Dungeon handoff uses a versioned party roster
+reservation before transfer. Multi-worker behavior still requires manual PBE
+validation whenever handoff or presence code changes.
 
 ### Dungeons On Distinct Workers
 

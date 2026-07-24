@@ -127,6 +127,17 @@ Good candidates:
 
 Do not hardcode balance data in scattered gameplay scripts if the project already has a JSON content path for it.
 
+Static authored UI structure belongs in `.tscn` scenes. Runtime code may create
+variable rows, slots, markers, previews and effects whose count or content is
+known only after server data arrives; it must not build an entire fixed window
+tree merely for convenience.
+
+Player-facing text uses Client language keys. Item `description.text`, dungeon
+display names and server feedback must not contain raw fallback sentences.
+Tuneable values such as chances, stat pools, stat curves, rewards and limits
+belong in validated JSON catalogs. Code owns algorithms, authority checks,
+registries and transient runtime state.
+
 ---
 
 ## Compatibility Rules

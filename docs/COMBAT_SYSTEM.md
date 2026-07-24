@@ -274,8 +274,61 @@ The skill formula and the shared defensive formula are separate concerns:
 - both paths still use the shared defense, system advantage, level difference,
   and variance calculations.
 
-Equipment stats are not yet included in the live stat calculation. They are a
-planned extension described in `ECONOMY.md`.
+Generated equipment stats are included in the live effective-stat calculation.
+They are added with base and flat bonuses before multiplicative buffs. The full
+progression contract is described in `ECONOMY.md`.
+
+### Skill JSON contract
+
+The standard formula needs no `damage_formula`. This skill uses only base damage
+and Link/skill-level growth:
+
+```json
+{
+  "slot": 2,
+  "damage": 100,
+  "damage_inc": 25,
+  "mana_cost": 20,
+  "cooldown": 4.0,
+  "cast_time": 0.8,
+  "buff_debuff": false
+}
+```
+
+A custom formula adds any combination of the supported scale fields. Omitted
+fields are zero:
+
+```json
+{
+  "slot": 2,
+  "damage": 100,
+  "damage_inc": 60,
+  "damage_formula": {
+    "atk_scale": 1.0,
+    "hp_scale": 0.1,
+    "mp_scale": 0.0,
+    "def_scale": 0.0,
+    "flat": 0.0
+  },
+  "mana_cost": 30,
+  "cooldown": 4.0,
+  "cast_time": 1.0,
+  "buff_debuff": false
+}
+```
+
+The formula fields are coefficients, not percentages. `atk_scale = 1.5` adds
+150% of effective ATK to power; `hp_scale = 0.1` adds 10% of effective maximum
+HP. Equipment bonuses are part of those effective stats.
+
+### Equipment combat contract
+
+- The Bracelet is mandatory for the active Datamoon to perform attacks.
+- Bracelet, Hood, and Shoes bonuses apply only to the active Datamoon.
+- Switching the active Datamoon reapplies the character's equipment bonuses.
+- Equipment changes are rejected while the character is in combat.
+- Outside combat, effective combat stats are recalculated immediately after an
+  equipment change.
 
 ### Current beta examples
 
