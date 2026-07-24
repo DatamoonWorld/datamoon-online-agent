@@ -181,6 +181,41 @@ These journal events are the alert source. Delivery to e-mail, Slack or an
 incident platform remains an infrastructure task and must be configured before
 public production; local logs alone do not notify an operator.
 
+### Web Spam And Brute-Force Protection
+
+The beta Web entry point uses layered limits. Nginx accepts an average of 10
+authentication requests per minute per source IP, with a burst of 10, and caps
+each IP at 20 simultaneous Web connections. The application blocks an IP for
+15 minutes after 30 login attempts in a 15-minute window and blocks a target
+account for 15 minutes after 8 invalid passwords in the same window. Public
+registration is disabled; if it is deliberately enabled later, its application
+limit is 5 attempts per IP per hour followed by a one-hour block.
+
+Application blocks return HTTP `429`. Requests rejected earlier by the current
+Nginx limit can return `503`; set an explicit Nginx `limit_req_status 429` in a
+reviewed configuration change before production so clients and monitoring can
+classify the event correctly. Check both protection layers:
+
+```bash
+journalctl -u datamoon-web.service --since "1 hour ago" --no-pager | grep 'rate_limit'
+grep -i 'limiting requests' /var/log/nginx/error.log | tail -n 100
+```
+
+Residual risks are accepted only for closed beta: application counters are
+in-memory and reset with the Web process; a distributed attack can rotate many
+IP addresses; and repeated failures against a known username can intentionally
+deny that user access. AWS Security Groups restrict ports but do not provide
+HTTP brute-force detection.
+
+Before public production, connect the structured events to external operator
+notifications, add reviewed temporary edge/firewall blocking (for example,
+Fail2ban or an equivalent), place distributed rate limiting/WAF protection at
+the public edge and use a shared limiter such as Redis if multiple Web instances
+are deployed. Review account-target limits so attackers cannot maintain an
+indefinite victim lockout. Never create automatic permanent IP bans: residential
+and mobile addresses are commonly shared or reassigned; prefer temporary,
+progressive blocks with an operator-visible audit trail.
+
 The following controls are intentionally deferred, not considered complete:
 
 - Password recovery: use a random single-use token stored only as a hash, a
