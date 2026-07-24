@@ -90,6 +90,57 @@ The updater intentionally aborts on dirty repositories. Schema migrations must
 remain backward-compatible because code rollback cannot undo a destructive DB
 migration.
 
+### Choosing The Deployment Path
+
+Use the coordinated deployment above whenever a release changes more than the
+Web application, or changes any Web dependency outside its repository. This
+includes MySQL API contracts, Auth/Gateway behavior, database migrations,
+Nginx, systemd units, environment/secrets, Node.js dependencies or files under
+`datamoon-online-agent/ops`. It is the default and safest release path.
+
+A Web-only deployment is allowed only when the intended commit changes files
+inside `datamoon-online-web`, keeps the existing API contract and runtime
+configuration, and requires no dependency installation. It restarts only
+`datamoon-web.service`; game sessions, Auth, Gateway, API and game workers stay
+online. Run the following as root:
+
+```bash
+WEB_REPO=/opt/datamoon/datamoon-online-web
+exec 9>/var/lock/datamoon-deploy.lock
+flock -n 9
+test -z "$(git -C "$WEB_REPO" status --porcelain)"
+PREVIOUS_WEB_COMMIT="$(git -C "$WEB_REPO" rev-parse HEAD)"
+git -C "$WEB_REPO" switch main
+git -C "$WEB_REPO" pull --ff-only origin main
+node --check "$WEB_REPO/src/app.js"
+systemctl restart datamoon-web.service
+systemctl is-active --quiet datamoon-web.service
+curl --fail --silent --show-error http://127.0.0.1:3101/health
+journalctl -u datamoon-web.service --since "2 minutes ago" --no-pager
+git -C "$WEB_REPO" rev-parse --short HEAD
+flock -u 9
+```
+
+Stop immediately if the clean-tree check, fast-forward pull or syntax check
+fails. If activation or health validation fails after the pull, inspect the
+journal and roll back the exact Web commit captured above:
+
+```bash
+git -C "$WEB_REPO" reset --hard "$PREVIOUS_WEB_COMMIT"
+node --check "$WEB_REPO/src/app.js"
+systemctl restart datamoon-web.service
+systemctl is-active --quiet datamoon-web.service
+curl --fail --silent --show-error http://127.0.0.1:3101/health
+flock -u 9
+```
+
+The hard reset is safe here only because the procedure first proved that this
+specific repository was clean and the target is an exact commit captured in the
+same shell. Never use this rollback against a dirty tree or a broad directory.
+Changing only `MAINTENANCE_MODE` or `REGISTRATION_ENABLED` in the existing Web
+environment file is not a code deployment; restart `datamoon-web.service` and
+validate health after the edit.
+
 ## Release Verification
 
 1. Confirm every repository HEAD equals the intended remote commit.
