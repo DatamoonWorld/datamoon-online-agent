@@ -288,6 +288,19 @@ Available in-game commands are `/mute Player duration_ms|permanent [reason]`,
 `/unmute Player`, `/slow channel [milliseconds]`, and `/normal channel`. Every
 command is re-authorized by the MySQL API against `dm_users.is_admin` and audited.
 
+### Manual gameplay persistence validation
+
+For Equipment, Fishing, Hatchery and recipe activity changes, validate at minimum:
+
+- clicking a filled Equipment NPC slot clears only the UI selection;
+- a material slot displays the sum of all matching inventory stacks and continues
+  with the next stack when the selected row is consumed;
+- upgrade/alternate consume exactly one material and preserve generated metadata;
+- stale or repeated Fishing session IDs do not grant a second reward;
+- a repeated Hatchery claim with the same operation ID returns the cached result;
+- Craft and Cooking use their domain catalogs through the shared recipe engine;
+- inventory, reward and mutation logs include the operation ID without secrets.
+
 ## Logging And Audit Retention
 
 Runtime services emit structured logs only to stdout for collection by

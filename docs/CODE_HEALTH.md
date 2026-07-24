@@ -1,6 +1,6 @@
 # Code Health And Domain Review
 
-Last full static pass: 2026-07-23. Scope: approximately 45,000 code lines across
+Last focused gameplay pass: 2026-07-24. Scope: approximately 45,000 code lines across
 Auth, Gateway, Server, Client, MySQL API and Web.
 
 ## Overall Assessment
@@ -32,12 +32,17 @@ the MySQL API transaction as the atomic boundary. Item use, generated equipment,
 upgrade and alternate operations should move into focused services rather than
 expanding the inventory facade again.
 
+The Equipment NPC keeps non-owning UI selections: clicking a selected NPC slot
+clears it without moving inventory, and material quantities are displayed as the
+sum of every matching inventory stack. Consumption remains atomic against a
+concrete row; the Client selects the next matching stack when one is exhausted.
+
 ### Dungeon And Portals
 
-`portal_manager.gd` combines static portals, local instances, remote handoff,
-completion, rewards, timeout/ejection and content parsing. Split configuration,
-instance lifecycle and transfer orchestration. Keep one public facade so RPC
-handlers do not depend on worker topology.
+Portal and dungeon content parsing/normalization now lives in `portal_config.gd`.
+`portal_manager.gd` remains the public facade for local instances, remote handoff,
+completion, rewards and timeout/ejection. Instance lifecycle and transfer
+orchestration are the next safe extraction boundaries.
 
 ## Domain Findings
 
@@ -53,8 +58,9 @@ adding more logic to `combat.gd` before this split.
 ### Guild
 
 Persistent membership and role operations belong in the API and snapshots are
-server-distributed, which is correct. Add permission matrices in one function,
-idempotent moderation operations, offline invite expiry and audit/admin tooling.
+server-distributed, which is correct. Permission matrices are centralized,
+invites expire, and persistent Guild audit records cover administrative state
+changes. Query/admin presentation remains future tooling.
 Cross-worker chat works through persistence polling but should eventually use a
 dedicated relay/pub-sub channel.
 
@@ -70,9 +76,11 @@ but not high-volume world chat.
 ### Craft, Cooking, Fishing And Hatchery
 
 Outcomes are server/API authoritative and inventory mutations are transactional.
-Craft/Cooking should share an engine; Fishing needs deterministic session IDs and
-stronger timing/replay telemetry; Hatchery should expose explicit job state
-transitions and claim idempotency metrics. Never move result rolls to the Client.
+Craft/Cooking share the recipe activity engine. Fishing uses server-generated
+session IDs, validates bite/catch timing, rejects stale sessions and derives a
+stable reward operation ID from the session. Hatchery start/claim operations use
+idempotency keys and explicit persisted job states. Never move result rolls to
+the Client.
 
 ### Party
 
@@ -87,11 +95,10 @@ validation whenever handoff or presence code changes.
 ### Dungeons On Distinct Workers
 
 Signed directed handoff, atomic lease replacement, fencing and acknowledgement are
-the correct foundation. Improve with an explicit transfer state machine shared by
-source/client/target, retry-safe acknowledgements, target readiness reservation,
-source rollback timeout, and explicit logs for manually interrupting each
-component at every transition. Party handoff should reserve all members before
-moving the first one.
+the correct foundation. Party handoff reserves the versioned complete roster
+before moving the first member and logs prepare, validation, cancellation,
+rollback and acknowledgement phases. An explicit shared transfer state type and
+dedicated relay remain future structural improvements.
 
 ### Client
 
