@@ -100,6 +100,59 @@ migration.
    handoff before opening the deployment to players.
 6. Rotate leaked historical DB/API credentials before production promotion.
 
+## Web Beta Controls
+
+Public account registration stays disabled during closed beta. The Web service
+defaults to a fail-closed posture when these variables are absent:
+
+```env
+REGISTRATION_ENABLED=false
+MAINTENANCE_MODE=false
+```
+
+`REGISTRATION_ENABLED=false` removes the registration link and returns `404`
+for both `GET` and `POST /register`. This controls only the website; disabling
+account creation in the game client requires a coordinated Auth/Gateway/API
+control. `MAINTENANCE_MODE=true` keeps `/health` available but returns a public
+maintenance page with HTTP `503` and `Retry-After` for every user route. Restart
+`datamoon-web.service` after changing either value.
+
+The Web service emits structured `WARN` events named `login_ip_rate_limit`,
+`login_account_rate_limit` and `register_ip_rate_limit` when an application
+limit first blocks an actor. Actor identifiers are keyed hashes; passwords,
+tokens, usernames and raw IP addresses are not logged. Inspect them with:
+
+```bash
+journalctl -u datamoon-web.service --since today --no-pager | grep 'rate_limit'
+```
+
+These journal events are the alert source. Delivery to e-mail, Slack or an
+incident platform remains an infrastructure task and must be configured before
+public production; local logs alone do not notify an operator.
+
+The following controls are intentionally deferred, not considered complete:
+
+- Password recovery: use a random single-use token stored only as a hash, a
+  short expiry, session revocation after reset and a generic response that does
+  not reveal whether an e-mail exists.
+- E-mail validation: use a single-use expiring token and do not trust a new
+  address until ownership is confirmed. Requires a transactional mail provider
+  and bounce/abuse handling.
+- Database backup: before production, implement automated encrypted MySQL
+  backups, off-host retention, restricted restore credentials and a tested
+  restore procedure. A backup that has not been restored in a drill is not a
+  verified backup.
+- OS/runtime patching: Ubuntu, Node.js and Nginx updates remain manual for beta.
+  Record the installed versions, review security advisories, take/verify a
+  backup, patch in a maintenance window and run the release verification list.
+
+Internal API tokens are high-entropy bearer secrets that identify Auth,
+Gateway, Server and Web to the loopback MySQL API. They are not player login
+tokens. Each service must receive only its own token and route scope; possession
+of a token grants that service's API permissions. Keep them only in root-owned
+secret environment files, never in Git, terminal transcripts or application
+logs, and rotate them after suspected disclosure or service compromise.
+
 ## Manual Connection Validation
 
 Follow the real connection path while streaming structured logs:
