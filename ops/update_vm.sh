@@ -29,6 +29,16 @@ trap cleanup EXIT
 exec 9>"$LOCK_FILE"
 flock -n 9 || { echo "Another Datamoon deployment is running." >&2; exit 1; }
 
+validate_godot_repo() {
+  local repo="$1"
+  local log_file="$BACKUP_DIR/godot-${repo}.log"
+  "$GODOT" --headless --editor --quit --path "$ROOT/$repo" 2>&1 | tee "$log_file"
+  if grep -Eq 'SCRIPT ERROR:|Parse Error:|Compile Error:|ERROR: Failed to load script' "$log_file"; then
+    echo "Godot script validation failed: $repo" >&2
+    return 1
+  fi
+}
+
 for command in git go node find curl systemctl "$GODOT"; do
   command -v "$command" >/dev/null 2>&1 || { echo "Missing command: $command" >&2; exit 1; }
 done
@@ -67,7 +77,7 @@ for repo in "${REPOS[@]}"; do
   git -C "$ROOT/$repo" switch "$branch"
   git -C "$ROOT/$repo" reset --hard "origin/$branch"
 done
-for repo in "${GODOT_REPOS[@]}"; do "$GODOT" --headless --editor --quit --path "$ROOT/$repo"; done
+for repo in "${GODOT_REPOS[@]}"; do validate_godot_repo "$repo"; done
 while IFS= read -r -d '' javascript_file; do
   node --check "$javascript_file"
 done < <(find "$ROOT/datamoon-online-web/src" -type f -name '*.js' -print0)
