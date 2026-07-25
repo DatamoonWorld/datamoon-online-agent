@@ -542,6 +542,22 @@ Ainda precisamos definir antes ou durante a execucao:
 
 O primeiro beta deve priorizar uma fatia vertical pequena, clara e completa.
 
+### Ordem confirmada em 2026-07-25
+
+- a rodada visual de nomes/guild, Party HUD e Enemy HUD foi validada
+  manualmente pelo responsavel do projeto;
+- Slimmoon e Nocmoon serao balanceados na proxima etapa de conteudo;
+- a quest line sera criada pelo responsavel usando
+  `docs/QUEST_AUTHORING_TEMPLATE.md`;
+- a dungeon diaria sera finalizada depois do balanceamento dos Datamoons;
+- campo de Slimmoon, floresta de Nocmoon, NPCs e portal serao consolidados na
+  etapa final de mapa;
+- polimento, mensagens, logs, metricas e bateria final permanecem documentados
+  para o fechamento da beta.
+
+Esta ordem nao marca os itens de beta como concluidos. Ela apenas registra a
+sequencia de execucao escolhida.
+
 O objetivo nao e mostrar volume de conteudo, mas provar que:
 
 - o jogador entende o mundo;

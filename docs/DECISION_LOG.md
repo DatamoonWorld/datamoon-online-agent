@@ -189,6 +189,63 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
+## 2026-07-25 - Hybrid world labels and quest completion contracts
+
+Status: accepted
+
+Decision:
+- World-name labels keep canonical editor values so authored scenes preview the
+  runtime result: nickname size 24, guild size 22, outline 6, shadow outline 4
+  and visual scale 0.5.
+- `Entity` reapplies the same values at runtime as a compatibility safeguard for
+  inherited, dynamic and legacy scenes. Semantic colors and scene-specific
+  positions remain authored per entity.
+- Dialogue quests stay active until the player reaches the final dialogue
+  balloon and explicitly selects `Complete`.
+- Closing the UI, leaving NPC range, disconnecting or changing NPC cancels the
+  temporary dialogue session without advancing the quest.
+- Dungeon quest credit occurs only after daily completion is accepted and the
+  dungeon reward operation succeeds. Matching automatic quests then complete
+  through a server-authoritative, idempotent event.
+
+Implementation status:
+- Hybrid world-label presentation is implemented in the Client scenes and
+  runtime base class.
+- Dialogue and dungeon objective contracts are documented only and remain
+  pending implementation.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- future Server, MySQL API and Client quest implementation
+
+## 2026-07-25 - Deterministic combat and source-scaled effects
+
+Status: accepted
+
+Decision:
+- Basic attacks use effective ATK as their power. Skills retain independent,
+  data-driven formulas and do not implicitly fall back to ATK.
+- Damage no longer uses random variance or a level-difference multiplier.
+  Positive post-formula damage has a minimum result of one.
+- Critical chance remains a separate probabilistic basic-attack mechanic.
+- Bleed, Poison and Burn scale from a percentage of the source's effective ATK
+  captured when the effect is applied.
+- Runtime stat changes do not alter an existing DOT. Concurrent applications
+  deal only the strongest captured tick instead of summing every application,
+  and equal or weaker renewals cannot replace or extend the strongest value.
+- Skills may define server-authoritative conditional post-hit effects, beginning
+  with target-effect checks and self-healing proportional to actual damage.
+
+Notes:
+- Nocmoon's existing Bleed is represented as 10% effective ATK per tick.
+- Nocmoon's conditional healing percentage remains intentionally unset until
+  species balance is finalized.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-server`
+
 Notes:
 - Multi-line branching is still planned, but the first implementation target is a single linear line for Nocmoon.
 - Switching between different lines must require regression to `Code`.

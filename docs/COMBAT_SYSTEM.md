@@ -222,9 +222,7 @@ Basic attacks always use the standard combat formula.
 power = ATK
 damage = formula_base(power, DEF)
 damage *= system_multiplier
-damage *= level_difference_multiplier
 damage *= crit, if the basic attack crits
-damage *= variance
 ```
 
 Critical chance and critical damage apply only to basic attacks.
@@ -245,9 +243,7 @@ power += flat
 
 damage = formula_base(power, DEF)
 damage *= system_multiplier
-damage *= level_difference_multiplier
 damage *= 1.0 + skill_damage
-damage *= variance
 ```
 
 If a skill has no `damage_formula`, it falls back to:
@@ -260,7 +256,12 @@ Skills do not crit.
 
 `skill_damage` is a final float multiplier for skills. For example, `skill_damage = 1.5` means +150% final skill damage.
 
-The current live variance is +/-10%.
+Damage does not use a random variance or a level-gap multiplier. Level still
+matters because it increases effective stats through each species' stat growth,
+but it does not apply a second hidden damage penalty or bonus.
+
+Any valid damaging action with positive post-formula damage deals at least `1`.
+Critical chance remains probabilistic and is not considered damage variance.
 
 Armor penetration is intentionally reserved for a future pass and is not part of the current beta formula.
 
@@ -271,8 +272,9 @@ The skill formula and the shared defensive formula are separate concerns:
 - a basic attack uses `ATK` as its power;
 - a skill uses its own `damage`, `damage_inc`, and optional `damage_formula`;
 - a skill without `damage_formula` does not fall back to `ATK`;
-- both paths still use the shared defense, system advantage, level difference,
-  and variance calculations.
+- both paths still use the shared defense and system-advantage calculations;
+- only a basic attack can crit;
+- final positive damage is deterministic apart from the separate critical roll.
 
 Generated equipment stats are included in the live effective-stat calculation.
 They are added with base and flat bonuses before multiplicative buffs. The full
@@ -320,6 +322,65 @@ fields are zero:
 The formula fields are coefficients, not percentages. `atk_scale = 1.5` adds
 150% of effective ATK to power; `hp_scale = 0.1` adds 10% of effective maximum
 HP. Equipment bonuses are part of those effective stats.
+
+### Damage-over-time contract
+
+Bleed, Poison and Burn use a percentage of the source's effective ATK:
+
+```json
+{
+  "buff_debuff": true,
+  "buff_debuff_id": "BLEED",
+  "buff_debuff_bonus": 10.0,
+  "buff_debuff_time": 5.0,
+  "buff_debuff_data": {
+    "dot_scaling": "source_atk_percent",
+    "dot_attack_scale": 0.1,
+    "stack_group": "skill",
+    "persistence_mode": "active_only"
+  }
+}
+```
+
+`dot_attack_scale = 0.1` means 10% of effective ATK per tick. Effective ATK is
+captured when the effect is applied. Later Attack Up, Attack Down, equipment or
+other runtime changes do not modify an already-active DOT; they affect only a
+new application.
+
+When multiple applications of the same stackable DOT are active, only the
+strongest captured tick deals damage. Weaker applications cannot evict or
+replace, refresh or extend the strongest active value. An equal application also
+leaves the existing DOT unchanged. Only a later application with higher
+captured damage replaces the value and renews its duration. Persisted effects
+retain this ATK snapshot even when their original source no longer exists.
+
+### Conditional skill effects
+
+Skills may define post-hit effects gated by target state:
+
+```json
+{
+  "conditional_effects": [
+    {
+      "condition": {
+        "type": "target_has_effect",
+        "effect_id": "bleed"
+      },
+      "effect": {
+        "type": "heal_self_from_damage",
+        "scale": 0.2
+      }
+    }
+  ]
+}
+```
+
+This example heals the caster for 20% of damage actually dealt when the target
+already had Bleed before the hit. A debuff applied by the same hit does not
+retroactively satisfy the condition.
+
+Conditions and effects are data-driven extension points. New condition/effect
+types must be implemented and validated server-side before appearing in JSON.
 
 ### Equipment combat contract
 
@@ -407,3 +468,46 @@ The current project direction should continue to favor:
 - server validation;
 - modular skill and state logic;
 - restrained but expressive combat feedback.
+
+---
+
+## Enemy Spawn Combat Configuration
+
+`skill_slots` belongs to enemy AI and is independent from the player hotbar.
+Values `2` through `5` select `SKILL_1` through `SKILL_4`. Omitting the field
+or providing an empty array makes the enemy collect every skill available in
+its scene. Set the field only when an enemy must use a restricted subset.
+
+`death_delay` is the time in seconds between entering the death state and
+removing the enemy entity. Overworld respawn timing starts after this removal,
+so the effective delay is `death_delay + respawn_seconds`.
+
+Enemy XP and Link EXP use an explicit object contract:
+
+```json
+{
+  "rewards": {
+    "xp": {
+      "base": 15,
+      "multiply_by_enemy_level": true
+    },
+    "link_exp": {
+      "base": 5,
+      "multiply_by_enemy_level": true
+    }
+  }
+}
+```
+
+Numeric enemy XP and Link EXP values are invalid. Reward calculation order is:
+
+1. Resolve `base * enemy_level` when `multiply_by_enemy_level` is enabled.
+2. Apply eligible party reward bonuses.
+3. Apply the receiver-versus-enemy level-gap scale.
+
+The level-gap scale grants 100% through five levels above the enemy, then loses
+10 percentage points per additional level. A receiver fifteen or more levels
+above the enemy receives zero XP and zero Link EXP.
+
+Dungeon completion rewards are a separate contract. They are not enemy rewards
+and are not multiplied by an enemy level.

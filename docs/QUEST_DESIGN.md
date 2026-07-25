@@ -32,6 +32,9 @@ Current live examples include starter quests such as:
 
 These are the baseline patterns to extend.
 
+For the copyable JSON contract, linear-chain pattern, NPC definition, runtime
+lifecycle and implementation checklist, see `docs/QUEST_AUTHORING_TEMPLATE.md`.
+
 ---
 
 ## Quest Identity
@@ -99,6 +102,15 @@ The current codebase already establishes patterns like:
 - `collect_item`
 
 New objective types should be added carefully and only when the server can validate them cleanly.
+
+Speaking to an NPC, opening a system, reaching a portal and completing a
+dungeon are planned objective categories, not current functional JSON types.
+They require server-side event hooks before content authors use them.
+
+The accepted future behavior for cancel-safe NPC dialogue completion and
+dungeon-reward-driven completion is documented in
+`docs/QUEST_AUTHORING_TEMPLATE.md`. It remains design-only until its
+server-authoritative hooks are implemented.
 
 ---
 
