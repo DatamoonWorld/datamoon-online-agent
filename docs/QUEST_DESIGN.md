@@ -153,6 +153,17 @@ Recommended structure:
 
 `required_level` should gate difficulty, not hide basic usability.
 
+When authored progression says `level A -> B`, `A` is the quest's
+`required_level` and the `datamoon_xp` reward is:
+
+```text
+total_xp_for_level(B) - total_xp_for_level(A)
+```
+
+This fixed reward is calculated from the canonical Datamoon XP curve. It moves
+a Datamoon from the start of level A to the start of level B. Existing partial
+XP is preserved and may carry the Datamoon beyond B.
+
 ---
 
 ## Repeatable Quest Rules
@@ -200,6 +211,19 @@ A quest should communicate:
 - what the reward is worth.
 
 The client can format and localize this, but the server should still send clean state.
+
+The global Quest Log lists only accepted quests that are still `active` or
+`ready_to_turn_in`. It reuses the standard quest row, shows localized
+description and authoritative objective progress, and permits abandonment
+without requiring NPC proximity. Accepting, dialogue completion and turn-in
+still require the correct NPC context.
+
+The NPC board and quest indicator hide quests while either the active Datamoon
+level or a prerequisite quest keeps them locked.
+
+Abandoning removes the persisted quest row and objective progress. A
+non-repeatable quest may then be accepted again if its level and prerequisite
+requirements remain satisfied.
 
 Error messaging should remain specific when possible, such as:
 

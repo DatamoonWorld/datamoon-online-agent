@@ -154,6 +154,9 @@ the intended sequence explicit and prevents skipping an intermediate quest.
 - An `item` reward must reference an existing item catalog id.
 - Keep tutorial rewards practical and small.
 - Avoid making story quests repeatable merely to permit retesting.
+- For a declared `level A -> B` reward, set `required_level` to A and calculate
+  `datamoon_xp.amount` as `total_xp_for_level(B) - total_xp_for_level(A)` using
+  the canonical Datamoon progression curve.
 
 ## NPC Definition
 

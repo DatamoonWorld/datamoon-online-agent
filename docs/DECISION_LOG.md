@@ -189,6 +189,26 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
+## 2026-07-27 - Global active quest log and level-interval rewards
+
+Status: accepted
+
+Decision:
+- The global Quest Log lists only accepted quests with `active` or
+  `ready_to_turn_in` status and shows objective progress from the authoritative
+  quest snapshot.
+- Accepting, talking through and turning in quests remain bound to the configured
+  NPC and proximity checks. Abandoning an owned active quest is available from
+  the global log and resets its objective rows.
+- An authored reward written as level `A -> B` means level `A` is the quest
+  requirement and the Datamoon XP reward is the cumulative XP from the start of
+  level `A` to the start of level `B`.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-server`
+
 ## 2026-07-25 - Hybrid world labels and quest completion contracts
 
 Status: accepted
@@ -342,6 +362,8 @@ Decision:
   every character on the account.
 - Supported staff controls are mute/unmute and persistent channel slow/normal
   mode. Chat-ban and message reports are not part of this scope.
+- Administrative command syntax and usage feedback are not exposed to normal
+  accounts. The MySQL API still re-authorizes every valid staff mutation.
 - The fifth message in two seconds is blocked and applies a 2,000 ms timeout.
 - Moderation expiry is stored in UTC with millisecond precision and blocked sends
   show remaining seconds to the player.
