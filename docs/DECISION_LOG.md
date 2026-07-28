@@ -357,6 +357,9 @@ Status: accepted
 Decision:
 - Activating a Datamoon through the Archive restores HP to the active
   equipment-adjusted maximum.
+- The restored HP is persisted before the Archive swap is confirmed. A failed
+  persistence attempt rolls the active selection and runtime Datamoon back to
+  the previous state.
 - Archive, NPC, and portal interactions are unavailable while the active
   Datamoon is in combat.
 - Archive activation immediately refreshes quest eligibility and NPC quest

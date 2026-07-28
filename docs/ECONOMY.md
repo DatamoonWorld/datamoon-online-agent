@@ -201,8 +201,10 @@ equipping, unequipping, or switching an item recalculates the active Datamoon's
 effective stats immediately.
 
 Activating a Datamoon through the Archive restores its current HP to the
-equipment-adjusted effective maximum. Archive, NPC, and portal interactions are
-blocked during combat so this safe interaction cannot be used as combat healing.
+equipment-adjusted effective maximum and persists that value before confirming
+the swap. If persistence fails, the active selection and runtime Datamoon are
+rolled back. Archive, NPC, and portal interactions are blocked during combat so
+this safe interaction cannot be used as combat healing.
 
 ### Main item upgrades
 
