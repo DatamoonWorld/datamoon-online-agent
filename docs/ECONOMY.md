@@ -292,8 +292,9 @@ Both tabs show one equipment slot and one material slot. Right-clicking a
 compatible inventory item stores only its `inventory_item_id` and renders a
 local visual reference; it does not move, reserve, or remove the item. Selecting
 another item for the same role replaces that reference, and closing the window
-clears every reference. This keeps disconnects and abandoned interactions
-lossless.
+clears every reference. Right-clicking a populated terminal slot clears that
+reference without touching the inventory item. This keeps disconnects and
+abandoned interactions lossless.
 
 Upgrade and Alternate requests include the selected equipment and material
 inventory row IDs. The backend locks both rows transactionally, verifies their
