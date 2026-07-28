@@ -200,6 +200,10 @@ Equipment changes are blocked while the character is in combat. Outside combat,
 equipping, unequipping, or switching an item recalculates the active Datamoon's
 effective stats immediately.
 
+Activating a Datamoon through the Archive restores its current HP to the
+equipment-adjusted effective maximum. Archive, NPC, and portal interactions are
+blocked during combat so this safe interaction cannot be used as combat healing.
+
 ### Main item upgrades
 
 For the current beta target, upgradeable equipment stops at `+5`. An `Upgrade
@@ -284,11 +288,12 @@ The equipment NPC opens a dedicated window with two tabs:
 The client may preview cost, chance, current stats, and possible pool entries.
 It must never decide success, consume materials locally, or generate a stat.
 
-Both tabs show one equipment slot and one material slot. Clicking a compatible
-inventory item stores only its `inventory_item_id` and renders a local visual
-reference; it does not move, reserve, or remove the item. Selecting another item
-for the same role replaces that reference, and closing the window clears every
-reference. This keeps disconnects and abandoned interactions lossless.
+Both tabs show one equipment slot and one material slot. Right-clicking a
+compatible inventory item stores only its `inventory_item_id` and renders a
+local visual reference; it does not move, reserve, or remove the item. Selecting
+another item for the same role replaces that reference, and closing the window
+clears every reference. This keeps disconnects and abandoned interactions
+lossless.
 
 Upgrade and Alternate requests include the selected equipment and material
 inventory row IDs. The backend locks both rows transactionally, verifies their

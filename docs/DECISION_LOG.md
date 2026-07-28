@@ -349,6 +349,25 @@ Repos affected:
 
 Notes:
 - Every attempt consumes one chip; failure never destroys or downgrades equipment.
+
+## 2026-07-28 - Archive activation and safe interaction combat rules
+
+Status: accepted
+
+Decision:
+- Activating a Datamoon through the Archive restores HP to the active
+  equipment-adjusted maximum.
+- Archive, NPC, and portal interactions are unavailable while the active
+  Datamoon is in combat.
+- Archive activation immediately refreshes quest eligibility and NPC quest
+  indicators for the newly active Datamoon.
+- Equipment NPC slots reference inventory rows through right-click and do not
+  move the underlying item.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-server`
 - Common stats use weight 10 and Crit/Skill Damage use weight 3.
 - Equipment has no rarity or quality; Critical Damage and Attack Speed are future
   stats.
