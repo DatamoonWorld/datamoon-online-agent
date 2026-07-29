@@ -231,8 +231,8 @@ Decision:
 Implementation status:
 - Hybrid world-label presentation is implemented in the Client scenes and
   runtime base class.
-- Dialogue and dungeon objective contracts are documented only and remain
-  pending implementation.
+- Dialogue completion/cancellation and dungeon objective hooks are implemented
+  in the current Server/API/Client flow.
 
 Repos affected:
 - `datamoon-online-agent`
@@ -345,7 +345,9 @@ Decision:
 
 Repos affected:
 - `datamoon-online-agent`
-- future Client, Server and MySQL API implementation
+- `datamoon-online-client`
+- `datamoon-online-server`
+- `datamoon-online-mysqlapi`
 
 Notes:
 - Every attempt consumes one chip; failure never destroys or downgrades equipment.
@@ -364,7 +366,7 @@ Decision:
   Datamoon is in combat.
 - Archive activation immediately refreshes quest eligibility and NPC quest
   indicators for the newly active Datamoon.
-- Equipment NPC slots reference inventory rows through right-click and do not
+- Equipment NPC slots reference inventory rows through left-click and do not
   move the underlying item.
 
 Repos affected:
@@ -404,8 +406,8 @@ Decision:
 - Dungeon Concourse portals remain Server-instantiated from the shared portal
   scene and world JSON; their Client selection shell is an authored `.tscn`.
 - Dungeon templates have no overworld `entry_portal`. Selection stores the
-  current character position as the return destination, while `exit_portal`
-  remains per-instance runtime content.
+  portal's safe adjacent `return_position` as the return destination, while
+  `exit_portal` remains per-instance runtime content.
 - Generated equipment boxes use `guaranteed_rewards` with the registered
   `equipment_stats` metadata generator instead of a parallel `unscan_result`.
 - Equipment stat curves and upgrade chances are catalog data. Item descriptions

@@ -1,5 +1,8 @@
 # Datamoons Online - Combat System
 
+> This document defines the combat contract. Current implementation status,
+> priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the combat direction for Datamoons Online.
@@ -202,6 +205,36 @@ Avoid overusing:
 
 ---
 
+## Enemy Behavior Contract
+
+Enemy intent is defined only by the spawn `behavior`. Species templates do not
+carry a separate `hostile` flag.
+
+| Behavior | Detection and reaction |
+| --- | --- |
+| `aggressive` | Detects nearby players, advances and attacks. |
+| `passive` | Ignores nearby players and flees when attacked. |
+| `defensive` | Ignores nearby players and fights the aggressor when attacked. |
+| `flee` | Detects and flees from nearby players, but fights the aggressor when attacked. |
+
+Unknown or absent values normalize to `passive`. Internal AI states such as
+`WANDER`, `CHASE`, `FLEE` and `RETURN` are runtime details and are not valid
+spawn behaviors.
+
+Enemy skill availability must be explicit:
+
+```json
+{
+  "skill_slots": [],
+  "skills_enabled": false
+}
+```
+
+When `skills_enabled` is false, an empty slot list means no skills. When true,
+an empty slot list may resolve all available species skills for compatibility.
+
+---
+
 ## Damage Formula Contract
 
 Basic attacks and skills share the same defensive damage baseline.
@@ -292,7 +325,12 @@ and Link/skill-level growth:
   "damage_inc": 25,
   "mana_cost": 20,
   "cooldown": 4.0,
-  "cast_time": 0.8,
+  "timing": {
+    "fps": 12,
+    "total_frames": 10,
+    "impact_frame": 6,
+    "impact_window_frames": 1
+  },
   "buff_debuff": false
 }
 ```
@@ -314,7 +352,12 @@ fields are zero:
   },
   "mana_cost": 30,
   "cooldown": 4.0,
-  "cast_time": 1.0,
+  "timing": {
+    "fps": 12,
+    "total_frames": 12,
+    "impact_frame": 7,
+    "impact_window_frames": 1
+  },
   "buff_debuff": false
 }
 ```
@@ -478,9 +521,57 @@ Values `2` through `5` select `SKILL_1` through `SKILL_4`. Omitting the field
 or providing an empty array makes the enemy collect every skill available in
 its scene. Set the field only when an enemy must use a restricted subset.
 
-`death_delay` is the time in seconds between entering the death state and
-removing the enemy entity. Overworld respawn timing starts after this removal,
-so the effective delay is `death_delay + respawn_seconds`.
+Enemy removal derives exclusively from `combat_timing.death`. At 12 FPS,
+`"total_frames": 12` keeps the dead entity for one second before removing it.
+`total_frames: 0` means that no death animation exists and removal is immediate.
+Overworld respawn timing starts after removal, so the effective time is the
+death frame duration plus `respawn_seconds`. The Server replicates the resolved
+death duration and the Client uses it for the death fade; no independent visual
+delay is allowed.
+
+Authoritative HP changes carry a monotonic `hp_version`. Clients must ignore an
+HP snapshot or combat event whose version is older than the last version
+applied to that entity. This applies to damage, healing, respawn, session
+restore, equipment clamping, and enemy leash reset.
+
+Boss instances additionally replicate `is_boss`, `boss_id`, `name_key`, and
+`hud_distance`. These fields are encounter data, not species data, and never
+modify another entity of the same species.
+
+## Frame-Based Action Timing
+
+Combat actions use one-based animation frames. The canonical configuration is:
+
+```json
+{
+  "fps": 12,
+  "total_frames": 6,
+  "impact_frame": 4,
+  "impact_window_frames": 1,
+  "movement": {
+    "start": {"mode": "free", "movement_multiplier": 1.0},
+    "impact": {"mode": "reduced", "movement_multiplier": 0.5},
+    "recovery": {"mode": "free", "movement_multiplier": 1.0}
+  }
+}
+```
+
+The Server converts frames to timers and remains authoritative over movement,
+hitboxes, projectiles and damage. `start` covers frames before
+`impact_frame`; `impact` covers `impact_window_frames`; all remaining frames
+are `recovery`. Supported movement modes are `free`, `reduced` and `locked`.
+
+`animation_speed`, `cast_time`, `impact_time`, `impact_ratio` and
+`death_delay` are not part of the current contract. Species and skills without
+positive `total_frames` cannot execute that action. `attack_speed` remains the
+interval in seconds between basic-attack starts and does not control animation
+duration.
+
+The resolved frame contract is included in `combat_action_started`. The Client
+uses that same contract for movement prediction and animation presentation,
+but never predicts HP loss or reward outcomes. Position rollback/snap
+correction remains a separate pending task and must not be hidden inside frame
+timing.
 
 Enemy XP and Link EXP use an explicit object contract:
 

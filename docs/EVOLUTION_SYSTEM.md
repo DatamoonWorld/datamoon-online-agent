@@ -1,5 +1,8 @@
 # Evolution System
 
+> This document defines the evolution contract. Current implementation status,
+> priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the v1 baseline for Datamoon evolutions.

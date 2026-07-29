@@ -32,8 +32,16 @@ When deeper project context is needed, consult these files first:
 20. `docs/CODE_HEALTH.md`
 21. `docs/OPERATIONS.md`
 22. `docs/SERVER_ARCHITECTURE_REVIEW.md`
+23. `docs/FIRST_BETA_ROADMAP.md`
+24. `docs/roadmap_v0.04.md`
 
 If this file is ever too brief for a decision, the files above win on detail.
+
+`docs/FIRST_BETA_ROADMAP.md` is the only operational gameplay backlog. Thematic
+documents define rules and contracts, but must not maintain competing priority
+lists. Before planning gameplay work, reconcile its status in that roadmap.
+When Beta v0.04 is affected, also read and update `docs/roadmap_v0.04.md` in the
+same change.
 
 ## Scope
 

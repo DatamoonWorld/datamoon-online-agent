@@ -1,5 +1,8 @@
 # Datamoons Online - Economy
 
+> This document defines economy and equipment contracts. Current implementation
+> status, priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the economic rules the project should follow.
@@ -290,11 +293,11 @@ The equipment NPC opens a dedicated window with two tabs:
 The client may preview cost, chance, current stats, and possible pool entries.
 It must never decide success, consume materials locally, or generate a stat.
 
-Both tabs show one equipment slot and one material slot. Right-clicking a
+Both tabs show one equipment slot and one material slot. Left-clicking a
 compatible inventory item stores only its `inventory_item_id` and renders a
 local visual reference; it does not move, reserve, or remove the item. Selecting
 another item for the same role replaces that reference, and closing the window
-clears every reference. Right-clicking a populated terminal slot clears that
+clears every reference. Left-clicking a populated terminal slot clears that
 reference without touching the inventory item. This keeps disconnects and
 abandoned interactions lossless.
 

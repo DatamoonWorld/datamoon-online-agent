@@ -1,5 +1,8 @@
 # Code Health And Domain Review
 
+> This is a technical review snapshot, not an active backlog. Current gameplay
+> status and priorities live only in `FIRST_BETA_ROADMAP.md`.
+
 Last focused gameplay pass: 2026-07-24. Scope: approximately 45,000 code lines across
 Auth, Gateway, Server, Client, MySQL API and Web.
 

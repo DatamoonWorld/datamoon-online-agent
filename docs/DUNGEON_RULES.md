@@ -1,5 +1,8 @@
 # Datamoons Online - Dungeon Rules
 
+> This document defines the dungeon contract. Current implementation status,
+> priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the rules for instanced dungeons in Datamoons Online.
@@ -28,7 +31,7 @@ Current implementation includes:
 - completion rewards;
 - forced ejection on timeout or party invalidation.
 
-`training_cavern` is the current reference template.
+`moonlight_cavern` is the current reference template.
 
 ---
 
@@ -78,9 +81,10 @@ means every enabled dungeon template. The Server creates that portal from the
 shared portal scene plus world JSON. The Client selector shell is an authored
 `.tscn` scene and creates only the variable option rows at runtime.
 
-Selecting an option stores the character's current authoritative position as
-the return destination before handoff. Do not add `entry_portal` to a dungeon
-template or duplicate one overworld portal per dungeon merely to enter it.
+Selecting an option stores the safe `return_position` configured by the
+overworld portal before handoff. It must be adjacent to, not on top of, the
+portal trigger. Do not add `entry_portal` to a dungeon template or duplicate one
+overworld portal per dungeon merely to enter it.
 
 Dungeon entry should validate:
 
@@ -203,7 +207,7 @@ Do not let dungeon rewards trivialize overworld progression.
 
 ### Equipment progression rewards
 
-This reward configuration is implemented for `training_cavern`.
+This reward configuration is implemented for `moonlight_cavern`.
 
 The current dungeon grants one `Upgrade Chip` on eligible completion and rolls
 an independent 5% chance to grant one `Alternate Chip`. These materials are

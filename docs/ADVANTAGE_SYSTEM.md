@@ -1,5 +1,8 @@
 # Datamoons Online - Advantage System
 
+> This document defines type-advantage rules. Current implementation status,
+> priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the high-level rules for type advantage in Datamoons Online.

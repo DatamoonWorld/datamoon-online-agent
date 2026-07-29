@@ -21,7 +21,7 @@ The current quest runtime supports these objective types:
 | Type | `target_id` | Progress source | Turn-in behavior |
 | --- | --- | --- | --- |
 | `kill_enemy_type` | Exact enemy type, such as `Slimmoon` | Server-confirmed enemy defeat | Progress is persisted as enemies die |
-| `collect_item` | Exact item id, such as `nocmoon_fang` | Current authoritative inventory quantity | Required items are consumed atomically at turn-in |
+| `collect_item` | Exact item id, such as `data_nocmoon_dna` | Current authoritative inventory quantity | Required items are consumed atomically at turn-in |
 
 The current reward types are:
 

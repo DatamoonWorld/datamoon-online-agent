@@ -1,5 +1,8 @@
 # Datamoons Online - Quest Design
 
+> This document defines the quest-authoring contract. Current implementation
+> status, priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines how quests should be designed and implemented in Datamoons Online.
@@ -16,21 +19,13 @@ Quests should:
 
 ## Current Baseline
 
-The active project already has a working quest flow with:
+The active project has a working data-driven quest flow with Server acceptance
+and progress authority, MySQL API persistence, NPC interactions, Client
+snapshots/UI, dependencies and repeatable/non-repeatable entries.
 
-- quest definitions in server JSON;
-- NPC-linked quest interactions;
-- server-side acceptance and turn-in flow;
-- mysqlapi-backed persistence;
-- client quest snapshots and UI;
-- repeatable and non-repeatable entries.
-
-Current live examples include starter quests such as:
-
-- `starter_nocmoon_hunt`
-- `starter_nocmoon_fangs`
-
-These are the baseline patterns to extend.
+The exact live count and IDs are tracked in `FIRST_BETA_ROADMAP.md`; content
+authors must inspect the current Server catalog instead of copying historical
+quest IDs from this specification.
 
 For the copyable JSON contract, linear-chain pattern, NPC definition, runtime
 lifecycle and implementation checklist, see `docs/QUEST_AUTHORING_TEMPLATE.md`.
@@ -96,21 +91,14 @@ Use objectives that map cleanly to server-observable actions, such as:
 
 ### Current safe baseline
 
-The current codebase already establishes patterns like:
+The current codebase establishes server-observable patterns including:
 
+- `talk_to_npc`
 - `kill_enemy_type`
 - `collect_item`
+- `complete_dungeon`
 
 New objective types should be added carefully and only when the server can validate them cleanly.
-
-Speaking to an NPC, opening a system, reaching a portal and completing a
-dungeon are planned objective categories, not current functional JSON types.
-They require server-side event hooks before content authors use them.
-
-The accepted future behavior for cancel-safe NPC dialogue completion and
-dungeon-reward-driven completion is documented in
-`docs/QUEST_AUTHORING_TEMPLATE.md`. It remains design-only until its
-server-authoritative hooks are implemented.
 
 ---
 

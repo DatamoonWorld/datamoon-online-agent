@@ -1,5 +1,8 @@
 # Datamoons Online - World Events
 
+> This document defines future world-event rules. Current implementation status,
+> priorities and pending work live only in `FIRST_BETA_ROADMAP.md`.
+
 ## Purpose
 
 This document defines the direction for world events in Datamoons Online.

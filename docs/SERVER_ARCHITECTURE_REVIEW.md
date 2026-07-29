@@ -1,5 +1,9 @@
 # Review arquitetural do `datamoon-online-server`
 
+> O backlog atual de gameplay e suas prioridades vivem somente em
+> `FIRST_BETA_ROADMAP.md`; secoes historicas de "next work" nao redefinem a ordem
+> atual.
+
 > Historical review retained for implementation context. Its deployment and
 > automated-test commands are superseded and must not be executed or restored.
 > `AGENTS.md` and `docs/OPERATIONS.md` define the current manual-validation and
@@ -1037,11 +1041,12 @@ cd /opt/datamoon/datamoon-online-server
 godot --headless --path .
 ```
 
-## 14. Current P2 Priority, Consolidated
+## 14. Historical P2 Priority Snapshot
 
-This section is the current planning shortcut for day-to-day use.
+This section preserves the priority that guided the P2 implementation cut. It is
+not the current planning shortcut; use `FIRST_BETA_ROADMAP.md`.
 
-### Best next work
+### Priority used by that historical cut
 
 1. `Projectiles`
 2. `Social/chat + party`
@@ -1263,7 +1268,7 @@ Implemented in the first P2 combat refactor cut:
 - the combat window expires after 5 seconds without positive damage;
 - portal interactions reject while the active Datamoon is in combat.
 
-Still pending after this cut:
+Still pending after that historical cut:
 
 - migrate client/UI naming to `animation_speed`, `attack_speed`, `skill_damage` and `crit_damage` if any old labels remain outside the server;
 - expose in-combat state to UI/debug if needed;
@@ -1353,7 +1358,7 @@ Completed in the current PBE code:
 - keep chat-ban and message reports out of scope by product decision;
 - the Party HUD keeps remote members gray and contains no `OFFLINE` text.
 
-Remaining operational work:
+Remaining work recorded by that historical cut:
 
 - add administrative audit queries to a future admin application;
 - complete manual multi-worker HUD and worker-crash validation;

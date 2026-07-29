@@ -1,5 +1,8 @@
 # LINK_SYSTEM.md
 
+> Este documento define o contrato de Link. Status de implementacao, prioridade
+> e pendencias vivem somente em `FIRST_BETA_ROADMAP.md`.
+
 # Datamoons Online — Sistema de Link
 
 ## Visão Geral
