@@ -391,10 +391,119 @@ Estes pontos nao bloqueiam automaticamente o beta se estiverem raros e pequenos,
 
 - pequenos snaps/resyncs ao trocar entre overworld e dungeon;
 - pequenos snaps em skill/ataque quando controlando Datamoon;
+- o dano pode ser exibido antes do frame visual de impacto porque a hitbox do
+  ataque basico e ativada imediatamente ao entrar no estado de ataque;
+- o HP de um inimigo pode cair, voltar por poucos milissegundos e cair novamente
+  quando o hit imediato e seguido por um worldstate interpolado mais antigo;
 - duplicacao eventual de mensagem privada em troca de worker;
 - estado de party member offline/remoto deve continuar mostrando corretamente;
 - blur no editor pode depender do zoom do viewport, mas runtime deve ficar limpo;
 - input pode segurar por alguns segundos em troca de worker se houver latencia.
+
+## Backlog De Combate, Economia E Temporada
+
+Itens discutidos e documentados em 2026-07-29. Nenhum deles deve ser
+implementado apenas no Client; combate, inventario, moeda, rewards e progressao
+permanecem autoritativos no Server.
+
+### Sincronizacao De Ataque E Dano
+
+Problema atual:
+
+- a hitbox do ataque basico e ativada no inicio do estado de ataque;
+- o Server pode aplicar e enviar o dano antes de o Client renderizar o frame de
+  impacto da animacao.
+
+Solucao planejada:
+
+- dividir cada acao em `START`, `IMPACT` e `RECOVERY`;
+- `START` inicia a animacao e bloqueia outra acao;
+- `IMPACT` ativa a hitbox e calcula o dano depois de um `impact_time`
+  configuravel por ataque;
+- `RECOVERY` encerra a acao e libera o proximo comando;
+- enviar `action_sequence`, `server_start_tick` e `impact_time` para o Client
+  alinhar a animacao mesmo com latencia;
+- suportar `impact_times` para skills com multiplos hits;
+- manter o Server como autoridade do impacto. Animation Call Method Track pode
+  disparar efeitos visuais, mas nao deve decidir o dano no Server headless.
+
+Criterios de pronto:
+
+- dano e numero flutuante aparecem no frame de impacto percebido;
+- latencia nao permite antecipar, repetir ou cancelar dano valido;
+- ataques basicos e skills usam o mesmo modelo temporal;
+- multiplos hits possuem sequencia deterministica e validada.
+
+### Oscilacao De HP Apos Hit
+
+Problema atual:
+
+- o pacote imediato de combate aplica o HP novo;
+- um worldstate interpolado mais antigo pode restaurar temporariamente o HP;
+- um snapshot posterior aplica novamente o valor correto.
+
+Solucao planejada:
+
+- versionar atualizacoes de HP com `server_tick`, `hit_sequence` ou ambos;
+- aplicar o hit imediato para preservar feedback rapido;
+- ignorar snapshots de HP anteriores a ultima versao autoritativa aplicada;
+- nunca corrigir o problema removendo a autoridade do Server ou atrasando todo
+  feedback ate o proximo worldstate.
+
+Criterios de pronto:
+
+- barra de HP nao sobe entre o hit e o snapshot seguinte;
+- cura, dano, DOT e morte respeitam a mesma ordenacao;
+- reconnect e troca de worker conseguem estabelecer uma nova versao-base.
+
+### Compra E Venda Em NPC
+
+Sistema planejado:
+
+- NPC referencia um `shop_id`; catalogo, precos e restricoes vivem no
+  Server/MySQL API;
+- compra valida proximidade/interacao, moeda, quantidade, estoque, limite e
+  espaco de inventario em uma unica operacao atomica;
+- venda valida posse, quantidade, estado equipado e flags de protecao antes de
+  remover o item e conceder moeda;
+- itens de quest, favoritos, equipados, bloqueados ou premium nao podem ser
+  vendidos sem uma regra explicita;
+- suportar quantidade, preco de compra, preco de venda e uma aba de recompra;
+- registrar auditoria e usar operacoes idempotentes para moeda e inventario.
+
+### Descarte De Item
+
+Sistema planejado:
+
+- arrastar para fora do inventario nao deve apagar automaticamente;
+- usar uma area explicita de descarte ou abrir confirmacao ao soltar fora;
+- stacks pedem quantidade; itens raros/equipamentos exigem confirmacao forte;
+- itens de quest, equipados, favoritos, bloqueados ou premium sao protegidos;
+- descarte e uma operacao autoritativa, idempotente e auditada no Server/API;
+- considerar recuperacao temporaria para itens elegiveis.
+
+### Passe De Temporada
+
+Direcao recomendada:
+
+- progresso por conta, nao por personagem ou Datamoon;
+- trilha gratuita e trilha premium predominantemente cosmetica;
+- nenhuma compra premium concede poder de combate;
+- progresso vem de atividades normais, quests e objetivos diarios, semanais e
+  permanentes;
+- recompensas reclamadas, nivel do passe, entitlement premium e missoes ficam
+  persistidos e validados no Server/API;
+- oferecer recuperacao de objetivos perdidos e, preferencialmente, manter
+  passes adquiridos disponiveis ou arquivados sem expiracao;
+- reutilizar o pipeline autoritativo de quests e rewards, sem criar uma segunda
+  implementacao de inventario/moeda.
+
+Ordem recomendada:
+
+1. corrigir sincronizacao de impacto e ordenacao de HP;
+2. implementar descarte seguro;
+3. implementar compra, venda e recompra em NPC;
+4. construir o passe sobre quests, rewards e auditoria ja estabilizados.
 
 ## Validacao Manual Concluida
 
