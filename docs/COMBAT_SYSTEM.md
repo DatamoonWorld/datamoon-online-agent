@@ -567,11 +567,18 @@ positive `total_frames` cannot execute that action. `attack_speed` remains the
 interval in seconds between basic-attack starts and does not control animation
 duration.
 
-The resolved frame contract is included in `combat_action_started`. The Client
-uses that same contract for movement prediction and animation presentation,
-but never predicts HP loss or reward outcomes. Position rollback/snap
-correction remains a separate pending task and must not be hidden inside frame
-timing.
+The resolved frame contract and `action_start_input_tick` are included in
+`combat_action_started`. Client and Server derive the movement phase from the
+same input tick, animation FPS and physics tick rate. Locked phases still
+advance the input sequence with zero displacement; commands are never discarded
+only because a combat phase blocks movement.
+
+The Client predicts the locally controlled entity, stores sequenced inputs and
+replays only inputs newer than the Server acknowledgement. Other entities use
+authoritative interpolation/presentation and are not locally resimulated.
+Rendering correction is separate from simulation state and must not become an
+input to later physics. HP loss, rewards, hits and cooldown legality remain
+Server-authoritative.
 
 Enemy XP and Link EXP use an explicit object contract:
 

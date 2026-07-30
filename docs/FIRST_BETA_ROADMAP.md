@@ -22,7 +22,7 @@ Status usados:
 - `IDEIA FUTURA`: direcao aceita para estudo, sem compromisso de implementacao;
 - `FORA DE ESCOPO`: decisao explicita de nao implementar nesta etapa.
 
-Ultima reconciliacao entre documentacao e codigo: **2026-07-29**.
+Ultima reconciliacao entre documentacao e codigo: **2026-07-30**.
 
 Roadmap de entrega em foco: `roadmap_v0.04.md`. Alteracoes de escopo, status ou
 prioridade da v0.04 devem atualizar os dois arquivos no mesmo commit.
@@ -53,6 +53,7 @@ prioridade da v0.04 devem atualizar os dois arquivos no mesmo commit.
 | Dungeon diaria | `moonlight_cavern` possui instancia, mobs, boss Nocmoon, completude, rewards, reset e retorno seguro. | Ajustar mobs para 7-8, boss para 13 e rewards finais da v0.04. |
 | Boss | O Server cria e rastreia uma instancia de boss usando a especie normal e conclui pela entidade rastreada. | Modificadores explicitos, `is_boss`/`boss_id`, nome localizado e HUD central por distancia ainda nao existem. |
 | Projeteis e areas | Runtime autoritativo no Server possui alcance/duracao, ticks e deduplicacao de hit. | Representacao visual, telegraph e sincronizacao perceptiva final no Client. |
+| Predicao e reconciliacao | Client e Server simulam movimento de combate pelo mesmo `action_start_input_tick`, com ACK e replay de inputs pendentes. | Validar visualmente Player/companion e START/IMPACT/RECOVERY sob latencia real antes de reduzir o codigo de correcao visual. |
 | Pixel crisp | Tema, fonte e varios assets foram atualizados. | Revisao completa em runtime de HUD, nomes, tooltips, tiles e movimento. |
 
 ### Proximas Entregas

@@ -6,6 +6,10 @@
 Last focused gameplay pass: 2026-07-24. Scope: approximately 45,000 code lines across
 Auth, Gateway, Server, Client, MySQL API and Web.
 
+Latest cross-repository pass: 2026-07-30. The checklist below is the canonical
+code cleanup tracker. A checked item means it was verified or safely completed;
+unchecked items require an isolated change and manual validation before removal.
+
 ## Overall Assessment
 
 Authority boundaries and persistent consistency are cohesive. Size is not itself
@@ -131,3 +135,107 @@ build verification. Manual scenarios live in the canonical Operations runbook.
 3. Every extraction preserves RPC/API contracts and records a complete manual log trace.
 4. Large gameplay changes are separate commits from mechanical moves.
 5. Measure frame time, packet size, DB writes and API latency before/after.
+
+## Cross-Repository Cleanup Checklist
+
+### Agent
+
+- [x] Keep gameplay priorities in `FIRST_BETA_ROADMAP.md` and v0.04 acceptance
+  in `roadmap_v0.04.md`; thematic documents define contracts only.
+- [x] Replace the old pixel-tolerance combat note with deterministic tick replay.
+- [ ] Repair the historical mojibake in `ai/CODE_RULES.md` without changing its
+  meaning.
+- [ ] Review old audit snapshots when the beta ships and archive only documents
+  that no longer provide decision history.
+
+### Auth
+
+- [x] Godot headless loads scripts without parse errors.
+- [x] No runtime `.env` or secret file is tracked.
+- [ ] Separate the HTTP/database adapter from the authentication coordinator if
+  either grows beyond its current small responsibility.
+- [x] No application-owned `Thread` exists in Auth; the headless editor shutdown
+  warning observed locally comes from the restricted Godot editor environment.
+
+### Gateway
+
+- [x] No runtime `.env` or secret file is tracked.
+- [ ] Re-run isolated headless shutdown validation in CI; the combined local
+  audit was terminated after the restricted editor environment stalled.
+- [ ] Keep Gateway limited to handshake, routing and connection lifecycle; do
+  not move gameplay reconciliation into it.
+
+### Client
+
+- [x] RPC surface is byte-identical to the Server mirror.
+- [x] All tracked JSON files parse and all tracked paths exist.
+- [x] Controlled movement uses sequenced input, authoritative ACK and replay
+  based on `action_start_input_tick`.
+- [x] Remote entities remain presentation/interpolation driven.
+- [ ] Split `movement_controller.gd` after live validation into input history,
+  deterministic simulation and visual correction components.
+- [ ] Split `server.gd` receivers into session, lobby, handoff and gameplay
+  adapters while preserving the mirrored RPC surface.
+- [ ] Split `worldmap.gd` scene streaming from entity presentation.
+- [ ] Remove `ChatPayloads.TYPE_LEGACY` only after confirming every local and
+  network message is wrapped by `build_chat` or `build_system`.
+- [ ] Inventory and UI scripts disabled for v0.04 remain future content and must
+  not be deleted merely because they do not spawn in the beta.
+
+### Server
+
+- [x] RPC surface is byte-identical to the Client mirror.
+- [x] All tracked JSON files parse and all tracked paths exist.
+- [x] Combat movement phases use the same deterministic helper as the Client.
+- [x] Locked combat phases process zero-distance commands instead of creating
+  gaps in the input sequence.
+- [x] Rename functional `ASpeedTimer` nodes to `ActionTimer`; attack speed is an
+  interval and no longer an animation-duration concept.
+- [ ] Extract dungeon instance lifecycle and transfer orchestration from
+  `portal_manager.gd`.
+- [ ] Split inventory use, rewards and equipment operations from `inventory.gd`.
+- [ ] Split enemy AI, combat and replication responsibilities in
+  `datamoon_enemy.gd`.
+- [ ] Measure worldstate packet size and tick cost before changing snapshot
+  frequency or compression.
+
+### MySQL API
+
+- [x] No runtime `.env` or secret file is tracked.
+- [ ] Run `go vet ./...` and `go build ./...` in CI/VM; Go is not installed in
+  the current local execution environment.
+- [ ] Split `game_write_handlers.go`, `guild_handlers.go` and
+  `inventory_handlers.go` by aggregate/use case.
+- [ ] Remove permissive legacy inventory-ID behavior only in the clean beta
+  database release that retires migrations 031/032 compatibility.
+- [ ] Generate and diff a route inventory so unused endpoints can be removed
+  without breaking Server callers.
+
+### Web
+
+- [x] `src/app.js` passes Node syntax validation.
+- [x] No runtime `.env` or secret file is tracked.
+- [ ] Split the 500+ line application into configuration, routes and page
+  rendering when another account flow is added.
+- [ ] Add a non-installing `check` script; there is currently no build script
+  and invoking package-manager build attempts an unnecessary install.
+
+### Sprites
+
+- [x] Repository intentionally contains source art rather than runtime code.
+- [ ] Create a manifest mapping source sprite IDs to Client runtime assets
+  before deleting apparently unreferenced art.
+- [ ] Detect duplicate binary hashes and obsolete exports only after the
+  manifest distinguishes source files from generated variants.
+
+### Release Gates
+
+- [ ] Validate Player movement while commanding companion attacks.
+- [ ] Validate Datamoon START/IMPACT/RECOVERY at normal latency and under
+  simulated latency/loss.
+- [ ] Confirm reconciliation errors converge instead of growing across actions.
+- [ ] Run Client, Server, Auth and Gateway headless checks in a writable CI
+  profile.
+- [ ] Run API vet/build and Web syntax check.
+- [ ] Perform the clean database reset before removing historical ID migrations
+  or permissive legacy-row handling.

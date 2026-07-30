@@ -868,6 +868,17 @@ conteudo visual e todo o balanceamento no mesmo ciclo.
 
 - data e janela de manutencao para executar a baseline limpa do banco;
 - valores finais de `START`, `IMPACT`, `RECOVERY`, `spawn` e `death`;
-- politica de movimento por skill e correcao de rollback;
+- validacao visual da reconciliacao deterministica por tick em latencia real;
 - cenas, dimensoes, colisoes e pontos finais dos dois mapas;
 - layout e animacao da HUD central do boss.
+### Combat movement reconciliation validation
+
+- Combat requests include the controlled entity input window even while the
+  Player commands the companion Datamoon.
+- START, IMPACT and RECOVERY movement are resolved from
+  `action_start_input_tick` by the same deterministic helper in Client and
+  Server. Locked phases advance sequence numbers with zero displacement.
+- Manually validate continuous Player movement while commanding a companion
+  basic attack and continuous Datamoon movement through every Slime Spikes
+  phase. Repeated reconciliation growth indicates a simulation mismatch and
+  must not be hidden by increasing pixel tolerances.
