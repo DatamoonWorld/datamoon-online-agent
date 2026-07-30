@@ -891,3 +891,7 @@ conteudo visual e todo o balanceamento no mesmo ciclo.
 - If `ack_already_reconciled` is true, a newer world snapshot already consumed
   the finish ACK. The Client applies only the action state transition and must
   not rewind to the older action-boundary position.
+- Visual correction is allowed to converge during action phases that permit
+  movement and remains frozen only while the active phase is locked. Residual
+  post-action correction uses the normal 120 px/s recovery speed so an offset
+  cannot produce several seconds of artificial catch-up movement.
