@@ -40,6 +40,11 @@ The combat loop should emphasize:
 - threat and exposure;
 - role distinction between human and Datamoon.
 
+When equipment or an equipment upgrade changes maximum HP or MP, the Server
+preserves the current resource percentage. A full Datamoon remains full, an
+injured Datamoon keeps the same relative condition, and a dead Datamoon remains
+at zero. This prevents equip/unequip healing exploits.
+
 ---
 
 ## Combat Structure
