@@ -41,9 +41,10 @@ The combat loop should emphasize:
 - role distinction between human and Datamoon.
 
 When equipment or an equipment upgrade changes maximum HP or MP, the Server
-preserves the current resource percentage. A full Datamoon remains full, an
-injured Datamoon keeps the same relative condition, and a dead Datamoon remains
-at zero. This prevents equip/unequip healing exploits.
+preserves the absolute current value. Increasing the maximum does not grant HP
+or MP; reducing it only clamps the current value to the new maximum. Recovery
+must come from an authorized gameplay source such as regeneration or an item,
+which prevents equipment changes from becoming a healing exploit.
 
 ---
 
