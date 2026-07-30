@@ -720,6 +720,14 @@ estavel ate o fim e converge depois com limite de 30 px/s. O Client envia um
 diagnostico ao concluir a acao, e o Server grava warning somente quando o erro
 ultrapassa o limite de hard snap.
 
+Durante uma acao com movimento permitido, divergencias de ate 24 px nao causam
+rewind visual. O diagnostico registra em `INFO` correcoes a partir de 2 px e usa
+`WARN` acima de 64 px, sempre uma vez por acao, nunca por frame. Slime Spikes
+mantem START e RECOVERY em 50%, mas usa dois frames bloqueados no IMPACT para a
+parada ser perceptivel. Com o personagem sob controle, a hotbar ainda pode
+ordenar ataques do Datamoon companheiro; nesse caso somente o Datamoon anima e
+o movimento previsto do personagem nao e alterado.
+
 Skills com `total_frames: 0` nao entram na rotacao da IA. O inimigo usa ataque
 basico ate receber animacao e timing validos; nao existe cast instantaneo como
 fallback. Essa regra se aplica atualmente a Fang Strike do Nocmoon.
