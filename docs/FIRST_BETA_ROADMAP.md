@@ -149,16 +149,20 @@ Implementado:
   Cooking e Hatchery;
 - operacoes sensiveis transacionais, idempotentes e auditadas;
 - Bracelet, Hood e Shoes com tres entradas de stats e caps por pool;
+- IDs finais `digital_bracelet`, `digital_hood` e `digital_shoes`, com Unscan
+  correspondente e migracao preservando inventario/equipamento;
 - Unscan pelo contrato normal de container com gerador autoritativo;
 - Upgrade `+1` a `+5` com chances `100/90/80/70/60%`;
 - Alternate troca apenas o stat selecionado, preserva os demais e respeita caps;
 - NPC de equipamento com referencias nao proprietarias aos itens do inventario;
 - quantidade de material exibida como soma de todos os stacks compativeis;
 - `Guild Deploy Drive` exigido na criacao de Guild.
+- energias verde/azul com recuperacao autoritativa de 10% do HP/MP efetivo.
 
 Pendente:
 
 - definir origem/drop do `Guild Deploy Drive`;
+- manter Hood/Shoes/Gloves/Shirt/Pants sem fonte na v0.04;
 - fechar balanceamento dos valores de stats e impacto na economia;
 - descarte seguro, loja NPC, compra/venda/recompra e passe de temporada;
 - Critical Damage, Attack Speed, raridade e qualidade nao pertencem ao
@@ -689,15 +693,15 @@ Problema atual:
 - o Server pode aplicar e enviar o dano antes de o Client renderizar o frame de
   impacto da animacao.
 
-Solucao planejada:
+Solucao implementada, pendente de validacao visual:
 
 - dividir cada acao em `START`, `IMPACT` e `RECOVERY`;
 - `START` inicia a animacao e bloqueia outra acao;
 - `IMPACT` ativa a hitbox e calcula o dano no `impact_frame` configurado por
   ataque;
 - `RECOVERY` encerra a acao e libera o proximo comando;
-- enviar `action_sequence`, `server_start_tick` e o timing resolvido em frames
-  para o Client alinhar a animacao mesmo com latencia;
+- enviar identificador da acao, tick autoritativo e timing resolvido em frames
+  para o Client alinhar a animacao e reconciliar movimento;
 - suportar `impact_times` para skills com multiplos hits;
 - manter o Server como autoridade do impacto. Animation Call Method Track pode
   disparar efeitos visuais, mas nao deve decidir o dano no Server headless.
@@ -911,6 +915,9 @@ mudanca de nitidez durante movimento ou zoom.
 - [x] Guild creation bloqueada pelo item `Guild Deploy Drive`.
 - [ ] Client sem blur relevante em runtime.
 - [ ] Server, gateway, auth e mysqlapi atualizados em `pbe`.
+- [ ] Baseline SQL consolidada sem migrations de conversao de dados PBE.
+- [ ] Baseline validada do zero em banco descartavel antes da janela de reset.
+- [ ] Backup realizado e reset limpo autorizado explicitamente para o beta.
 - [ ] Overworld e dungeon-1 ativos na VM.
 - [ ] Dungeon-2 desligada.
 - [ ] Teste manual completo aprovado.

@@ -36,13 +36,13 @@ sincronizados em `FIRST_BETA_ROADMAP.md`.
 
 | Area | Estado atual | Acao v0.04 |
 | --- | --- | --- |
-| Mapas | Um unico `main_map.tscn`; mudanca de `space_id` nao troca TileMap. | `IMPLEMENTAR` Digital Center e Moonlight Forest como cenas/espacos distintos. |
+| Mapas | Digital Center e Moonlight Forest possuem cenas e troca por `space_id`. | `AJUSTAR` arte, colisao e pontos finais. |
 | Portais | Cena compartilhada e portal de dungeon data-driven. | `AJUSTAR` variantes azul para mapa e vermelha para dungeon. |
-| Dungeon | `training_cavern`, Nocmoon level 5-6 e boss level 11. | `AJUSTAR` para `moonlight_cavern`, mobs 7-8 e boss 13. |
+| Dungeon | `moonlight_cavern`, mobs 7-8 e boss 13 configurados. | `VALIDAR` fluxo e balanceamento final. |
 | Quests | Seis quests funcionais e lineares. | `AJUSTAR` IDs de dungeon, EXP e rewards. |
 | NPCs | Seis NPCs/estacoes ativos no overworld. | `DESATIVAR` todos exceto Devmoon no conteudo v0.04. |
-| Equipamentos | Bracelet, Hood e Shoes gerados. | `AJUSTAR` Bracelet; demais ficam sem fonte/fora do beta. |
-| Pocoes | Nao existem. | `IMPLEMENTAR` energia verde e azul. |
+| Equipamentos | Bracelet, Hood e Shoes usam IDs `digital_*`; Unscan gera stats persistidos. | `MANTER` apenas Bracelet com fonte; Hood/Shoes ficam fora do conteudo. |
+| Pocoes | Energias verde e azul recuperam 10% de HP/MP efetivos. | `VALIDAR` uso e feedback no Client. |
 | Boss | Instancia rastreada, sem identidade/HUD final de boss. | `IMPLEMENTAR` modificadores e HUD central. |
 
 ## Decisoes De ID
@@ -56,6 +56,10 @@ Usar IDs canonicos em `snake_case`, independentes do nome localizado:
 | Moonlight Cavern | `moonlight_cavern` |
 | Digital Bracelet | `digital_bracelet` |
 | Unscan Digital Bracelet | `unscan_digital_bracelet` |
+| Digital Hood | `digital_hood` |
+| Unscan Digital Hood | `unscan_digital_hood` |
+| Digital Shoes | `digital_shoes` |
+| Unscan Digital Shoes | `unscan_digital_shoes` |
 | Nocmoon DNA | `data_nocmoon_dna` |
 | Slimmoon DNA | `data_slimmoon_dna` |
 | Small Green Digital Energy | `small_digital_energy_green` |
@@ -73,9 +77,57 @@ Renomear IDs de itens persistidos exige:
 - nao reescrever IDs em auditorias historicas;
 - publicar Server/API/Client no mesmo deploy para evitar catalog mismatch.
 
-Antes do beta publico, a alternativa mais simples e limpar apenas os itens PBE
-de teste e adotar os IDs finais. Isso nao deve ser feito automaticamente em
-producao.
+As migrations `031_migrate_final_beta_item_ids.sql` e
+`032_migrate_small_fish_item_ids.sql` sao temporarias enquanto o PBE ainda
+possui dados antigos. Como o banco sera recriado antes do beta, elas devem ser
+removidas durante a consolidacao da baseline. Auditorias historicas nao devem
+ser migradas para o banco novo.
+
+## Baseline Limpa Do Banco Para O Beta
+
+Status: `MAPEADO; EXECUTAR SOMENTE COM AUTORIZACAO EXPLICITA DE LANCAMENTO`.
+
+Objetivo:
+
+- recriar Auth e Game sem dados PBE;
+- manter apenas o schema final esperado pelo codigo do beta;
+- executar uma sequencia limpa de `CREATE TABLE`, indices e seeds necessarios;
+- eliminar migrations de conversao de dados e evolucoes por `ALTER TABLE`;
+- iniciar `schema_migrations` do zero.
+
+Mapa de consolidacao:
+
+| Migration atual | Destino na baseline limpa |
+| --- | --- |
+| Auth `001-002` | Manter como `CREATE TABLE`; nenhuma consolidacao estrutural necessaria. |
+| Game `000-019` | Manter como base de criacao, incorporando nelas o estado final das tabelas. |
+| `020_scope_game_chat_messages` | Incorporar `scope_id` e o indice final diretamente em `019`; remover `020`. |
+| `024_add_audit_retention_indexes` | Incorporar os indices em `004`, `005` e `016`; manter `dm_value_audit` como criacao direta, sem `ALTER`. |
+| `025_create_chat_moderation` | Manter as quatro tabelas e o seed de canais, ja com nomes e tipos finais de `029`. |
+| `026_version_parties_and_invites` | Incorporar `version` e `offline_since_unix` em `021`; manter `dm_party_invites` como criacao direta. |
+| `027_create_guild_audit` | Manter como criacao direta, ja com o indice de retencao definido em `029`. |
+| `028_create_party_handoff_groups` | Incorporar `group_id` e seu indice em `018`; manter `dm_game_handoff_groups` como criacao direta. |
+| `029_finalize_chat_moderation` | Incorporar `is_admin` em `000` e os campos/indices finais em `025` e `027`; remover `029`. |
+| `030_expand_character_equipment_slots` | Incorporar todos os slots no `CHECK` de `013`; remover `030`. |
+| `031-032` | Remover; sao conversoes de IDs de dados PBE que nao existirao no banco novo. |
+
+Regras para a execucao futura:
+
+- produzir backup completo antes de qualquer `DROP DATABASE`;
+- confirmar nomes dos bancos Auth e Game a partir dos envs da VM;
+- parar API, Auth, Gateway e workers antes do reset;
+- consolidar e validar as migrations em codigo antes de tocar no banco;
+- recriar somente os bancos Datamoon, nunca o schema MySQL do sistema;
+- executar o migrator da API com credenciais de escopo restrito;
+- iniciar os servicos pelo deploy coordenado;
+- validar `schema_migrations`, tabelas, indices, healthcheck e logs;
+- criar novamente apenas a conta administrativa necessaria;
+- nao transportar personagens, inventarios, hotbars ou auditorias PBE.
+
+Quando o lancamento do beta for autorizado, os comandos devem ser montados com
+os nomes reais lidos de `/opt/datamoon/env/datamoon-api.env` e
+`datamoon-api-secrets.env`. O runbook destrutivo nao deve ser antecipado com
+nomes presumidos.
 
 ## Mapas
 
@@ -148,6 +200,12 @@ Hoje o Client limpa entidades ao trocar `space_id`, mas continua exibindo
 - portal vermelho lista somente dungeons habilitadas e mostra seus requisitos;
 - cores sao variantes da mesma cena e do mesmo script, nunca implementacoes
   separadas.
+
+Portais de mapa com um unico destino transportam imediatamente. Com dois ou
+mais destinos, o Server abre uma sessao de selecao de 20 segundos e envia ao
+Client apenas IDs e nomes localizados; a escolha retorna `destination_id` e o
+Server revalida sessao, portal, distancia e destino antes do teleporte. O Client
+nunca envia `space_id`, coordenadas ou escolhe implicitamente o primeiro item.
 
 Digital Center e Moonlight Forest continuam no worker overworld na v0.04. A
 dungeon permanece no worker `dungeon-1`.
@@ -387,7 +445,7 @@ Status: `AJUSTAR`.
 
 `small_digital_energy_green`:
 
-- `IMPLEMENTAR`;
+- `IMPLEMENTADO`;
 - restaura 10% do HP maximo efetivo atual do Datamoon ativo, incluindo
   equipamentos;
 - uso e quantidade restaurada validados no Server;
@@ -396,7 +454,7 @@ Status: `AJUSTAR`.
 
 `small_digital_energy_blue`:
 
-- `IMPLEMENTAR`;
+- `IMPLEMENTADO`;
 - restaura 10% do MP maximo efetivo atual do Datamoon ativo, incluindo
   equipamentos;
 - uso e quantidade restaurada validados no Server;
@@ -438,15 +496,23 @@ rewards e apresentacao ativa:
 - `dataegg_glitch`;
 - `dataegg_slimmoon`;
 - `dataegg_nocmoon`;
-- `attack_fish_skewer`.
+- `attack_core_fish_skewer`.
 
 Observacoes:
 
-- Hood e Shoes existem hoje como `battle_hood` e `battle_shoes`; devem ficar sem
-  fonte e fora da UI/rewards da v0.04.
-- Gloves, Shirt e Pants ainda nao existem. Nao criar nesta versao.
-- Os slots futuros exigirao mudancas de schema, equipamento, UI e recalculo de
-  stats; nao antecipar isso no Beta.
+- Hood e Shoes foram renomeados para `digital_hood` e `digital_shoes`; seus
+  containers usam `unscan_digital_hood` e `unscan_digital_shoes`. Permanecem
+  sem fonte e fora da UI/rewards da v0.04.
+- Gloves, Shirt e Pants e seus Unscan existem no catalogo, com slots funcionais,
+  mas permanecem sem sprite e sem fonte nesta versao.
+- Gloves, Shirt e Pants sao conteudo futuro, nao pendencias de ativacao da
+  v0.04.
+- As pools dos equipamentos futuros ficam definidas desde agora:
+  - `digital_gloves`: `Crit x2`, `ATK x1` e `MP x1`.
+  - `digital_shirt`: `Skill Damage x1`, `HP x2` e `DEF x1`.
+  - `digital_pants`: `DEF x1`, `HP x2` e `MP x2`.
+- Os slots `gloves`, `shirt` e `pants` ja sao aceitos pelo schema, API, Server e
+  UI. Na v0.04, os itens permanecem sem fonte de aquisicao e sem sprite final.
 - Fishing, Hatchery, Craft, Cooking e Guild continuam implementados, mas sem
   onboarding, NPC ou fonte de itens nesta versao.
 - Fishing fica inacessivel porque a vara permanece desabilitada e sem fonte.
@@ -621,51 +687,28 @@ prevista imediatamente; correcoes usam a posicao autoritativa mais recente
 aceita. Isso separa `START/IMPACT/RECOVERY` da formula de dano e reduz rollback
 visual sem entregar autoridade ao Client.
 
-### Contrato De Estados Pendente
-
-Nao implementar `START/IMPACT/RECOVERY`, bloqueio de movimento ou correcao de
-rollback antes de medir as animacoes finais. O formato a confirmar deve ser
-data-driven e explicito em segundos:
-
-```json
-{
-  "states": {
-    "spawn": {
-      "duration": 0.8,
-      "locks_movement": true,
-      "invulnerable": true
-    },
-    "death": {
-      "duration": 1.2,
-      "locks_movement": true
-    },
-    "basic_attack": {
-      "start": 0.25,
-      "impact": 0.10,
-      "recovery": 0.35
-    },
-    "skills": {
-      "2": {
-        "start": 0.40,
-        "impact": 0.15,
-        "recovery": 0.55
-      }
-    }
-  }
-}
-```
+### Contrato De Estados Em Frames
 
 O Server deve ser autoridade sobre inicio, instante do impacto, dano e fim da
 recuperacao. O Client apenas antecipa animacao e feedback. `spawn` impede alvo,
 dano e input durante sua duracao; `death` mantem a entidade sem colisao/acao ate
 o fim da animacao. Os valores so serao aprovados depois do teste visual.
 
-O contrato de ataque e skill foi simplificado para frames em 12 FPS. Slimmoon
+O contrato de ataque e skill usa frames em 12 FPS. Slimmoon
 e a referencia inicial: ataque `total_frames: 6`, `impact_frame: 4` e janela de
 um frame; Slime Spikes usa `9/6/1`. Server e Client aplicam as mesmas fases e
 multiplicadores de movimento. `spawn` e `death` permanecem com duracao zero e
-sem efeito novo no runtime ate a aprovacao visual. A correcao de rollback/snap
-continua documentada e nao faz parte desta implementacao.
+sem efeito novo no runtime ate a aprovacao visual.
+
+Durante reconciliacao, o Client reaplica comandos pendentes usando o
+multiplicador da fase ativa, sem trocar `attack/skill` por `move`. O Server
+preserva direcao ao entrar em uma acao cujo `START` permita movimento e descarta,
+com ACK, inputs recebidos apenas nas fases `locked`. Falta validar visualmente
+ataque basico e Slime Spikes andando em todas as direcoes e sob latencia real.
+
+Skills com `total_frames: 0` nao entram na rotacao da IA. O inimigo usa ataque
+basico ate receber animacao e timing validos; nao existe cast instantaneo como
+fallback. Essa regra se aplica atualmente a Fang Strike do Nocmoon.
 
 ## Ordem De Implementacao
 
@@ -714,7 +757,7 @@ continua documentada e nao faz parte desta implementacao.
 ### Fase 6 - Polimento
 
 - aplicar perfis PvE iniciais e validar dano recebido;
-- adicionar politica de movimento por skill e remover rollback de cast;
+- validar visualmente a politica de movimento e a reconciliacao durante casts;
 - ordenar snapshots de HP por versao/tick;
 - corrigir known issues;
 - revisar pixel crisp;
@@ -801,7 +844,7 @@ conteudo visual e todo o balanceamento no mesmo ciclo.
 
 ## Decisoes Ainda Abertas
 
-- se reset/limpeza de inventarios PBE sera permitido antes da migracao de IDs;
+- data e janela de manutencao para executar a baseline limpa do banco;
 - valores finais de `START`, `IMPACT`, `RECOVERY`, `spawn` e `death`;
 - politica de movimento por skill e correcao de rollback;
 - cenas, dimensoes, colisoes e pontos finais dos dois mapas;

@@ -230,18 +230,18 @@ The planned stat values by upgrade level are:
 
 | Stat | +0 | +1 | +2 | +3 | +4 | +5 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Attack | 50 | 70 | 90 | 110 | 130 | 180 |
-| Defense | 12 | 17 | 22 | 27 | 32 | 44 |
-| Critical chance | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 | 0.08 |
-| Skill damage | 0.10 | 0.15 | 0.20 | 0.25 | 0.30 | 0.40 |
-| HP | 700 | 1100 | 1500 | 1900 | 2300 | 3000 |
+| Attack | 40 | 60 | 80 | 100 | 120 | 160 |
+| Defense | 10 | 15 | 20 | 25 | 30 | 40 |
+| Critical chance | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 |
+| Skill damage | 0.05 | 0.08 | 0.11 | 0.14 | 0.17 | 0.22 |
+| HP | 500 | 700 | 900 | 1100 | 1300 | 1800 |
 | MP | 90 | 150 | 210 | 270 | 330 | 420 |
 
 The table represents cumulative values. Upgrades `+1` through `+4` add the
 regular increment; `+5` adds the larger final increment. Every stat entry uses
 the full value for the item's current upgrade level, and one successful upgrade
 advances all three entries together. Therefore, two `ATK` entries at `+2` grant
-`90 + 90 = 180 ATK`.
+`80 + 80 = 160 ATK`.
 
 ### Unscan equipment boxes
 
