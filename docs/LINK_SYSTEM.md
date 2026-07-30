@@ -62,8 +62,39 @@ Atualmente o Link influencia:
 * Progressão de habilidades;
 * Desbloqueio de conteúdo relacionado ao Datamoon;
 * Compatibilidade entre humano e Datamoon.
+* Eficiência dos bônus concedidos por equipamentos.
 
 Novas funcionalidades poderão ser adicionadas futuramente.
+
+---
+
+# Sincronização com Equipamentos
+
+O nível de Link define quanto dos bônus brutos dos equipamentos o Datamoon
+consegue sincronizar. Essa eficiência é individual para cada Datamoon:
+
+| Link | Bônus sincronizado |
+| ---: | ---: |
+| 1 | 10% |
+| 2 | 20% |
+| 3 | 30% |
+| 4 | 40% |
+| 5 | 50% |
+| 6 | 60% |
+| 7 | 70% |
+| 8 | 80% |
+| 9 | 90% |
+| 10 | 100% |
+
+A regra se aplica somente aos stats fornecidos pelos equipamentos. Stats-base
+da espécie e do nível, buffs e modificadores de encontro não recebem esse
+multiplicador. O Server calcula o valor efetivo e continua sendo a autoridade.
+
+Exemplo: um conjunto que forneça 180 ATK concede 18 ATK no Link 1, 90 ATK no
+Link 5 e 180 ATK no Link 10.
+
+Essa progressão numérica complementa o Link, mas não substitui suas funções de
+vínculo, evolução, habilidades e desbloqueios.
 
 ---
 

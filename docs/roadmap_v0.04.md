@@ -311,8 +311,9 @@ apenas a especie Nocmoon.
 
 Status: `AJUSTAR`.
 
-As seis quests atuais permanecem como base. Todas usam Devmoon, dependem da
-anterior e nao sao repetiveis.
+As sete quests atuais permanecem como base. Todas usam Devmoon, dependem da
+anterior e nao sao repetiveis. A Q7 encerra o onboarding com uma conversa
+explicativa sobre Link, evolucao e sincronizacao dos equipamentos.
 
 | # | Level | Objetivo | Reward de EXP recomendado | Outros rewards |
 | --- | ---: | --- | ---: | --- |
@@ -322,6 +323,7 @@ anterior e nao sao repetiveis.
 | Q4 | 7 | Derrotar 3 Slimmoon | 15.532 | - |
 | Q5 | 9 | Derrotar 3 Nocmoon | 27.000 | - |
 | Q6 | 10 | Completar `moonlight_cavern` | 35.000 | `unscan_digital_bracelet` |
+| Q7 | 12 | Conversar com Devmoon sobre Link | - | - |
 
 Esses valores correspondem aos intervalos exatos da curva atual:
 
@@ -331,6 +333,8 @@ Esses valores correspondem aos intervalos exatos da curva atual:
 - Q4 preserva o intervalo level 7 -> 9 com 15.532 EXP;
 - Q5 concede 27.000 EXP como quest de combate mais avancada;
 - Q6 concede 35.000 EXP como conclusao da linha inicial.
+- Q7 nao concede EXP; ela apresenta a eficiencia de equipamentos por Link antes
+  de encerrar o treinamento basico.
 
 Importante: rewards de combate e os 10.000 EXP da dungeon fazem o jogador
 ultrapassar o inicio do level-alvo. As quests somam 87.447 EXP; com os 10.000
@@ -346,6 +350,8 @@ Alteracoes:
 - trocar `training_cavern` por `moonlight_cavern` na Q6;
 - adicionar os dois consumiveis na Q3;
 - adicionar `unscan_digital_bracelet` na Q6;
+- adicionar a Q7 explicativa e aplicar 10% dos bônus de equipamento por Link
+  level, chegando a 100% no Link 10;
 - revisar textos PT-BR/EN-US para Digital Center, Moonlight Forest e Moonlight
   Cavern;
 - validar recompensa somente apos turn-in e impedir duplicacao.
@@ -524,7 +530,7 @@ Observacoes:
 Status: `MANTER E AJUSTAR`.
 
 - unico NPC presente no Digital Center;
-- oferece e conclui as seis quests;
+- oferece e conclui as sete quests;
 - explica mundo, combate, mapa, portais e dungeon;
 - dicas devem usar dialogo localizado e respeitar sessao/cancelamento atuais.
 
@@ -568,7 +574,7 @@ Semantica de `enabled`:
 - spawns e levels dos inimigos;
 - `moonlight_cavern` e o ID final aplicado;
 - dungeon rewards, boss level e identidade;
-- rewards/targets das seis quests;
+- rewards/targets das sete quests;
 - nomes/IDs/pools do Digital Bracelet e DNA;
 - idiomas e assets relacionados;
 - catalogos espelhados do Server e MySQL API;
@@ -854,7 +860,7 @@ conteudo visual e todo o balanceamento no mesmo ciclo.
 - [ ] Nocmoon da dungeon aparece na faixa 7-8.
 - [ ] Boss Nocmoon level 13 possui HUD e stats de boss.
 - [ ] Dungeon concede exatamente os rewards da v0.04 uma vez.
-- [ ] As seis quests formam uma cadeia sem bloqueio acidental.
+- [ ] As sete quests formam uma cadeia sem bloqueio acidental.
 - [ ] Q3 concede Bracelet e 20 pocoes no total.
 - [ ] Q6 concede Unscan Digital Bracelet.
 - [ ] Datamoon termina a cadeia entre os levels 12 e 13.

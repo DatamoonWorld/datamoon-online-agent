@@ -47,7 +47,7 @@ prioridade da v0.04 devem atualizar os dois arquivos no mesmo commit.
 
 | Sistema | O que existe | O que falta |
 | --- | --- | --- |
-| Quest inicial | Seis quests data-driven existem; a sexta observa `complete_dungeon` da dungeon inicial. | Manter seis quests na v0.04 e ajustar EXP, pocoes, Unscan, textos e target para `moonlight_cavern`. |
+| Quest inicial | Sete quests data-driven existem; a sexta observa `complete_dungeon` e a sétima explica Link. | Validar EXP, poções, Unscan, textos, `moonlight_cavern` e a eficiência de equipamentos por Link. |
 | Slimmoon e Nocmoon | JSONs, cenas aliadas/inimigas, spawns, combate e skills existem. | Balanceamento final, animacoes, leitura visual, drops e revisao das duas versoes. |
 | Mapas | Existe apenas `main_map.tscn`; `space_id` limpa entidades, mas nao troca a cena visual. | Implementar Digital Center e Moonlight Forest com map registry, colisao espelhada e portais azul/vermelho. |
 | Dungeon diaria | `moonlight_cavern` possui instancia, mobs, boss Nocmoon, completude, rewards, reset e retorno seguro. | Ajustar mobs para 7-8, boss para 13 e rewards finais da v0.04. |
@@ -64,8 +64,8 @@ prioridade da v0.04 devem atualizar os dois arquivos no mesmo commit.
 2. Implementar Digital Center, Moonlight Forest, troca visual por `space_id` e
    portais com listas data-driven de destinos/requisitos.
 3. Ajustar Slimmoon 1-3, Nocmoon 3-6 e conteudo/NPCs ativos.
-4. Ajustar as seis quests para Slimmoon antes de Nocmoon e progressao final
-   entre os levels 12 e 13.
+4. Validar as sete quests com Slimmoon antes de Nocmoon, progressao final entre
+   os levels 12 e 13 e encerramento explicativo sobre Link.
 5. Converter a dungeon em Moonlight Cavern com mobs 7-8 e boss 13.
 6. Implementar o contrato final de boss e sua HUD.
 7. Corrigir sincronizacao visual de impacto/dano e impedir oscilacao de HP por
@@ -179,12 +179,13 @@ Implementado:
   autoritativo e exibe progresso do snapshot;
 - objetivos observaveis `talk_to_npc`, `kill_enemy_type`, `collect_item` e
   `complete_dungeon`;
-- seis quests iniciais atuais, terminando em `starter_moonlight_cavern`;
+- sete quests iniciais, com `starter_moonlight_cavern` seguida pela conversa
+  explicativa `starter_link_and_evolution`;
 - conclusao da dungeon pode alimentar objetivo de quest.
 
 Pendente:
 
-- ajustar as seis quests existentes ao escopo final da v0.04;
+- validar as sete quests no escopo final da v0.04;
 - escrever textos finais em ambos os idiomas;
 - fechar rewards, IDs e ordem definitiva;
 - conceder/validar a recompensa final ligada a Q6;
