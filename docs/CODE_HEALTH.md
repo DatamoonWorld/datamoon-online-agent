@@ -234,6 +234,10 @@ build verification. Manual scenarios live in the canonical Operations runbook.
 - [ ] Validate Datamoon START/IMPACT/RECOVERY at normal latency and under
   simulated latency/loss.
 - [ ] Confirm reconciliation errors converge instead of growing across actions.
+- [ ] Validate that `prediction_adjustment` and
+  `visual_correction_distance` remain small under normal latency; do not use
+  `head_to_authority_distance` as a correction measurement because it includes
+  movement inputs newer than the acknowledged server tick.
 - [ ] Run Client, Server, Auth and Gateway headless checks in a writable CI
   profile.
 - [ ] Run API vet/build and Web syntax check.

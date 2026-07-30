@@ -882,3 +882,12 @@ conteudo visual e todo o balanceamento no mesmo ciclo.
   basic attack and continuous Datamoon movement through every Slime Spikes
   phase. Repeated reconciliation growth indicates a simulation mismatch and
   must not be hidden by increasing pixel tolerances.
+- The post-action diagnostic is emitted only for corrections of at least two
+  pixels. `authority_error_at_ack` compares equivalent simulation ticks,
+  `prediction_adjustment` is the actual correction after pending input replay,
+  and `visual_correction_distance` plus `visual_recovery_seconds` describe the
+  presentation offset that the player can perceive. `head_to_authority_distance`
+  is context only and must not be interpreted as an applied snap.
+- If `ack_already_reconciled` is true, a newer world snapshot already consumed
+  the finish ACK. The Client applies only the action state transition and must
+  not rewind to the older action-boundary position.

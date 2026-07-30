@@ -965,7 +965,14 @@ Ordem recomendada após esta validação:
 Implementado neste corte:
 
 - boundary autoritativo de término para craft, cooking, hatch e archive, com diagnóstico client-side de erro previsto/visual devolvido apenas para observabilidade;
-- métricas `player_operation_reconcile_error`, `player_operation_visual_error`, `player_operation_pending_commands` e `player_operation_hard_snap_candidates_total`, sem conceder autoridade de posição ao client;
+- metricas genericas `player_operation_reconcile_error`,
+  `player_operation_visual_error`, `player_operation_pending_commands` e
+  `player_operation_hard_snap_candidates_total`, mais as metricas de combate
+  `combat_authority_error_at_ack`, `combat_prediction_adjustment`,
+  `combat_visual_correction_distance`, `combat_visual_recovery_seconds` e
+  `combat_replayed_commands`, alem do contador
+  `combat_stale_finish_acks_total`, sem conceder autoridade de posicao ao
+  Client;
 - snapshot autoritativo de cooldown reenviado no boundary de operação;
 - validação fail-fast de JSON, IDs duplicados e referências críticas de dungeon, com SHA-256 determinístico do catálogo no readiness e heartbeat do worker.
 - primeiro recorte estrutural do P1-05, com loading handshake e diagnóstico pós-operação extraídos de `server.gd` e composição dos handlers centralizada em `_initialize_runtime_components()`.
