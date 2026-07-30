@@ -706,6 +706,12 @@ preserva direcao ao entrar em uma acao cujo `START` permita movimento e descarta
 com ACK, inputs recebidos apenas nas fases `locked`. Falta validar visualmente
 ataque basico e Slime Spikes andando em todas as direcoes e sob latencia real.
 
+O timing resolvido tambem acompanha a configuracao runtime da hotbar, mas nao e
+persistido. Assim, a previsao de uma skill usa seu multiplicador real desde o
+pressionamento da tecla; ao receber a confirmacao, o Client alinha o relogio da
+acao pela latencia de ida medida. Nunca assumir `1.0` para uma skill pendente:
+Slime Spikes comeca em `0.5`, bloqueia somente no impacto e retorna a `0.5`.
+
 Skills com `total_frames: 0` nao entram na rotacao da IA. O inimigo usa ataque
 basico ate receber animacao e timing validos; nao existe cast instantaneo como
 fallback. Essa regra se aplica atualmente a Fang Strike do Nocmoon.
