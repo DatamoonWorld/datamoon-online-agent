@@ -712,6 +712,14 @@ pressionamento da tecla; ao receber a confirmacao, o Client alinha o relogio da
 acao pela latencia de ida medida. Nunca assumir `1.0` para uma skill pendente:
 Slime Spikes comeca em `0.5`, bloqueia somente no impacto e retorna a `0.5`.
 
+Cada previsao recebe `client_action_id`, devolvido pelo Server junto do
+`action_id` autoritativo. Confirmacoes antigas ou de outra acao nao podem
+confirmar a previsao atual. Durante `attack/skill`, reconciliacao nunca executa
+hard snap nem consome o offset visual como velocidade adicional; o offset fica
+estavel ate o fim e converge depois com limite de 30 px/s. O Client envia um
+diagnostico ao concluir a acao, e o Server grava warning somente quando o erro
+ultrapassa o limite de hard snap.
+
 Skills com `total_frames: 0` nao entram na rotacao da IA. O inimigo usa ataque
 basico ate receber animacao e timing validos; nao existe cast instantaneo como
 fallback. Essa regra se aplica atualmente a Fang Strike do Nocmoon.
