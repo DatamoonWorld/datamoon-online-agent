@@ -229,7 +229,6 @@ Bloqueiam ou precisam ser resolvidas antes do release candidate:
 - configurar frames finais de Fang Strike;
 - implementar HUD central do boss por distancia;
 - fechar pontos autoritativos dos portais com os mapas finais;
-- revisar o ultimo snap perceptivel de Slime Spikes sob soltar input;
 - consolidar a baseline SQL limpa antes do reset do banco;
 - executar `go vet ./...` e `go build ./...` na VM/CI com Go disponivel;
 - validar sintaxe/build Web e imports Godot em ambiente gravavel;
@@ -252,6 +251,8 @@ Nao bloqueiam a v0.04:
 - criar HUD superior do boss;
 - posicionar Devmoon, spawns e portais;
 - revisar pixel crisp em nomes, tiles, HUD, tooltips e movimento;
+- corrigir o texto de dano do Slimmoon, que surge abaixo do sprite e salta para
+  cima antes de seguir sua animacao de subida;
 - confirmar que somente conteudo ativo aparece.
 
 Pixel crisp significa manter sprites e camera alinhados a pixels inteiros,

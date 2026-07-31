@@ -24,6 +24,8 @@ available for a future capacity increase.
 - Auth binds `127.0.0.1:5200`.
 - PBE uses `wss://gateway-pbe.datamoononline.com.br` on TCP `443`.
 - Nginx terminates TLS and proxies WebSocket to `ws://127.0.0.1:5100`.
+- Nginx answers `GET /healthz` with `204` and rejects non-WebSocket requests
+  with `426` before they reach the Godot Gateway.
 - Gateway binds `127.0.0.1`, sets `DATAMOON_GATEWAY_REQUIRE_TLS=false` and never
   reads the certificate private key. Local development may also use loopback WS.
 - Nginx owns public connection/IP limits because proxied peers appear as
