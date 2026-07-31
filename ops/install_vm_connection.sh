@@ -8,6 +8,25 @@ ENV_DIR="$ROOT/env"
 SERVER_STATE_DIR="/var/lib/datamoon"
 WEB_STATE_DIR="/var/lib/datamoon-web"
 
+install_env_template() {
+  local template="$1"
+  local target="$2"
+  if test ! -e "$target"; then
+    install -m 0640 -o root -g datamoon "$template" "$target"
+  else
+    echo "Preserving existing environment: $target"
+    chown root:datamoon "$target"
+    chmod 0640 "$target"
+  fi
+}
+
+ensure_env_default() {
+  local target="$1"
+  local key="$2"
+  local value="$3"
+  grep -q "^${key}=" "$target" || printf '%s=%s\n' "$key" "$value" >>"$target"
+}
+
 test "$(id -u)" -eq 0 || { echo "Run as root." >&2; exit 1; }
 for command in install nginx systemctl; do
   command -v "$command" >/dev/null 2>&1 || { echo "Missing command: $command" >&2; exit 1; }
@@ -39,15 +58,21 @@ install -d -m 0700 -o datamoon-web -g datamoon-web \
   "$WEB_STATE_DIR" "$WEB_STATE_DIR/storage"
 
 for service in api auth gateway server web; do
-  install -m 0640 -o root -g datamoon \
+  install_env_template \
     "$AGENT_ROOT/ops/env/datamoon-$service.env.example" \
     "$ENV_DIR/datamoon-$service.env"
 done
 for worker in overworld dungeon-1 dungeon-2; do
-  install -m 0640 -o root -g datamoon \
+  install_env_template \
     "$SERVER_ROOT/deploy/env/datamoon-server-$worker.env.example" \
     "$ENV_DIR/datamoon-server-$worker.env"
 done
+
+ensure_env_default "$ENV_DIR/datamoon-web.env" TRANSACTIONAL_EMAIL_ENABLED false
+ensure_env_default "$ENV_DIR/datamoon-web.env" DATAMOON_MAILER_SOCKET /run/datamoon-mailer/mailer.sock
+ensure_env_default "$ENV_DIR/datamoon-web.env" AWS_REGION us-east-1
+ensure_env_default "$ENV_DIR/datamoon-web.env" SES_FROM_EMAIL no-reply@datamoononline.com.br
+ensure_env_default "$ENV_DIR/datamoon-web.env" SES_FROM_NAME 'Datamoons Online'
 
 if test ! -e "$ENV_DIR/datamoon-api-secrets.env"; then
   "$AGENT_ROOT/ops/generate_vm_secrets.sh"

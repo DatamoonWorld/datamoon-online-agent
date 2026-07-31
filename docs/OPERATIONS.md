@@ -74,10 +74,12 @@ git -C /opt/datamoon/datamoon-online-server pull --ff-only origin pbe
 sudo /opt/datamoon/datamoon-online-agent/ops/install_vm_connection.sh
 ```
 
-The installer writes root-owned `0640` runtime configuration and `0600` secret
-files under `/opt/datamoon/env`. Systemd injects only the secret file declared by
-each unit. It also installs units and the canonical Nginx proxy/rate limits,
-validates Nginx and leaves activation to the coordinated updater.
+The installer creates missing root-owned `0640` runtime configuration and `0600`
+secret files under `/opt/datamoon/env`. On later runs it preserves every existing
+environment and secret, adding only newly required defaults that are absent.
+Systemd injects only the secret file declared by each unit. The installer also
+installs units and the canonical Nginx proxy/rate limits, validates Nginx and
+leaves activation to the coordinated updater.
 
 ## Coordinated Update
 
