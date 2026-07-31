@@ -46,7 +46,7 @@ available for a future capacity increase.
 - Web runs as the dedicated `datamoon-web` Unix account, not as the gameplay
   service account. Its systemd sandbox can read application code, write only its
   private state directory and open only loopback network connections.
-- Web never talks to SES directly. It submits one of three fixed transactional
+- Web never talks to SES directly. It submits one of five fixed transactional
   templates over a group-restricted Unix socket. `datamoon-mailer` has no API,
   database or session secret and is the only Web-side process allowed outbound
   network access. It receives temporary AWS credentials through the EC2 role;
@@ -203,14 +203,20 @@ SES_FROM_NAME=Datamoons Online
 
 The SES identity, DKIM and custom MAIL FROM must all be `SUCCESS`. While SES is
 in sandbox, only verified recipients can receive mail; keep public registration
-closed. The EC2 role may only call `ses:SendEmail` for the verified domain and
-the exact From address. Never put AWS keys in either environment file.
+closed. The EC2 role may call `ses:SendEmail` only when `ses:FromAddress` is
+exactly `no-reply@datamoononline.com.br`. `Resource: "*"` is required while SES
+evaluates verified sandbox recipients; the From condition prevents sender
+spoofing. Never put AWS keys in either environment file.
 
 ### Account E-mail Lifecycle
 
-The MySQL API owns verification, reset and e-mail-change state. Tokens contain
-32 random bytes, expire after 15 minutes, are single-use and are stored only as
-SHA-256 hashes. Password/e-mail changes increment `credential_version`, which
+The MySQL API owns verification, reset and e-mail-change state. Public tokens
+contain 32 random bytes, expire after 15 minutes, are single-use and are stored
+only as SHA-256 hashes. Authenticated password and e-mail changes use six-digit
+codes sent to the current address. Codes expire after 10 minutes, permit at most
+five attempts, replace prior challenges of the same purpose and are also stored
+only as SHA-256 hashes. Pending passwords are persisted only as bcrypt hashes.
+Password/e-mail changes increment `credential_version`, which
 invalidates every existing signed account session. An already-consumed gameplay
 ticket remains governed by the worker lease until disconnect. Public request
 responses are generic and do not reveal whether an account exists.
@@ -222,6 +228,11 @@ deliveries/day and three per recipient/day. Nginx limits e-mail endpoints to
 three requests/minute. Token landing routes have Nginx access logging disabled
 because query strings contain credentials; application logs also exclude token,
 password, e-mail and raw IP values.
+
+Password changes require the current password and a code delivered to the
+current e-mail. E-mail changes require the current password, a code delivered to
+the old address and then a single-use link delivered to the new address. The
+database address changes only after the new-address link is confirmed.
 
 E-mail-link `GET` only renders a confirmation page. Token consumption happens
 on same-origin `POST` with CSRF, preventing mail scanners from confirming or
@@ -304,8 +315,9 @@ The following controls remain deferred:
 Run this matrix before enabling registration: new account receives verification,
 unverified login is rejected, confirmation works once, repeated/expired links
 fail, unknown reset requests look identical, password reset revokes old sessions,
-password change requires the current password, e-mail change applies only after
-confirmation, and all account sessions are revoked afterward. Confirm that
+password change requires the current password plus the current-address code,
+wrong codes lock after five attempts, e-mail change requires the old-address code
+and new-address link, and all account sessions are revoked afterward. Confirm that
 `journalctl -u datamoon-web -u datamoon-mailer -u datamoon-api` contains only
 event names/user IDs and never token, password, address or raw IP data.
 

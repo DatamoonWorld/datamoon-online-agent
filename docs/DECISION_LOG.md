@@ -189,6 +189,27 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
+## 2026-07-31 - Two-step authenticated credential changes
+
+Status: accepted
+
+Decision:
+- Registration and unauthenticated password recovery continue to use single-use
+  links sent to the account e-mail.
+- Authenticated password changes require the current password and a six-digit
+  code sent to the current e-mail.
+- E-mail changes require the current password, a six-digit code sent to the old
+  address and a single-use confirmation link sent to the new address.
+- Codes expire after 10 minutes, allow five attempts and are stored only as
+  SHA-256 hashes. Pending passwords are stored only as bcrypt hashes.
+- Completing a password or e-mail change increments `credential_version` and
+  revokes existing account sessions.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-mysqlapi`
+- `datamoon-online-web`
+
 ## 2026-07-27 - Global active quest log and level-interval rewards
 
 Status: accepted
