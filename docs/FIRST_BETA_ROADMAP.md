@@ -1,975 +1,457 @@
-# Datamoons Online - Roadmap Principal de Gameplay
+# Datamoons Online - Roadmap Principal
+
+Ultima consolidacao: 2026-07-31.
 
 ## Uso Deste Documento
 
-Este e o unico painel operacional de ajustes e implementacoes do jogo. Os demais
-documentos tematicos continuam sendo fonte de regras e contratos, mas nao devem
-manter listas concorrentes de prioridade.
+Este e o unico backlog operacional do jogo. Toda prioridade, status, bloqueio e
+criterio de aceite deve existir aqui. Documentos tematicos continuam definindo
+contratos duraveis de combate, mundo, economia, Link, quests, dungeons,
+personagens e operacao, mas nao mantem filas de trabalho concorrentes.
 
-Toda mudanca relevante de gameplay deve atualizar aqui:
+Estados usados:
 
-1. status atual;
-2. proxima entrega;
-3. decisoes ainda abertas;
-4. criterio de validacao manual.
+- `VALIDADO`: implementado e aprovado manualmente no PBE;
+- `IMPLEMENTADO`: existe, mas ainda precisa do aceite final;
+- `EM ANDAMENTO`: alteracao local ainda nao publicada ou nao validada;
+- `PENDENTE`: necessario para a entrega atual;
+- `FUTURO`: nao bloqueia a v0.04;
+- `DESATIVADO`: codigo preservado, sem fonte de acesso no conteudo atual.
 
-Status usados:
+## Objetivo Da v0.04
 
-- `IMPLEMENTADO E VALIDADO`: existe no codigo e passou pela validacao manual;
-- `IMPLEMENTADO`: existe no codigo, mas ainda requer validacao ou conteudo final;
-- `PARCIAL`: apenas parte do fluxo esta pronta;
-- `PROXIMO`: entrega priorizada;
-- `IDEIA FUTURA`: direcao aceita para estudo, sem compromisso de implementacao;
-- `FORA DE ESCOPO`: decisao explicita de nao implementar nesta etapa.
+Entregar uma fatia vertical curta e coerente:
 
-Ultima reconciliacao entre documentacao e codigo: **2026-07-30**.
+1. login;
+2. criacao completa de personagem;
+3. escolha do Datamoon inicial;
+4. entrada no Digital Center;
+5. onboarding pelo Devmoon;
+6. progressao na Moonlight Forest;
+7. conclusao da Moonlight Cavern;
+8. encerramento da linha inicial entre os levels 12 e 13.
 
-Roadmap de entrega em foco: `roadmap_v0.04.md`. Alteracoes de escopo, status ou
-prioridade da v0.04 devem atualizar os dois arquivos no mesmo commit.
+O beta e pequeno e controlado. A arquitetura deve continuar segura e preparada
+para crescer, mas nao receber abstracoes ou infraestrutura de grande escala sem
+uma metrica que justifique o custo.
 
----
+## Painel Executivo
 
-## Painel Canonico
+### Validado No PBE
 
-### Implementado E Validado
-
-| Sistema | Estado confirmado |
-| --- | --- |
-| Login e conexao | Login seguro por WSS, Gateway, entrada no overworld e workers PBE validados. |
-| Party e workers | Handoff overworld/dungeon, HUD remota acinzentada sem `OFFLINE`, remocao apos desconexao definitiva, reserva integral e rollback validados com dois Clients. |
-| Chat | Antispam da quinta mensagem em dois segundos, timeout restante, mute/unmute e slow/normal mode persistentes validados. |
-| Atividades | Fishing com sessao protegida, Hatchery idempotente e motor compartilhado de Craft/Cooking validados manualmente. |
-| Guild | Estado persistente entre reconnects validado; criacao exige e consome `Guild Deploy Drive` de forma transacional e auditada. |
-| Equipamentos | Unscan, stats aleatorios persistidos, tooltip, equipar/desequipar, Upgrade e Alternate pelo NPC validados. |
-| Dungeon entre workers | Entrada, limite diario, Party, handoff e retorno ao overworld possuem fluxo funcional. |
-
-### Implementado, Mas Ainda Nao Final
-
-| Sistema | O que existe | O que falta |
-| --- | --- | --- |
-| Quest inicial | Sete quests data-driven existem; a sexta observa `complete_dungeon` e a sétima explica Link. | Validar EXP, poções, Unscan, textos, `moonlight_cavern` e a eficiência de equipamentos por Link. |
-| Slimmoon e Nocmoon | JSONs, cenas aliadas/inimigas, spawns, combate e skills existem. | Balanceamento final, animacoes, leitura visual, drops e revisao das duas versoes. |
-| Mapas | Existe apenas `main_map.tscn`; `space_id` limpa entidades, mas nao troca a cena visual. | Implementar Digital Center e Moonlight Forest com map registry, colisao espelhada e portais azul/vermelho. |
-| Dungeon diaria | `moonlight_cavern` possui instancia, mobs, boss Nocmoon, completude, rewards, reset e retorno seguro. | Ajustar mobs para 7-8, boss para 13 e rewards finais da v0.04. |
-| Boss | O Server cria e rastreia uma instancia de boss usando a especie normal e conclui pela entidade rastreada. | Modificadores explicitos, `is_boss`/`boss_id`, nome localizado e HUD central por distancia ainda nao existem. |
-| Projeteis e areas | Runtime autoritativo no Server possui alcance/duracao, ticks e deduplicacao de hit. | Representacao visual, telegraph e sincronizacao perceptiva final no Client. |
-| Predicao e reconciliacao | Client e Server simulam movimento de combate pelo mesmo `action_start_input_tick`, com ACK e replay de inputs pendentes. | Validar visualmente Player/companion e START/IMPACT/RECOVERY sob latencia real antes de reduzir o codigo de correcao visual. |
-| Pixel crisp | Tema, fonte e varios assets foram atualizados. | Revisao completa em runtime de HUD, nomes, tooltips, tiles e movimento. |
-
-### Proximas Entregas
-
-1. Confirmar IDs finais e calibrar os multiplicadores iniciais documentados do
-   boss. As pocoes recuperam 10% do HP/MP maximo efetivo. Upgrade e Alternate
-   permanecem indisponiveis ate a v0.05 ou v0.06.
-2. Implementar Digital Center, Moonlight Forest, troca visual por `space_id` e
-   portais com listas data-driven de destinos/requisitos.
-3. Ajustar Slimmoon 1-3, Nocmoon 3-6 e conteudo/NPCs ativos.
-4. Validar as sete quests com Slimmoon antes de Nocmoon, progressao final entre
-   os levels 12 e 13 e encerramento explicativo sobre Link.
-5. Converter a dungeon em Moonlight Cavern com mobs 7-8 e boss 13.
-6. Implementar o contrato final de boss e sua HUD.
-7. Corrigir sincronizacao visual de impacto/dano e impedir oscilacao de HP por
-   snapshots antigos.
-8. Finalizar visuais de projeteis/areas e revisar pixel crisp.
-9. Rodar a bateria manual completa do Beta em PBE.
-
-### Ideias Futuras, Ainda Nao Implementadas
-
-| Ideia | Direcao registrada | Dependencia |
-| --- | --- | --- |
-| Descarte seguro | Confirmacao, quantidade para stacks, protecao de itens sensiveis, operacao autoritativa/idempotente e possivel recuperacao temporaria. | Inventario/rewards estabilizados. |
-| Loja de NPC | Compra, venda e recompra atomicas, data-driven por `shop_id`, com auditoria. | Economia, moeda e descarte seguros. |
-| Passe de temporada | Progresso por conta, trilhas gratuita/premium cosmeticas, sem poder comprado, objetivos e claims autoritativos. | Quests, rewards, auditoria, loja e economia estabilizados. |
-| Evolucao | Contrato Code -> Nex -> Omega documentado, mas sem runtime de unlock/transformacao/regressao. | Conteudo e progressao posteriores ao Beta 1. |
-| Aplicacao administrativa | Consultas de auditoria e comandos administrativos fora do jogo. | Ferramenta administrativa futura. |
-| Escala MMO adicional | Indice espacial de alvos, indice global de presenca, mais workers e autoscaling. | Metricas reais de carga. |
-| Producao endurecida | Recuperacao de senha, e-mail, backups/restauracao, alertas, WAF e Fail2ban. | Preparacao de producao. |
-
-O passe de temporada e uma ideia futura, nao uma funcionalidade aprovada para o
-Beta 1. Nenhum schema, rota, runtime ou UI de passe foi encontrado nos
-repositorios em 2026-07-29.
-
-## Registro Consolidado Por Sistema
-
-Esta secao absorve o estado de implementacao antes espalhado pelos documentos
-tematicos. Contratos detalhados continuam nesses documentos, mas status e
-prioridade devem ser alterados somente aqui.
-
-### Combate
-
-Implementado:
-
-- Server autoritativo para alvo, espaco, dano, buffs/debuffs e rewards;
-- formula defensiva compartilhada
-  `damage = (power * 100) / ((DEF * 2.5) + 100)`;
-- ataque basico usa `ATK`, pode critar e recebe multiplicador de sistema;
-- skill usa dano base/crescimento e escalas data-driven de ATK, HP, MP, DEF e
-  valor fixo; skills nao critam;
-- `skill_damage` multiplica o dano final de skills;
-- dano positivo minimo de `1`, sem variacao aleatoria ou modificador oculto por
-  diferenca de level;
-- DOT captura ATK efetivo na aplicacao e preserva apenas a aplicacao mais forte
-  dentro do mesmo grupo;
-- equipamentos entram nos stats efetivos do Datamoon ativo;
-- Bracelet e obrigatorio para atacar e troca de equipamento e bloqueada em
-  combate;
-- projeteis lineares e areas temporizadas possuem runtime autoritativo.
-
-Pendente:
-
-- alinhar `START`, `IMPACT` e `RECOVERY` ao frame percebido;
-- ordenar HP por tick/sequencia para snapshot antigo nao restaurar vida;
-- finalizar visuais/telegraphs de projeteis e areas;
-- monitorar snap no inicio/fim de skills e lock apos handoff;
-- adicionar politica data-driven `free`, `reduced` ou `locked` por skill e
-  impedir restauracao da posicao antiga do inicio do cast;
-- balancear inimigos comuns por perfil PvE de encontro, iniciando ataque em
-  `0.25`, sem alterar a formula defensiva global ou inflar a DEF do jogador;
-- separar lifecycle de acao da matematica de dano antes de ampliar
-  `combat.gd`;
-- Armor Penetration e acoes moveis/dash/channel ficam para uma etapa futura.
-
-### Vantagem De Tipos
-
-Implementado como contrato de combate:
-
-- ciclo simples `Datacore > Patch > Glitch > Datacore`;
-- vantagem altera dano sem substituir stats, build, skill ou decisao do player;
-- Server e a unica autoridade para o multiplicador.
-
-Pendente:
-
-- calibracao final dos multiplicadores com Slimmoon/Nocmoon e futuras lutas PvP;
-- feedback visual mais claro quando houver vantagem/desvantagem.
-
-### Economia, Inventario E Equipamentos
-
-Implementado:
-
-- Bits, rewards de combate/quest/dungeon, drops, inventario limitado, Craft,
-  Cooking e Hatchery;
-- operacoes sensiveis transacionais, idempotentes e auditadas;
-- Bracelet, Hood e Shoes com tres entradas de stats e caps por pool;
-- IDs finais `digital_bracelet`, `digital_hood` e `digital_shoes`, com Unscan
-  correspondente e migracao preservando inventario/equipamento;
-- Unscan pelo contrato normal de container com gerador autoritativo;
-- Upgrade `+1` a `+5` com chances `100/90/80/70/60%`;
-- Alternate troca apenas o stat selecionado, preserva os demais e respeita caps;
-- NPC de equipamento com referencias nao proprietarias aos itens do inventario;
-- quantidade de material exibida como soma de todos os stacks compativeis;
-- `Guild Deploy Drive` exigido na criacao de Guild.
-- energias verde/azul com recuperacao autoritativa de 10% do HP/MP efetivo.
-
-Pendente:
-
-- definir origem/drop do `Guild Deploy Drive`;
-- manter Hood/Shoes/Gloves/Shirt/Pants sem fonte na v0.04;
-- fechar balanceamento dos valores de stats e impacto na economia;
-- descarte seguro, loja NPC, compra/venda/recompra e passe de temporada;
-- Critical Damage, Attack Speed, raridade e qualidade nao pertencem ao
-  equipamento do Beta 1.
-
-### Quests E Dialogos
-
-Implementado:
-
-- definicoes JSON, NPC giver/turn-in, persistencia na API, snapshot/UI e
-  dependencias lineares;
-- Quest Log global mostra apenas quests aceitas ativas/prontas, permite abandono
-  autoritativo e exibe progresso do snapshot;
-- objetivos observaveis `talk_to_npc`, `kill_enemy_type`, `collect_item` e
-  `complete_dungeon`;
-- sete quests iniciais, com `starter_moonlight_cavern` seguida pela conversa
-  explicativa `starter_link_and_evolution`;
-- conclusao da dungeon pode alimentar objetivo de quest.
-
-Pendente:
-
-- validar as sete quests no escopo final da v0.04;
-- escrever textos finais em ambos os idiomas;
-- fechar rewards, IDs e ordem definitiva;
-- conceder/validar a recompensa final ligada a Q6;
-- validar cancelamento de dialogo, reconnect e tentativa duplicada de turn-in.
-
-### Dungeons E Bosses
-
-Implementado:
-
-- templates data-driven, selector de dungeon, instancias por `space_id`, timer,
-  membership e ejection;
-- handoff assinado entre workers, fencing, reserva integral/versionada da Party,
-  rollback e logs por fase;
-- completude pela morte da instancia de boss rastreada;
-- `moonlight_cavern` concede um `Upgrade Chip` e possui 5% de chance independente
-  de `Alternate Chip` em conclusao elegivel;
-- limite diario persistente, reset as `03:00 UTC` e retorno seguro ao lado do
-  portal.
-
-Pendente:
-
-- contrato completo de boss com modificadores de HP, ataque, defesa e
-  `attack_speed`;
-- `is_boss`, `boss_id`, nome localizado e HUD central superior por distancia;
-- balanceamento solo/Party, reward final e validacao completa da Q6 na v0.04;
-- revisar mensagens de bloqueio, reentrada e timeout.
-
-### Social E Atividades
-
-Implementado:
-
-- Party versionada, convites persistentes com expiracao, presenca cross-worker,
-  grace period, remocao offline e preservacao no handoff;
-- Guild com permissoes centralizadas, convites, roles e auditoria;
-- Chat com sanitizacao, mute administrativo, slow mode e antispam persistentes;
+- login WSS com TLS valido, ticket curto e selecao de worker;
+- Overworld e Dungeon 1 em processos separados; Dungeon 2 desativada;
+- movimento autoritativo com prediction, ACK, replay e reconciliacao suave;
+- controle direto do Player e do Datamoon;
+- combate, critico, defesa, equipamentos, Link e persistencia de HP/MP;
+- Party cross-worker, handoff, HUD acinzentada e remocao offline;
+- Chat com mute, slow mode e antispam;
+- Fishing contra replay/timing;
+- Hatchery idempotente;
 - Craft/Cooking em motor compartilhado;
-- Fishing com session ID, timing e protecao contra replay;
-- Hatchery com jobs e claims idempotentes;
-- auditorias de inventario, moeda, rewards e administracao com retencao padrao
-  de 180 dias.
-
-Fora do escopo atual:
-
-- chat-ban e reports;
-- conteudo de chat em logs;
-- ferramenta administrativa.
-
-### Client, Server E API
-
-Implementado:
-
-- snapshots baseline/delta, budget, bootstrap de sessao e handshake de loading;
-- labels de mundo hibridas usam valores autorados nas cenas e reaplicacao no
-  runtime para entidades dinamicas/legadas;
-- workers separados para overworld e dungeon, registry, leases e drain;
-- catalogos data-driven com validacao semantica/fail-fast;
-- logging estruturado no journald e deploy coordenado;
-- infraestrutura social, atividades e operacoes de inventario parcialmente
-  extraidas em modulos compartilhados.
-
-Refatoracao futura:
-
-- dividir sessao, lobby, handoff e gameplay no Client;
-- extrair lifecycle de instancias/transferencias de `portal_manager.gd`;
-- mover operacoes de item para servicos focados sem ampliar `inventory.gd`;
-- dividir handlers grandes da API por agregado/use case;
-- substituir polling social por relay/pub-sub apenas quando escala justificar;
-- criar indice espacial de IA e indice eficiente de players online quando
-  metricas demonstrarem necessidade.
-
-### Evolucao, Link E Eventos
-
-Implementado:
-
-- Link, tipos e progressao possuem contratos de design;
-- modelo de evolucao `Code -> Nex -> Omega` e primeira linha
-  `Nocmoon -> Kainemoon -> Bathorymoon` estao documentados.
-
-Ainda somente em design:
-
-- persistencia de unlock por Datamoon;
-- runtime de transformacao/regressao;
-- cenas/stats/skills finais de Kainemoon e Bathorymoon;
-- eventos mundiais e recompensas sazonais.
-
-Nenhum desses itens bloqueia o Beta 1.
-
-## Proposta Historica Do Primeiro Beta
-
-As secoes abaixo preservam a proposta anterior de mapa central e dez quests
-apenas como contexto. Elas foram substituidas para a entrega atual por
-`roadmap_v0.04.md` e nao devem orientar implementacao sem serem reconciliadas
-com o painel canonico acima.
-
-## Objetivo
-
-Preparar uma primeira experiencia jogavel, curta e validavel, com foco em:
-
-- onboarding claro para novos jogadores;
-- mapa central com progressao simples;
-- dois Datamoons completos para combate inicial;
-- dungeon diaria funcional;
-- loops basicos de hatch, craft, cooking, archive, combate e guild bloqueada pelo
-  item `Guild Deploy Drive`;
-- estabilidade suficiente para um teste pequeno com jogadores reais.
-
-Este roadmap deve guiar o que falta fazer antes do primeiro beta fechado.
-
----
-
-## Escopo do Beta 1
-
-### Experiencia esperada
-
-O jogador deve conseguir:
-
-- entrar no jogo e entender o contexto inicial;
-- falar com o NPC principal;
-- seguir uma quest line linear de introducao;
-- aprender os sistemas basicos sem depender de explicacao externa;
-- lutar contra Slimmoon em campo aberto;
-- lutar contra Nocmoon em uma area com arvores;
-- acessar o portal da dungeon no final do mapa central;
-- completar uma dungeon diaria;
-- receber rewards de completude da dungeon;
-- testar party, chat, combate e movimentacao entre workers.
-
-### Fora do escopo inicial
-
-- guild criada livremente sem item;
-- dungeon 2 ativa;
-- teste de carga grande;
-- IA complexa;
-- grande variedade de Datamoons;
-- economia aberta ou balanceamento final;
-- quests ramificadas;
-- progressao longa.
-
----
-
-## Conteudo Principal
-
-### 1. Quest line inicial - 10 quests
-
-A quest line inicial deve ser linear e ensinar um sistema por vez.
-
-#### Q01 - Bem-vindo ao Mundo dos Datamoons
-
-Objetivo:
-
-- falar com o NPC inicial.
-
-Conteudo:
-
-- NPC explica o mundo;
-- apresenta o papel do Tamer;
-- explica que Datamoons sao companheiros de batalha e progressao.
-
-Criterio de pronto:
-
-- quest aparece no log;
-- dialogo funciona;
-- quest completa ao falar com o NPC;
-- proxima quest desbloqueia corretamente.
-
-#### Q02 - Primeiro Hatching
-
-Objetivo:
-
-- interagir com o sistema de Hatching.
-
-Conteudo:
-
-- NPC explica DataEggs;
-- explica que novos Datamoons podem nascer pelo Hatching.
-
-Criterio de pronto:
-
-- interacao com hatchery validada;
-- UI abre e fecha corretamente;
-- quest registra progresso por interacao ou fluxo minimo definido.
-
-#### Q03 - Aprendendo Craft
-
-Objetivo:
-
-- interagir com a bancada de craft.
-
-Conteudo:
-
-- NPC explica que itens podem ser criados com materiais;
-- introduz a ideia de receitas.
-
-Criterio de pronto:
-
-- craft station abre;
-- quest registra interacao;
-- mensagem/tutorial deixa claro o uso futuro.
-
-#### Q04 - Aprendendo Cooking
-
-Objetivo:
-
-- interagir com a cooking station.
-
-Conteudo:
-
-- NPC explica cooking como sistema de preparacao/consumo futuro;
-- reforca que cooking pode apoiar progresso e combate.
-
-Criterio de pronto:
-
-- cooking station abre;
-- quest registra interacao;
-- fluxo nao quebra ao mover/usar skill depois.
-
-#### Q05 - Conhecendo o Archive
-
-Objetivo:
-
-- interagir com o Archive.
-
-Conteudo:
-
-- NPC explica que o Archive guarda informacoes de Datamoons, descobertas e progresso.
-
-Criterio de pronto:
-
-- archive abre;
-- quest registra interacao;
-- UI exibe informacao minima util.
-
-#### Q06 - Fundamentos de Combate
-
-Objetivo:
-
-- falar com o NPC e/ou atacar um alvo de treino.
-
-Conteudo:
-
-- NPC explica combate com Datamoon;
-- reforca que Tamer e mais voltado a interacao;
-- Datamoon e o foco de batalha;
-- explica HP, MP, ataque basico e skills.
-
-Criterio de pronto:
-
-- tutorial claro;
-- ataque basico e skill podem ser usados;
-- estado `is_in_combat` entra apenas ao causar ou receber dano.
-
-#### Q07 - Controle de Campo: Slimmoon
-
-Objetivo:
-
-- derrotar 10 Slimmoon.
-
-Conteudo:
-
-- primeira quest de combate real;
-- usa campo aberto do mapa central.
-
-Criterio de pronto:
-
-- objetivo `kill_enemy_type` funciona para Slimmoon;
-- progresso incrementa corretamente;
-- recompensa e turn-in funcionam.
-
-#### Q08 - Controle de Campo: Nocmoon
-
-Objetivo:
-
-- derrotar 10 Nocmoon.
-
-Conteudo:
-
-- segunda quest de combate real;
-- leva o jogador para area com arvores.
-
-Criterio de pronto:
-
-- objetivo `kill_enemy_type` funciona para Nocmoon;
-- spawns de Nocmoon existem na area correta;
-- dificuldade maior ou diferente de Slimmoon.
-
-#### Q09 - O Portal da Dungeon
-
-Objetivo:
-
-- falar com o NPC e ir ate o portal da dungeon.
-
-Conteudo:
-
-- NPC explica que dungeons sao desafios instanciados;
-- explica limite diario;
-- explica que completar a dungeon da rewards de completude.
-
-Criterio de pronto:
-
-- portal fica no final do mapa central;
-- tentativa de entrada valida se o jogador pode entrar;
-- nao inicia loading se a entrada for bloqueada.
-
-#### Q10 - Ajuda na Dungeon
-
-Objetivo:
-
-- entrar na dungeon e derrotar o boss.
-
-Conteudo:
-
-- NPC pede ajuda para eliminar o boss da dungeon;
-- quest conclui quando os rewards de completude forem ganhos.
-
-Criterio de pronto:
-
-- dungeon diaria pode ser concluida;
-- boss death dispara completion;
-- rewards sao entregues uma vez por reset diario;
-- quest marca completa apos reward de completude;
-- reentrada respeita estado diario.
-
----
-
-## Mapa Central
-
-### Estrutura
-
-O mapa central deve ter:
-
-- area inicial segura com NPC principal;
-- campo aberto com Slimmoon;
-- area com arvores contendo Nocmoon;
-- caminho visual ate o portal da dungeon;
-- portal da dungeon no final do mapa.
-
-### Requisitos
-
-- colisoes do client e server devem estar espelhadas;
-- portais devem usar cena/collision padronizada;
-- spawns devem ter posicoes previsiveis e sem sobrepor o jogador;
-- inimigos devem ter HUD visivel com level e HP;
-- nomes de inimigos podem continuar ocultos durante testes se for decisao visual.
-
-### Criterios de pronto
-
-- jogador entende para onde ir sem mapa externo;
-- Slimmoon e Nocmoon aparecem em areas distintas;
-- portal da dungeon e visualmente reconhecivel;
-- nao ha travas de input ao caminhar entre areas;
-- nao ha tiles borrados ou seams visiveis em runtime.
-
----
-
-## Datamoons do Beta
-
-### Slimmoon
-
-Deve estar fechado para beta com:
-
-- sprite final ou placeholder aprovado;
-- animacoes de idle, move, attack e skill;
-- ataque basico funcional;
-- pelo menos 1 skill funcional;
-- stats definidos;
-- drops/rewards definidos;
-- versao inimiga no mapa;
-- versao aliada controlavel.
-
-### Nocmoon
-
-Deve estar fechado para beta com:
-
-- sprite final ou placeholder aprovado;
-- animacoes de idle, move, attack e skill;
-- ataque basico funcional;
-- pelo menos 1 skill funcional;
-- stats definidos;
-- drops/rewards definidos;
-- versao inimiga no mapa;
-- versao aliada controlavel.
-
-### Criterios gerais
-
-- nomes e outlines padronizados;
-- HUD inimigo padronizado;
-- fontes e icones sem blur no runtime;
-- ataques nao geram snap relevante;
-- combate entra em estado `is_in_combat` apenas ao causar ou receber dano.
-
----
-
-## Dungeon Diaria
-
-### Regra de design
-
-A dungeon do beta deve ser diaria.
-
-Ela deve marcar completude quando o jogador ganhar os rewards de completude.
-
-### Requisitos
-
-- template da dungeon configurado;
-- portal de entrada no mapa central;
-- worker de dungeon ativo;
-- boss configurado;
-- rewards de completude definidos;
-- persistencia de completion diaria;
-- UI/mensagem clara quando ja completou no dia;
-- retorno ao overworld funcionando.
-
-### Criterios de pronto
-
-- jogador entra na dungeon;
-- jogador derrota o boss;
-- reward e entregue uma unica vez por dia;
-- quest Q10 completa depois do reward;
-- jogador consegue sair/retornar sem travar em "connecting to game server";
-- dungeon 2 permanece off por enquanto.
-
----
-
-## Guild
-
-### Regra de beta
-
-Guild so pode ser criada usando um item especifico.
-
-Esse item nao estara disponivel no beta 1.
-
-### Requisitos
-
-- botao/fluxo de criar guild deve validar item necessario;
-- se o jogador nao tiver o item, mostrar mensagem clara;
-- nao permitir criacao direta sem item;
-- manter funcionalidades de visualizacao/social que ja forem seguras.
-
-### Criterios de pronto
-
-- jogador nao consegue criar guild sem item;
-- mensagem explica que o item e necessario;
-- sistema nao quebra caso a feature esteja parcialmente bloqueada.
-
----
-
-## Sistemas Que Precisam Estar Validados
+- Guild, permissoes, convites e auditoria;
+- equipamentos Unscan, Upgrade e Alternate;
+- deploy coordenado, logs estruturados e auditoria com retencao de 180 dias;
+- snapshots baseline/delta, limite por peer, chunks e `space_id`.
+
+### Implementado, Com Aceite Final Pendente
+
+- sete quests iniciais e rewards idempotentes;
+- Moonlight Cavern, boss rastreado e retorno seguro;
+- Slimmoon e Nocmoon com behavior e combat profile data-driven;
+- portais de mapa e dungeon data-driven;
+- poções autoritativas de 10% de HP/MP, arredondadas para cima;
+- projeteis e areas autoritativos;
+- sincronizacao de impacto por frames;
+- conteudo desativado por `enabled: false`;
+- Link aplicando de 10% a 100% dos stats de equipamento;
+- hashes de catalogo entre Client, Server e API.
+
+### Em Andamento Nesta Revisao
+
+- remocao do RPC antigo de movimento e de fallbacks de catalogo inexistentes;
+- tokens internos obrigatoriamente distintos e com no minimo 32 caracteres;
+- rate limit Web contabilizando falhas de login e toda tentativa de cadastro,
+  com limpeza de entradas expiradas;
+- processamento ocioso reduzido em hotbar, loading e resource preloader;
+- refresh do estado de mundo alinhado aos snapshots de 20 Hz;
+- polling de respawn, instancias e sessao de NPC desacelerado;
+- VSync habilitado por padrao no Client;
+- consolidacao de documentos e inventario de performance.
+
+## Conteudo Canonico Da v0.04
+
+### Mapas
+
+- `digital_center`: hub inicial, Devmoon e portais principais;
+- `moonlight_forest`: Slimmoon 1-3, Nocmoon 3-6 e acesso a dungeon;
+- `moonlight_cavern`: Nocmoon 7-8 e boss Nocmoon level 13.
+
+Digital Center, Moonlight Forest e Moonlight Cavern ainda precisam receber
+TileMaps, colisoes e composicao visual finais. Cada mapa deve ser uma cena
+propria. O registro `space_id -> PackedScene` e o fluxo de troca ja existem.
+
+### Portais
+
+Uma unica cena compartilhada recebe comportamento data-driven:
+
+- portal principal de cidade lista destinos de mapa autorizados;
+- portal de retorno leva ao ponto seguro do portal principal;
+- portal mapa-a-mapa declara destino direto;
+- portal de dungeon lista templates, requisitos e disponibilidade;
+- portal vermelho fica oculto ate o desbloqueio por quest.
+
+O Server e a autoridade para `enabled`, level, limite diario, Party, origem,
+destino e transferencia. O Client apenas apresenta opcoes e estado visual.
+
+### Inimigos E Boss
+
+- Slimmoon de campo: `wild_easy`, passive, sem skills;
+- Nocmoon de campo: `wild_easy`, aggressive, sem skills;
+- Nocmoon de dungeon: `dungeon_easy`, aggressive, sem skills;
+- boss: stats solo fixos, sem escala por quantidade da Party;
+- boss: HP x12, ATK x0.65, DEF x0.9 e attack speed 2.0;
+- boss: grace inicial de 1.8 s;
+- Fang Strike abaixo de 40% de HP, cooldown de 10 s;
+- boss: 5% de `data_nocmoon_dna` como drop proprio;
+- conclusao depende da entidade exata do boss da instancia;
+- saida automatica ocorre 10 s depois da conclusao.
+
+Behavior e a unica autoridade da IA:
+
+- `aggressive`: detecta e avanca;
+- `passive`: ignora e foge quando atacado;
+- `defensive`: ignora e revida quando atacado;
+- `flee`: detecta e foge, mas revida quando atacado.
+
+### Quests
+
+| Quest | Requisito | Objetivo | Reward |
+| --- | --- | --- | --- |
+| Q1 | Level 1 | Falar com Devmoon | 332 EXP |
+| Q2 | Level 3 + Q1 | Falar com Devmoon | 2.379 EXP |
+| Q3 | Level 5 + Q2 | Falar com Devmoon | 7.204 EXP, Starter Bracelet, 10 energias verdes e 10 azuis |
+| Q4 | Level 7 + Q3 | Derrotar 3 Slimmoon | 15.532 EXP |
+| Q5 | Level 9 + Q4 | Derrotar 3 Nocmoon | 27.000 EXP |
+| Q6 | Level 10 + Q5 | Completar Moonlight Cavern | 35.000 EXP e Unscan Digital Bracelet |
+| Q7 | Level 12 + Q6 | Explicacao de Link/evolucao | Sem reward |
+
+Rewards de quest sao operacoes autoritativas e idempotentes. Turn-in duplicado
+nao pode conceder reward novamente.
+
+### Dungeon
+
+Reward de conclusao diaria elegivel:
+
+- 10.000 EXP;
+- 100 Link EXP;
+- 500 Bits;
+- 1 Upgrade Chip;
+- 5% de chance de 1 Alternate Chip.
+
+O reset e `03:00 UTC`, equivalente a `00:00 America/Sao_Paulo` sem horario
+de verao vigente. O retorno deve usar o portal de origem e um ponto seguro ao
+lado dele.
+
+### Conteudo Ativo
+
+- Devmoon;
+- Starter Bracelet;
+- Digital Bracelet e seu Unscan;
+- Upgrade Chip e Alternate Chip como rewards;
+- energias verde e azul;
+- Slimmoon, Nocmoon e materiais aprovados;
+- Moonlight Cavern.
+
+### Conteudo Preservado E Desativado
+
+Nao apagar estes sistemas ou catalogos:
+
+- Archive;
+- Hatchery;
+- Craft;
+- Cooking;
+- Equipment NPC;
+- Fishing;
+- Guild;
+- Hood, Shoes, Gloves, Shirt e Pants;
+- receitas, DataEggs e consumiveis futuros.
+
+Eles ficam sem NPC, portal, receita ou fonte de obtencao ativa. Fishing tambem
+fica inacessivel porque a Rod nao possui fonte na v0.04. Itens nao precisam de
+`enabled`; disponibilidade e controlada pelas fontes autoritativas.
+
+## Criacao De Personagem
+
+Status: `PENDENTE` e bloqueia a experiencia final da v0.04.
+
+Fluxo aprovado:
+
+1. login;
+2. draft local de nome e aparencia;
+3. escolha do Datamoon inicial;
+4. confirmacao unica;
+5. transacao idempotente cria personagem, Datamoon e baseline;
+6. entrada no jogo.
+
+Nada e persistido antes da confirmacao final. Fechar ou desconectar descarta o
+rascunho.
+
+Opcoes:
+
+- body masculino ou feminino;
+- tres paletas predefinidas de pele;
+- cabelo e tres ou quatro paletas;
+- olhos e tres ou quatro paletas;
+- roupa casual ou urbana.
+
+Aparencia e composta por body, hair, eyes, head, shirt, pants, gloves, shoes e
+bracelet. A roupa inicial e um preset, mas suas camadas sao persistidas
+separadamente para permitir substituicao visual futura por equipamento.
+
+Body, cabelo, olhos e roupa inicial nao sao itens. O personagem nasce sem
+bracelet visual; a camada aparece quando o Bracelet recebido na quest e
+equipado. Fishing Rod continua sendo item, mas nao e obtida na v0.04.
+
+O Client usa cenas para composicao visual estavel e shader de palette swap com
+cores predefinidas. O Server valida IDs e persiste escolhas; nao recebe RGB
+arbitrario nem confia na composicao visual enviada pelo Client.
+
+Contrato detalhado: `CHARACTER_CREATION.md`.
+
+## Pendencias De Codigo
+
+Bloqueiam ou precisam ser resolvidas antes do release candidate:
+
+- implementar persistencia atomica da nova criacao de personagem;
+- implementar composicao visual por camadas no Client;
+- integrar equipamento visual sem transformar roupa inicial em inventario;
+- configurar frames finais de Fang Strike;
+- implementar HUD central do boss por distancia;
+- fechar pontos autoritativos dos portais com os mapas finais;
+- revisar o ultimo snap perceptivel de Slime Spikes sob soltar input;
+- consolidar a baseline SQL limpa antes do reset do banco;
+- executar `go vet ./...` e `go build ./...` na VM/CI com Go disponivel;
+- validar sintaxe/build Web e imports Godot em ambiente gravavel;
+- atualizar a versao do Client de `0.03` para `0.04` somente no release candidate.
+
+Nao bloqueiam a v0.04:
+
+- dividir arquivos grandes sem mudanca funcional;
+- substituir chat polling por pub/sub;
+- dividir overworld em varios workers;
+- criar indice espacial adicional antes de perfil de carga;
+- migrar renderer sem comparacao visual e de frame time.
+
+## Pendencias Visuais
+
+- criar as tres cenas finais de mapa;
+- finalizar TileMaps, colisoes e pontos de entrada/retorno;
+- finalizar Player, Slimmoon, Nocmoon e Fang Strike;
+- produzir camadas e mascaras da criacao de personagem;
+- criar HUD superior do boss;
+- posicionar Devmoon, spawns e portais;
+- revisar pixel crisp em nomes, tiles, HUD, tooltips e movimento;
+- confirmar que somente conteudo ativo aparece.
+
+Pixel crisp significa manter sprites e camera alinhados a pixels inteiros,
+filtro nearest, escalas inteiras quando possivel e evitar subpixel em elementos
+que devem permanecer nitidos.
+
+## Validacao Manual Final
+
+### Conta Nova
+
+- criar conta;
+- login WSS;
+- criar personagem sem persistencia parcial;
+- escolher Datamoon;
+- entrar no Digital Center;
+- relogar e confirmar aparencia e stats.
+
+### Progressao
+
+- concluir Q1-Q7;
+- confirmar Slimmoon antes de Nocmoon;
+- terminar aproximadamente entre levels 12 e 13;
+- validar todos os rewards uma unica vez;
+- equipar/desequipar e confirmar HP/MP atual e maximo;
+- validar Link de 10% a 100%.
+
+### Combate E Rede
+
+- Player e Datamoon controlados separadamente;
+- basic e Slime Spikes em movimento;
+- soltar input logo depois da skill;
+- dano no frame de impacto;
+- nenhum snapshot antigo restaurando HP;
+- reconectar no mesmo mapa;
+- testar latencia e perda simuladas antes de alterar thresholds.
+
+### Dungeon E Party
+
+- solo e Party;
+- reserva integral da Party;
+- handoff Overworld -> Dungeon 1;
+- membro remoto acinzentado sem texto OFFLINE;
+- reconnect durante handoff;
+- morte do boss exato;
+- rewards e limite diario;
+- retorno ao portal de origem;
+- Dungeon 2 permanece desativada.
+
+### Operacao
+
+- hashes Client/Server/API iguais;
+- API `/ready`;
+- logs sem erros de startup;
+- Overworld e Dungeon 1 ativos;
+- Web, Auth e Gateway ativos;
+- journal dentro da retencao;
+- nenhum segredo ou dado sensivel em logs.
+
+## Lancamento Do Banco
+
+Executar somente quando o usuario autorizar explicitamente o lancamento.
+
+Decisao atual:
+
+- nao fazer backup dos dados PBE;
+- parar aplicacoes antes do reset;
+- recriar Auth e Game;
+- usar baseline composta apenas por `CREATE TABLE`, indices e seeds finais;
+- incorporar alteracoes estruturais antigas na criacao final;
+- remover migrations de conversao de IDs PBE;
+- nao transportar auditorias, inventarios, personagens ou hotbars de teste;
+- recriar apenas a conta administrativa necessaria;
+- subir tudo pelo deploy coordenado;
+- validar migrations, healthcheck e logs.
+
+Nunca montar ou executar o runbook destrutivo com nomes de banco presumidos. Os
+nomes reais devem vir dos envs da VM na janela de lancamento.
+
+## Performance E Escala
+
+### Base Que Deve Ser Preservada
+
+- Server autoritativo;
+- snapshots a 20 Hz;
+- interest management por chunk e `space_id`;
+- baseline/delta e budget por peer;
+- API interna com backpressure e circuit breaker;
+- MySQL fora do loop de movimento/combate;
+- checkpoints e operacoes idempotentes;
+- workers separados para zonas e instancias;
+- logs estruturados sem registrar cada movimento ou ataque.
+
+### Proximas Medicoes
+
+Antes de uma refatoracao de performance, medir:
+
+- frame time de CPU e GPU do Client;
+- draw calls, CanvasItems visiveis e memoria de texturas;
+- tempo de build/compressao de snapshot por peer;
+- bytes por peer por segundo;
+- quantidade de entidades por chunk;
+- tempo de physics tick do Server;
+- requests, fila e latencia da API;
+- conexoes e slow queries MySQL;
+- memoria por worker e tempo de handoff.
+
+### Melhorias Condicionadas A Metricas
+
+- carregar recursos por mapa/manifesto em vez de ampliar preload global;
+- pool de projeteis e floating text se alocacao aparecer no profiler;
+- batch de heartbeat/presenca quando houver dezenas de jogadores por worker;
+- indice espacial para IA e busca de peers quando scans se tornarem hotspot;
+- compartilhar trabalho de serializacao entre peers com deltas equivalentes;
+- dividir `movement_controller.gd`, `portal_manager.gd`,
+  `datamoon_enemy.gd` e handlers grandes por responsabilidade;
+- considerar renderer Compatibility apenas depois de validar shaders, visual e
+  ganho em hardware alvo;
+- adicionar limite de FPS configuravel alem do VSync.
+
+Nao reduzir linhas por objetivo numerico. Reduzir decisoes duplicadas,
+processamento ocioso, acoplamento e caminhos de compatibilidade comprovadamente
+mortos.
+
+## Backlog Pos-v0.04
 
 ### Gameplay
 
-- login e entrada no mundo;
-- movimento;
-- troca por TAB;
-- controle de Tamer e Datamoon;
-- combate basico;
-- skill;
-- hatch;
-- craft;
-- cooking;
-- archive;
-- quest log;
-- portal;
-- dungeon;
-- chat;
-- party;
-- guild bloqueada por item.
-
-### Tecnico
-
-- client local em `pbe`;
-- server em `pbe`;
-- gateway em `pbe`;
-- auth em `pbe`;
-- mysqlapi em `pbe`;
-- imports headless feitos em Godot;
-- mysqlapi rebuildado quando houver alteracao Go;
-- workers ativos: overworld e dungeon-1;
-- dungeon-2 off por enquanto.
-
----
-
-## Known Bugs / Pontos Para Monitorar
-
-Estes pontos nao bloqueiam automaticamente o beta se estiverem raros e pequenos, mas devem ser monitorados:
-
-- pequenos snaps/resyncs ao trocar entre overworld e dungeon;
-- pequenos snaps em skill/ataque quando controlando Datamoon;
-- o dano pode ser exibido antes do frame visual de impacto porque a hitbox do
-  ataque basico e ativada imediatamente ao entrar no estado de ataque;
-- o HP de um inimigo pode cair, voltar por poucos milissegundos e cair novamente
-  quando o hit imediato e seguido por um worldstate interpolado mais antigo;
-- duplicacao eventual de mensagem privada em troca de worker;
-- estado de party member offline/remoto deve continuar mostrando corretamente;
-- blur no editor pode depender do zoom do viewport, mas runtime deve ficar limpo;
-- input pode segurar por alguns segundos em troca de worker se houver latencia.
-
-## Backlog De Combate, Economia E Temporada
-
-Itens discutidos e documentados em 2026-07-29. Nenhum deles deve ser
-implementado apenas no Client; combate, inventario, moeda, rewards e progressao
-permanecem autoritativos no Server.
-
-### Sincronizacao De Ataque E Dano
-
-Problema atual:
-
-- a hitbox do ataque basico e ativada no inicio do estado de ataque;
-- o Server pode aplicar e enviar o dano antes de o Client renderizar o frame de
-  impacto da animacao.
-
-Solucao implementada, pendente de validacao visual:
-
-- dividir cada acao em `START`, `IMPACT` e `RECOVERY`;
-- `START` inicia a animacao e bloqueia outra acao;
-- `IMPACT` ativa a hitbox e calcula o dano no `impact_frame` configurado por
-  ataque;
-- `RECOVERY` encerra a acao e libera o proximo comando;
-- enviar identificador da acao, tick autoritativo e timing resolvido em frames
-  para o Client alinhar a animacao e reconciliar movimento;
-- suportar `impact_times` para skills com multiplos hits;
-- manter o Server como autoridade do impacto. Animation Call Method Track pode
-  disparar efeitos visuais, mas nao deve decidir o dano no Server headless.
-
-Criterios de pronto:
-
-- dano e numero flutuante aparecem no frame de impacto percebido;
-- latencia nao permite antecipar, repetir ou cancelar dano valido;
-- ataques basicos e skills usam o mesmo modelo temporal;
-- multiplos hits possuem sequencia deterministica e validada.
-
-### Oscilacao De HP Apos Hit
-
-Problema atual:
-
-- o pacote imediato de combate aplica o HP novo;
-- um worldstate interpolado mais antigo pode restaurar temporariamente o HP;
-- um snapshot posterior aplica novamente o valor correto.
-
-Solucao planejada:
-
-- versionar atualizacoes de HP com `server_tick`, `hit_sequence` ou ambos;
-- aplicar o hit imediato para preservar feedback rapido;
-- ignorar snapshots de HP anteriores a ultima versao autoritativa aplicada;
-- nunca corrigir o problema removendo a autoridade do Server ou atrasando todo
-  feedback ate o proximo worldstate.
-
-Criterios de pronto:
-
-- barra de HP nao sobe entre o hit e o snapshot seguinte;
-- cura, dano, DOT e morte respeitam a mesma ordenacao;
-- reconnect e troca de worker conseguem estabelecer uma nova versao-base.
-
-### Compra E Venda Em NPC
-
-Sistema planejado:
-
-- NPC referencia um `shop_id`; catalogo, precos e restricoes vivem no
-  Server/MySQL API;
-- compra valida proximidade/interacao, moeda, quantidade, estoque, limite e
-  espaco de inventario em uma unica operacao atomica;
-- venda valida posse, quantidade, estado equipado e flags de protecao antes de
-  remover o item e conceder moeda;
-- itens de quest, favoritos, equipados, bloqueados ou premium nao podem ser
-  vendidos sem uma regra explicita;
-- suportar quantidade, preco de compra, preco de venda e uma aba de recompra;
-- registrar auditoria e usar operacoes idempotentes para moeda e inventario.
-
-### Descarte De Item
-
-Sistema planejado:
-
-- arrastar para fora do inventario nao deve apagar automaticamente;
-- usar uma area explicita de descarte ou abrir confirmacao ao soltar fora;
-- stacks pedem quantidade; itens raros/equipamentos exigem confirmacao forte;
-- itens de quest, equipados, favoritos, bloqueados ou premium sao protegidos;
-- descarte e uma operacao autoritativa, idempotente e auditada no Server/API;
-- considerar recuperacao temporaria para itens elegiveis.
-
-### Passe De Temporada
-
-Direcao recomendada:
-
-- progresso por conta, nao por personagem ou Datamoon;
-- trilha gratuita e trilha premium predominantemente cosmetica;
-- nenhuma compra premium concede poder de combate;
-- progresso vem de atividades normais, quests e objetivos diarios, semanais e
-  permanentes;
-- recompensas reclamadas, nivel do passe, entitlement premium e missoes ficam
-  persistidos e validados no Server/API;
-- oferecer recuperacao de objetivos perdidos e, preferencialmente, manter
-  passes adquiridos disponiveis ou arquivados sem expiracao;
-- reutilizar o pipeline autoritativo de quests e rewards, sem criar uma segunda
-  implementacao de inventario/moeda.
-
-Ordem recomendada:
-
-1. corrigir sincronizacao de impacto e ordenacao de HP;
-2. implementar descarte seguro;
-3. implementar compra, venda e recompra em NPC;
-4. construir o passe sobre quests, rewards e auditoria ja estabilizados.
-
-## Validacao Manual Concluida
-
-Validado em PBE em 2026-07-24, sem bugs visiveis:
-
-- Web atualizado e Smithesyzer validada em login, cadastro e conta;
-- Client `95f3d8e` validado em janelas, HUD, nomes e tooltips;
-- Party entre overworld e dungeon;
-- HUD de membro remoto acinzentada, sem texto `OFFLINE`;
-- remocao de Party depois de desconexao definitiva;
-- reserva integral da Party e rollback de handoff;
-- antispam na quinta mensagem em dois segundos e feedback do tempo restante;
-- mute/unmute e slow/normal mode persistentes;
-- Fishing protegido contra replay/timing;
-- Hatchery idempotente;
-- motor compartilhado de Craft/Cooking;
-- Guild preservada entre reconnects.
-
-Esses fluxos saem da fila de implementacao principal. Devem continuar no roteiro
-de regressao manual sempre que networking, persistencia ou UI social mudarem.
-
-## Roteiro De Bosses Do Beta
-
-Bosses reutilizam a cena, sprites e animacoes da especie normal. A identidade de
-boss pertence aos dados do encontro, nao a uma copia da cena do Datamoon.
-
-Ordem de implementacao:
-
-1. adicionar ao JSON da dungeon um bloco `boss.modifiers` com multiplicadores de
-   HP, ataque, defesa e `attack_speed`;
-2. aplicar os multiplicadores somente na instancia criada como boss, depois dos
-   stats normais por especie e level;
-3. identificar a entidade no worldstate com `is_boss`, `boss_id` e nome
-   localizado, sem tornar o Client autoridade;
-4. criar uma HUD unica de boss no centro superior da tela;
-5. mostrar a HUD somente quando o boss estiver vivo, no mesmo `space_id` e
-   dentro da distancia configurada; ocultar ao afastar, morrer, sair da dungeon
-   ou trocar de worker;
-6. manter HUD local comum dos inimigos regulares e impedir duas HUDs de boss
-   simultaneas no mesmo Client;
-7. concluir a dungeon pela morte da instancia rastreada, nunca apenas pelo tipo
-   da especie;
-8. validar boss solo e em Party, reconnect, reset de combate, morte simultanea e
-   handoff de retorno.
-
-Os multiplicadores finais de Slimmoon/Nocmoon permanecem pendentes junto do
-balanceamento, sprites, animacoes, skills e drops do beta. O reset diario ocorre
-a meia-noite de Brasilia, correspondente a `03:00 UTC`. O retorno deve usar um
-ponto seguro adjacente ao portal de entrada, persistido no handoff, e nunca a
-posicao exata sobre o trigger do portal.
-
-Baseline da primeira validacao manual do Nocmoon Boss:
-
-- `max_hp: 12.0`;
-- `attack: 0.65`;
-- `defense: 0.9`.
-
-O Server calcula a especie e o level antes desses multiplicadores. O worldstate
-replica identidade, HP atual/maximo e versao monotona; o Client somente apresenta
-a HUD. A dungeon conclui pela morte do `entity_id` registrado na instancia.
-Bosses nao acumulam automaticamente perfis `wild_*` ou `dungeon_*`; seus
-modificadores de encontro sao aplicados diretamente depois da especie e level.
-
-## Pixel Crisp
-
-`Pixel crisp` significa preservar a grade de pixels sem interpolacao ou
-posicionamento fracionario. Sprites, fontes e HUDs devem usar filtro `nearest`,
-escala inteira quando possivel e coordenadas alinhadas a pixels inteiros. O
-resultado esperado e ausencia de blur, bordas tremidas, seams entre tiles e
-mudanca de nitidez durante movimento ou zoom.
-
----
-
-## Ordem Recomendada de Execucao
-
-### Fase 1 - Consolidar Base Visual e Mapa
-
-- fechar fonte e tamanhos;
-- garantir `nearest`/pixel crisp em todos icones, sprites e HUDs;
-- finalizar mapa central;
-- posicionar NPC, Slimmoon, Nocmoon e portal;
-- revisar colisoes espelhadas client/server.
-
-### Fase 2 - Fechar Datamoons
-
-- finalizar Slimmoon;
-- finalizar Nocmoon;
-- revisar stats;
-- revisar ataques e skills;
-- revisar rewards/drops;
-- validar versoes aliadas e inimigas.
-
-### Fase 3 - Implementar Quest Line
-
-- criar as 10 quests no server;
-- criar/ajustar dialogos;
-- conectar objetivos observaveis;
-- validar rewards e sequencia;
-- garantir que Q10 depende da completude da dungeon.
-
-### Fase 4 - Fechar Dungeon Diaria
-
-- configurar daily completion;
-- validar reward unico por dia;
-- validar boss completion;
-- validar retorno ao overworld;
-- validar mensagens de bloqueio/reentrada.
-
-### Fase 5 - Bloqueios e Polimento Beta
-
-- bloquear guild creation por item;
-- revisar mensagens de erro;
-- revisar loading antes de portais/dungeon;
-- revisar logs/metrics basicas;
-- rodar bateria manual de gameplay.
-
----
-
-## Checklist de Beta Ready
-
-- [ ] Quest line com 10 quests implementada.
-- [ ] NPC inicial com dialogos finais.
-- [ ] Mapa central com campo de Slimmoon.
-- [ ] Mapa central com floresta de Nocmoon.
-- [ ] Portal da dungeon no final do mapa.
-- [ ] Slimmoon finalizado para beta.
-- [ ] Nocmoon finalizado para beta.
-- [ ] Dungeon diaria funcional.
-- [ ] Rewards de dungeon marcando completude.
-- [x] Guild creation bloqueada pelo item `Guild Deploy Drive`.
-- [ ] Client sem blur relevante em runtime.
-- [ ] Server, gateway, auth e mysqlapi atualizados em `pbe`.
-- [ ] Baseline SQL consolidada sem migrations de conversao de dados PBE.
-- [ ] Baseline validada do zero em banco descartavel antes da janela de reset.
-- [ ] Backup realizado e reset limpo autorizado explicitamente para o beta.
-- [ ] Overworld e dungeon-1 ativos na VM.
-- [ ] Dungeon-2 desligada.
-- [ ] Teste manual completo aprovado.
-
----
-
-## Informacoes Que Ainda Precisamos Definir
-
-Para comecar a implementacao, ja temos escopo suficiente.
-
-Ainda precisamos definir antes ou durante a execucao:
-
-- texto final dos dialogos das 10 quests;
-- rewards de cada quest;
-- stats finais de Slimmoon e Nocmoon;
-- skill final de Slimmoon e Nocmoon;
-- boss da dungeon: especie, level, HP, ataque e reward;
-- origem/drop futuro do item `Guild Deploy Drive`;
-- se a dungeon pode ser feita solo no beta ou se party sera recomendada;
-- duracao, quantidade de niveis e curva de XP de um futuro passe de temporada;
-- catalogo gratuito/premium, preco, compra tardia e tratamento de passes antigos;
-- se objetivos sazonais expirados podem ser recuperados integral ou parcialmente.
-
----
-
-## Decisao Atual
-
-O primeiro beta deve priorizar uma fatia vertical pequena, clara e completa.
-
-### Ordem confirmada em 2026-07-25
-
-- a rodada visual de nomes/guild, Party HUD e Enemy HUD foi validada
-  manualmente pelo responsavel do projeto;
-- Slimmoon e Nocmoon serao balanceados na proxima etapa de conteudo;
-- a quest line sera criada pelo responsavel usando
-  `docs/QUEST_AUTHORING_TEMPLATE.md`;
-- a dungeon diaria sera finalizada depois do balanceamento dos Datamoons;
-- campo de Slimmoon, floresta de Nocmoon, NPCs e portal serao consolidados na
-  etapa final de mapa;
-- polimento, mensagens, logs, metricas e bateria final permanecem documentados
-  para o fechamento da beta.
-
-Esta ordem nao marca os itens de beta como concluidos. Ela apenas registra a
-sequencia de execucao escolhida.
-
-O objetivo nao e mostrar volume de conteudo, mas provar que:
-
-- o jogador entende o mundo;
-- o jogador aprende os sistemas principais;
-- o combate base funciona;
-- a troca de workers funciona;
-- a dungeon diaria fecha um ciclo de recompensa;
-- a base tecnica suporta evolucao para P2/P3.
+- habilitar Archive, Hatchery, Craft, Cooking, Equipment e Fishing por conteudo;
+- adicionar Hood, Shoes, Gloves, Shirt e Pants como fontes reais;
+- evolucao Code -> Nex -> Omega;
+- mais mapas, dungeons e dificuldades;
+- eventos mundiais;
+- guild creation por `guild_deploy_drive`;
+- vendor, compra, venda e descarte seguro;
+- skills e projeteis adicionais;
+- administracao de login separada de moderacao de chat.
+
+### Temporada
+
+Passe de temporada permanece somente como ideia futura. Antes de implementar,
+definir temporada, duracao, XP, trilha gratuita/premium, rewards, catch-up,
+prevencao de abuso, expiracao e impacto economico. Nenhuma regra de temporada
+deve entrar silenciosamente na v0.04.
+
+### Producao
+
+- recuperacao de senha;
+- validacao de e-mail;
+- backup automatico e restauracao testada;
+- alertas externos;
+- Grafana/Prometheus;
+- WAF/Fail2ban;
+- rotacao operacional de credenciais;
+- ferramenta administrativa para consultas de auditoria;
+- teste de carga com metas definidas.
+
+## Divisao Cena, Codigo E Dados
+
+Usar cenas para:
+
+- composicao visual de entidades;
+- mapas, colisoes e markers;
+- janelas e componentes de UI;
+- AnimationTree, shaders e anchors;
+- variantes visuais reutilizaveis.
+
+Usar codigo para:
+
+- autoridade e validacao;
+- rede, prediction e reconciliacao;
+- state machines;
+- streaming, pooling e lifecycle;
+- persistencia e transacoes;
+- composicao runtime orientada por dados.
+
+Usar JSON para:
+
+- IDs e disponibilidade;
+- stats, timings, rewards e drops;
+- spawns, portais, NPCs, quests e receitas;
+- presets de aparencia e paletas permitidas.
+
+Nao criar uma cena por combinacao de cor, regra de gameplay escondida em cena
+visual ou entidade critica inteiramente montada por codigo quando uma cena
+reutilizavel torna o contrato mais claro.
+
+## Criterio Beta Ready
+
+A v0.04 esta pronta quando:
+
+- nao ha persistencia parcial na criacao;
+- mapas e assets finais estao integrados;
+- Q1-Q7 fecham a progressao aprovada;
+- boss, dungeon e rewards funcionam solo e em Party;
+- movimento e combate nao exibem snaps recorrentes;
+- hashes e baseline SQL estao consistentes;
+- deploy limpo passa;
+- logs nao mostram erros criticos;
+- banco PBE foi recriado na janela aprovada;
+- o roteiro manual foi aprovado por uma conta nova.
+
+A decisao final de release e manual. Nenhum status historico substitui esse
+checklist.

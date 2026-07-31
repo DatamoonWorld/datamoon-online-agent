@@ -201,7 +201,8 @@ Before implementing a cross-repo feature, answer:
 ## Audited Runtime Baseline (2026-07-23)
 
 The detailed evidence, findings and release gates supporting this baseline are
-recorded in `docs/TECHNICAL_AUDIT_2026-07-23.md`.
+recorded in `docs/CODE_HEALTH.md` and the release gates of
+`docs/FIRST_BETA_ROADMAP.md`.
 
 ```mermaid
 flowchart LR

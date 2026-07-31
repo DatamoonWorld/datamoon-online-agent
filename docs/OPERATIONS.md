@@ -28,9 +28,10 @@ available for a future capacity increase.
   reads the certificate private key. Local development may also use loopback WS.
 - Nginx owns public connection/IP limits because proxied peers appear as
   loopback to Godot. Gateway owns per-session login/register cooldown.
-- API uses unique `INTERNAL_API_AUTH_TOKEN`, `INTERNAL_API_GATEWAY_TOKEN`,
-  `INTERNAL_API_SERVER_TOKEN` and `INTERNAL_API_WEB_TOKEN`.
-  `INTERNAL_API_TOKEN` is only a rollout fallback.
+- API requires unique `INTERNAL_API_AUTH_TOKEN`, `INTERNAL_API_GATEWAY_TOKEN`,
+  `INTERNAL_API_SERVER_TOKEN` and `INTERNAL_API_WEB_TOKEN`; there is no shared
+  rollout fallback. Every token must contain at least 32 characters; API
+  startup fails when one is missing, short or duplicated.
 - Each Godot service receives only its corresponding token through
   `DATAMOON_INTERNAL_API_TOKEN`.
 - Database, API, Auth and observability ports are blocked from the public network.

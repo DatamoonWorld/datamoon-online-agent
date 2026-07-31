@@ -1,245 +1,247 @@
-# Code Health And Domain Review
+# Code Health And Performance Contract
 
-> This is a technical review snapshot, not an active backlog. Current gameplay
-> status and priorities live only in `FIRST_BETA_ROADMAP.md`.
+Ultima revisao estrutural: 2026-07-31.
 
-Last focused gameplay pass: 2026-07-24. Scope: approximately 45,000 code lines across
-Auth, Gateway, Server, Client, MySQL API and Web.
+## Finalidade
 
-Latest cross-repository pass: 2026-07-30. The checklist below is the canonical
-code cleanup tracker. A checked item means it was verified or safely completed;
-unchecked items require an isolated change and manual validation before removal.
+Este documento define como manter o codigo coeso, seguro e eficiente. Ele nao e
+um backlog. Prioridades, bloqueios e criterios de release vivem somente em
+`FIRST_BETA_ROADMAP.md`.
 
-## Overall Assessment
+Reducao de linhas nao e objetivo isolado. Uma mudanca e boa quando reduz pelo
+menos um destes custos sem esconder comportamento:
 
-Authority boundaries and persistent consistency are cohesive. Size is not itself
-the main problem; concentrated responsibilities and duplicated orchestration are.
-Refactoring must preserve RPC/API contracts, operation IDs, leases and gameplay
-rules rather than optimize only for line count.
+- decisoes duplicadas;
+- acoplamento;
+- processamento ocioso;
+- alocacao;
+- trafego;
+- round-trips;
+- superficie de ataque;
+- caminhos legados sem consumidor.
 
-## Highest-value Reductions
+## Baseline Arquitetural
 
-### Recipe Activities
+A direcao atual deve ser preservada:
 
-Crafting and Cooking now share reusable recipe activity infrastructure while
-retaining thin domain facades for RPC/UI semantics. Future recipes should extend
-the shared engine instead of restoring duplicated catalog and result handling.
+- Client cuida de input, prediction, reconciliacao, animacao e apresentacao;
+- Server e autoridade de movimento, combate, inventario, rewards e mundo;
+- Auth cuida de credenciais e sessao;
+- Gateway cuida de entrada, handshake e selecao de worker;
+- MySQL API concentra persistencia e operacoes transacionais;
+- MySQL nao participa do loop por frame ou por ataque;
+- Overworld e dungeons possuem workers separados;
+- `space_id` e chunks limitam interesse;
+- snapshots usam baseline/delta, 20 Hz e budget por peer;
+- operacoes economicas sensiveis sao idempotentes e auditadas;
+- deploy e observabilidade sao coordenados pelo Agent.
 
-### Social Runtime
+Essa base e adequada para beta pequena. Ela ainda nao prova capacidade de MMO
+em larga escala; isso exige carga representativa, metas e perfil.
 
-Party and Guild now use a shared social directory for online-character and client
-resolution. Their leadership, persistence, reward-sharing and dungeon-binding
-rules remain separate. A dedicated relay/pub-sub adapter is still a future scale
-improvement; database relay remains acceptable for PBE.
+## Cobertura Da Revisao
 
-### Inventory And Rewards
+A revisao de 2026-07-31 inventariou todos os repositorios e todos os arquivos de
+codigo, cena e dados rastreados. Foram executados:
 
-Inventory operation context has been extracted and persistent mutations retain
-the MySQL API transaction as the atomic boundary. Item use, generated equipment,
-upgrade and alternate operations should move into focused services rather than
-expanding the inventory facade again.
+- contagem e ranking de arquivos grandes;
+- busca global por legado, fallback, TODO, segredo e endpoint inseguro;
+- inventario de loops `_process` e `_physics_process`;
+- verificacao de referencias de cenas e formatos JSON atuais;
+- comparacao byte a byte do contrato RPC espelhado;
+- import/parse headless de Client, Server, Auth e Gateway;
+- verificacao de diff e whitespace;
+- leitura profunda dos caminhos de movimento, snapshots, catalogos, rate limit,
+  tokens internos, preloading, spawn, NPC e portal.
 
-The Equipment NPC keeps non-owning UI selections: clicking a selected NPC slot
-clears it without moving inventory, and material quantities are displayed as the
-sum of every matching inventory stack. Consumption remains atomic against a
-concrete row; the Client selects the next matching stack when one is exhausted.
+Uma revisao estatica integral encontra incoerencias e hotspots provaveis, mas
+nao substitui profiler, teste manual ou carga. Nao declarar um sistema
+"otimizado" sem medida de runtime.
 
-### Dungeon And Portals
+## Correcoes Estruturais Aplicadas
 
-Portal and dungeon content parsing/normalization now lives in `portal_config.gd`.
-`portal_manager.gd` remains the public facade for local instances, remote handoff,
-completion, rewards and timeout/ejection. Instance lifecycle and transfer
-orchestration are the next safe extraction boundaries.
+- removido o token interno compartilhado como fallback;
+- tokens de Auth, Gateway, Server e Web precisam ser distintos e fortes;
+- rate limit Web conta falhas de login e toda tentativa de cadastro; sucesso de
+  login nao apaga o historico de falhas do IP;
+- entradas expiradas do limiter sao limpas periodicamente;
+- removido RPC antigo de direcao; movimento usa apenas comandos sequenciados;
+- removidos fallbacks para catalogos agregados inexistentes;
+- removidos formatos antigos de skill unica e servico unico de NPC;
+- formato atual de Bits deixou de ser chamado incorretamente de legado;
+- hotbar, loading e resource preloader nao processam quando ociosos;
+- respawn, timeout de instancia e range de NPC usam polling limitado;
+- estado completo do mundo e coletado na taxa de snapshot, nao tres vezes mais;
+- VSync e o padrao do Client para evitar renderizacao irrestrita.
 
-## Domain Findings
+## Regras De Refatoracao
 
-### Combat
+1. Preservar contratos de RPC, API, JSON e persistencia em mudancas mecanicas.
+2. Separar alteracao funcional de movimentacao/extracao de codigo.
+3. Nao criar abstracao generica sem dois consumidores estaveis.
+4. Nao dividir um arquivo apenas pelo numero de linhas.
+5. Extrair quando houver responsabilidades, lifecycle ou dependencias distintas.
+6. Remover fallback somente depois de provar que nao ha produtor nem consumidor.
+7. Manter logs correlacionaveis para fluxos multi-etapa.
+8. Nunca ampliar tolerancias para esconder divergencia de simulacao.
+9. Medir antes e depois de uma otimizacao relevante.
+10. Reverter uma otimizacao se legibilidade ou jogabilidade piorar sem ganho real.
 
-Damage authority, target/space validation, action acknowledgements and projectile
-de-duplication are cohesive. Improve by moving formulas into immutable typed
-combat inputs/results and separating action lifecycle from damage math. Validate
-defense curves, level gaps, systems, buffs, AoE cadence and simultaneous death
-through controlled live scenarios with structured inputs/results in logs. Avoid
-adding more logic to `combat.gd` before this split.
+Arquivos grandes atuais devem ser divididos por fronteira, nao por tamanho:
 
-### Guild
+- `movement_controller.gd`: input history, simulacao e apresentacao;
+- `portal_manager.gd`: catalogo, instancia e handoff;
+- `datamoon_enemy.gd`: IA, combate e replicacao;
+- `inventory.gd`: uso, equipamento, rewards e operacoes;
+- handlers Go: agregado e use case.
 
-Persistent membership and role operations belong in the API and snapshots are
-server-distributed, which is correct. Permission matrices are centralized,
-invites expire, and persistent Guild audit records cover administrative state
-changes. Query/admin presentation remains future tooling.
-Cross-worker chat works through persistence polling but should eventually use a
-dedicated relay/pub-sub channel.
+Essas extracoes devem ocorrer depois do release gate quando o fluxo afetado ja
+possuir um roteiro manual reproduzivel.
 
-### Chat
+## Estrategia Godot Hibrida
 
-Payload bounds, sanitization, scope separation, duplicate/spam protection,
-persistent mute state, persistent channel slow mode, account-level administrator
-authorization, in-game moderation commands, millisecond UTC expiry and moderation
-audit storage exist. Chat-ban and reports are intentionally out of scope. A future
-admin application still needs query UI. Database polling is acceptable for beta
-but not high-volume world chat.
+### Cenas
 
-### Craft, Cooking, Fishing And Hatchery
+Preferir cenas para estruturas visuais e autoradas:
 
-Outcomes are server/API authoritative and inventory mutations are transactional.
-Craft/Cooking share the recipe activity engine. Fishing uses server-generated
-session IDs, validates bite/catch timing, rejects stale sessions and derives a
-stable reward operation ID from the session. Hatchery start/claim operations use
-idempotency keys and explicit persisted job states. Never move result rolls to
-the Client.
+- entidades;
+- mapas e colisoes;
+- janelas e componentes de UI;
+- AnimationTree;
+- anchors e markers;
+- shaders e materiais;
+- variantes visuais reutilizaveis.
 
-### Party
+Uma cena deve tornar hierarquia e contrato visual legiveis no editor. Evitar
+cenas duplicadas que diferem apenas por cor ou valor de catalogo.
 
-Reward sharing, canonical party versioning, persistent invite expiry, cross-worker
-presence, offline membership removal and handoff preservation are implemented.
-Remote-worker members remain represented in the HUD without an `OFFLINE` label.
-Worker-crash cleanup now marks stale heartbeat presence and applies a short grace
-period before membership removal. Dungeon handoff uses a versioned party roster
-reservation before transfer. Multi-worker behavior still requires manual PBE
-validation whenever handoff or presence code changes.
+### Codigo
 
-### Dungeons On Distinct Workers
+Preferir codigo para comportamento dinamico:
 
-Signed directed handoff, atomic lease replacement, fencing and acknowledgement are
-the correct foundation. Party handoff reserves the versioned complete roster
-before moving the first member and logs prepare, validation, cancellation,
-rollback and acknowledgement phases. An explicit shared transfer state type and
-dedicated relay remain future structural improvements.
+- rede;
+- prediction e reconciliacao;
+- autoridade;
+- state machines;
+- streaming;
+- pooling;
+- lifecycle;
+- validacao;
+- persistencia;
+- composicao runtime orientada por dados.
 
-### Client
+Nao montar por codigo uma arvore visual estavel que seria mais clara e barata de
+manter como cena.
 
-Prediction/reconciliation is correctly presentation-side, but `server.gd`,
-`movement_controller.gd`, `worldmap.gd` and the global autoload count are large.
-Split network session, lobby, handoff and gameplay receivers; replace broad global
-state with domain stores/signals where practical.
+### JSON
 
-### MySQL API
+Preferir dados para conteudo ajustavel:
 
-Transactions and domain routes are strong. Several handler files exceed 600-1400
-lines and should be split by aggregate/use case. Add a generated route inventory,
-repository interfaces, service-scoped auth telemetry and manual query-plan/load
-checks for chat, guild and inventory hot paths.
+- stats e timings;
+- drops e rewards;
+- quests;
+- receitas;
+- portais;
+- spawns;
+- NPCs;
+- disponibilidade;
+- presets e paletas.
 
-## Validation Policy
+JSON nao deve conter autoridade secreta que o Client possa alterar para obter
+vantagem. O Server carrega e valida o contrato canonico.
 
-Automated test files were removed by project decision on 2026-07-23. Functional
-validation is performed in the real PBE flow with structured logs. CI and deploy
-retain only Godot import, source formatting, static analysis, syntax checks and
-build verification. Manual scenarios live in the canonical Operations runbook.
+## Performance Do Client
 
-## Rules For Reduction
+Metas iniciais de perfil:
 
-1. Reduce duplicated decisions, not merely formatting or line breaks.
-2. No cross-domain generic abstraction without at least two stable consumers.
-3. Every extraction preserves RPC/API contracts and records a complete manual log trace.
-4. Large gameplay changes are separate commits from mechanical moves.
-5. Measure frame time, packet size, DB writes and API latency before/after.
+- 60 FPS sustentados em hardware alvo;
+- frame de CPU e GPU abaixo de 16,67 ms no p95;
+- sem stutter perceptivel em troca de mapa;
+- memoria estabiliza depois de carregar/descarregar conteudo;
+- nenhuma fila de recursos permanece processando quando vazia.
 
-## Cross-Repository Cleanup Checklist
+Cuidados:
 
-### Agent
+- palette swap compartilha shader e atualiza uniforms apenas quando a aparencia
+  muda;
+- camadas de personagem aumentam draw calls; ocultar camadas vazias e evitar
+  materiais unicos sem necessidade;
+- usar nearest e alinhamento inteiro para pixel art;
+- carregar por mapa/manifesto quando o catalogo crescer;
+- pool apenas quando o profiler mostrar churn em projeteis, efeitos ou textos;
+- VSync fica ligado por padrao e um limite configuravel pode ser adicionado;
+- renderer Compatibility so deve substituir Forward Plus depois de comparar
+  shaders, visual, GPU e compatibilidade em hardware real.
 
-- [x] Keep gameplay priorities in `FIRST_BETA_ROADMAP.md` and v0.04 acceptance
-  in `roadmap_v0.04.md`; thematic documents define contracts only.
-- [x] Replace the old pixel-tolerance combat note with deterministic tick replay.
-- [ ] Repair the historical mojibake in `ai/CODE_RULES.md` without changing its
-  meaning.
-- [ ] Review old audit snapshots when the beta ships and archive only documents
-  that no longer provide decision history.
+## Performance Do Server
 
-### Auth
+Metas iniciais de perfil:
 
-- [x] Godot headless loads scripts without parse errors.
-- [x] No runtime `.env` or secret file is tracked.
-- [ ] Separate the HTTP/database adapter from the authentication coordinator if
-  either grows beyond its current small responsibility.
-- [x] No application-owned `Thread` exists in Auth; the headless editor shutdown
-  warning observed locally comes from the restricted Godot editor environment.
+- physics tick sem overruns;
+- snapshot build abaixo do budget de tick;
+- trafego limitado por peer;
+- nenhuma operacao MySQL no caminho por frame;
+- memoria por worker estabiliza apos cleanup de instancia;
+- filas de API e logs permanecem limitadas.
 
-### Gateway
+Cuidados:
 
-- [x] No runtime `.env` or secret file is tracked.
-- [ ] Re-run isolated headless shutdown validation in CI; the combined local
-  audit was terminated after the restricted editor environment stalled.
-- [ ] Keep Gateway limited to handshake, routing and connection lifecycle; do
-  not move gameplay reconciliation into it.
+- atualizar estado replicado na frequencia realmente publicada;
+- manter interest management por chunk e `space_id`;
+- evitar scan global por evento de combate;
+- batch de presenca quando a escala justificar;
+- indice espacial adicional somente quando scans aparecerem no profiler;
+- manter Dungeon 1 apenas no PBE enquanto nao houver necessidade de capacidade;
+- nao aumentar snapshot rate para mascarar interpolacao ou prediction incorreta.
 
-### Client
+## Performance Da API E Banco
 
-- [x] RPC surface is byte-identical to the Server mirror.
-- [x] All tracked JSON files parse and all tracked paths exist.
-- [x] Controlled movement uses sequenced input, authoritative ACK and replay
-  based on `action_start_input_tick`.
-- [x] Remote entities remain presentation/interpolation driven.
-- [ ] Split `movement_controller.gd` after live validation into input history,
-  deterministic simulation and visual correction components.
-- [ ] Split `server.gd` receivers into session, lobby, handoff and gameplay
-  adapters while preserving the mirrored RPC surface.
-- [ ] Split `worldmap.gd` scene streaming from entity presentation.
-- [ ] Remove `ChatPayloads.TYPE_LEGACY` only after confirming every local and
-  network message is wrapped by `build_chat` or `build_system`.
-- [ ] Inventory and UI scripts disabled for v0.04 remain future content and must
-  not be deleted merely because they do not spawn in the beta.
+- tokens por servico e comparacao em tempo constante;
+- endpoints especificos, nunca SQL generico;
+- transacoes curtas e idempotentes;
+- pool de conexoes limitado;
+- indices guiados por consultas reais;
+- cleanup de auditoria em batches;
+- sem persistencia por frame, movimento ou ataque;
+- medir p50, p95, p99, erros e saturacao antes de ampliar pool;
+- usar slow-query log durante teste de carga, nao logging detalhado permanente.
 
-### Server
+## Observabilidade
 
-- [x] RPC surface is byte-identical to the Client mirror.
-- [x] All tracked JSON files parse and all tracked paths exist.
-- [x] Combat movement phases use the same deterministic helper as the Client.
-- [x] Locked combat phases process zero-distance commands instead of creating
-  gaps in the input sequence.
-- [x] Rename functional `ASpeedTimer` nodes to `ActionTimer`; attack speed is an
-  interval and no longer an animation-duration concept.
-- [ ] Extract dungeon instance lifecycle and transfer orchestration from
-  `portal_manager.gd`.
-- [ ] Split inventory use, rewards and equipment operations from `inventory.gd`.
-- [ ] Split enemy AI, combat and replication responsibilities in
-  `datamoon_enemy.gd`.
-- [ ] Measure worldstate packet size and tick cost before changing snapshot
-  frequency or compression.
+INFO registra transicoes importantes, bloqueios e operacoes sensiveis. DEBUG
+pode conter snapshots completos temporarios. Nunca registrar:
 
-### MySQL API
+- senha;
+- token;
+- ticket;
+- conteudo de chat;
+- movimento por frame;
+- cada ataque aceito.
 
-- [x] No runtime `.env` or secret file is tracked.
-- [ ] Run `go vet ./...` and `go build ./...` in CI/VM; Go is not installed in
-  the current local execution environment.
-- [ ] Split `game_write_handlers.go`, `guild_handlers.go` and
-  `inventory_handlers.go` by aggregate/use case.
-- [ ] Remove permissive legacy inventory-ID behavior only in the clean beta
-  database release that retires migrations 031/032 compatibility.
-- [ ] Generate and diff a route inventory so unused endpoints can be removed
-  without breaking Server callers.
+Metricas prioritarias:
 
-### Web
+- frame/tick time;
+- entidades e peers;
+- bytes e tamanho de snapshot;
+- fila e latencia da API;
+- conexoes e slow queries;
+- memoria por worker;
+- handoff por resultado;
+- reconciliacao por distancia aplicada.
 
-- [x] `src/app.js` passes Node syntax validation.
-- [x] No runtime `.env` or secret file is tracked.
-- [ ] Split the 500+ line application into configuration, routes and page
-  rendering when another account flow is added.
-- [ ] Add a non-installing `check` script; there is currently no build script
-  and invoking package-manager build attempts an unnecessary install.
+## Gate De Qualidade
 
-### Sprites
+Antes de publicar uma alteracao:
 
-- [x] Repository intentionally contains source art rather than runtime code.
-- [ ] Create a manifest mapping source sprite IDs to Client runtime assets
-  before deleting apparently unreferenced art.
-- [ ] Detect duplicate binary hashes and obsolete exports only after the
-  manifest distinguishes source files from generated variants.
+- `git diff --check`;
+- import/parse Godot nos repos afetados;
+- JSON valido e referencias existentes;
+- RPC espelhado quando alterado;
+- `gofmt`, `go vet ./...` e `go build ./...` para API;
+- sintaxe Node para Web;
+- roteiro manual do fluxo afetado;
+- logs sem erro novo;
+- documentacao contratual e roadmap atualizados quando aplicavel.
 
-### Release Gates
-
-- [ ] Validate Player movement while commanding companion attacks.
-- [ ] Validate Datamoon START/IMPACT/RECOVERY at normal latency and under
-  simulated latency/loss.
-- [ ] Confirm reconciliation errors converge instead of growing across actions.
-- [ ] Validate that `prediction_adjustment` and
-  `visual_correction_distance` remain small under normal latency; do not use
-  `head_to_authority_distance` as a correction measurement because it includes
-  movement inputs newer than the acknowledged server tick.
-- [ ] Run Client, Server, Auth and Gateway headless checks in a writable CI
-  profile.
-- [ ] Run API vet/build and Web syntax check.
-- [ ] Perform the clean database reset before removing historical ID migrations
-  or permissive legacy-row handling.
+O projeto nao mantem arquivos de teste automatizado por decisao atual. Build,
+parse, analise estatica e validacao manual continuam obrigatorios.

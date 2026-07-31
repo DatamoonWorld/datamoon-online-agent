@@ -291,7 +291,8 @@ Decision:
 Impact:
 - Canonical architecture now records trust boundaries and actual login,
   gameplay and handoff flows.
-- Evidence and release gates live in `docs/TECHNICAL_AUDIT_2026-07-23.md`.
+- Current evidence and release gates live in `docs/CODE_HEALTH.md` and
+  `docs/FIRST_BETA_ROADMAP.md`.
 
 Repos affected:
 - `datamoon-online-agent`
