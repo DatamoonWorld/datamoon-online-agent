@@ -216,6 +216,10 @@ only as SHA-256 hashes. Authenticated password and e-mail changes use six-digit
 codes sent to the current address. Codes expire after 10 minutes, permit at most
 five attempts, replace prior challenges of the same purpose and are also stored
 only as SHA-256 hashes. Pending passwords are persisted only as bcrypt hashes.
+Authenticated challenges use a 60-second cooldown and a limit of five deliveries
+per purpose and address per day. Public recovery limits remain separate. A new
+challenge invalidates the previous code; consuming it does not erase rate-limit
+history.
 Password/e-mail changes increment `credential_version`, which
 invalidates every existing signed account session. An already-consumed gameplay
 ticket remains governed by the worker lease until disconnect. Public request
