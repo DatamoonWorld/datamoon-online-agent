@@ -1,17 +1,15 @@
 [Unit]
-Description=Datamoons Online web portal
-After=network-online.target datamoon-api.service datamoon-mailer.service
-Wants=network-online.target datamoon-mailer.service
-Requires=datamoon-api.service
+Description=Datamoons Online transactional mailer
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
-User=datamoon-web
+User=datamoon-mailer
 Group=datamoon-web
 WorkingDirectory=/opt/datamoon/datamoon-online-web
 EnvironmentFile=/opt/datamoon/env/datamoon-web.env
-EnvironmentFile=/opt/datamoon/env/datamoon-web-secrets.env
-ExecStart=/usr/bin/node /opt/datamoon/datamoon-online-web/src/app.js
+ExecStart=/usr/bin/node /opt/datamoon/datamoon-online-web/src/mailer.js
 Restart=on-failure
 RestartSec=3
 TimeoutStopSec=20
@@ -31,14 +29,12 @@ RestrictRealtime=true
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 LockPersonality=true
 SystemCallArchitectures=native
-UMask=0077
+UMask=0007
 CapabilityBoundingSet=
 AmbientCapabilities=
-IPAddressDeny=any
-IPAddressAllow=localhost
-ReadWritePaths=/var/lib/datamoon-web
-StateDirectory=datamoon-web
-LimitNOFILE=65536
+RuntimeDirectory=datamoon-mailer
+RuntimeDirectoryMode=0750
+LimitNOFILE=4096
 
 [Install]
 WantedBy=multi-user.target

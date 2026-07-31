@@ -13,7 +13,7 @@ SOURCE_UPDATED=0
 
 REPOS=(datamoon-online-agent datamoon-online-auth datamoon-online-gateway datamoon-online-mysqlapi datamoon-online-server datamoon-online-web)
 GODOT_REPOS=(datamoon-online-auth datamoon-online-gateway datamoon-online-server)
-UNITS=(datamoon-gateway.service datamoon-auth.service datamoon-server@overworld.service datamoon-server@dungeon-1.service datamoon-api.service datamoon-web.service)
+UNITS=(datamoon-gateway.service datamoon-auth.service datamoon-server@overworld.service datamoon-server@dungeon-1.service datamoon-api.service datamoon-mailer.service datamoon-web.service)
 
 declare -A REPO_BRANCHES=(
   [datamoon-online-agent]="${DATAMOON_AGENT_BRANCH:-main}"
@@ -39,7 +39,7 @@ validate_godot_repo() {
   fi
 }
 
-for command in git go node find curl systemctl "$GODOT"; do
+for command in git go node npm find curl systemctl "$GODOT"; do
   command -v "$command" >/dev/null 2>&1 || { echo "Missing command: $command" >&2; exit 1; }
 done
 
@@ -57,6 +57,7 @@ rollback() {
     systemctl start datamoon-api.service || true
     systemctl start datamoon-auth.service datamoon-gateway.service || true
     systemctl start datamoon-server@overworld.service datamoon-server@dungeon-1.service || true
+    systemctl start datamoon-mailer.service || true
     systemctl start datamoon-web.service || true
   fi
 }
@@ -78,6 +79,10 @@ for repo in "${REPOS[@]}"; do
   git -C "$ROOT/$repo" reset --hard "origin/$branch"
 done
 for repo in "${GODOT_REPOS[@]}"; do validate_godot_repo "$repo"; done
+pushd "$ROOT/datamoon-online-web" >/dev/null
+npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+npm run check
+popd >/dev/null
 while IFS= read -r -d '' javascript_file; do
   node --check "$javascript_file"
 done < <(find "$ROOT/datamoon-online-web/src" -type f -name '*.js' -print0)
@@ -88,7 +93,7 @@ go vet ./...
 go build -trimpath -o "$BACKUP_DIR/datamoon-api.next" ./cmd/api
 popd >/dev/null
 test ! -f "$API_BINARY" || cp -a "$API_BINARY" "$BACKUP_DIR/datamoon-api.previous"
-systemctl stop datamoon-web.service
+systemctl stop datamoon-web.service datamoon-mailer.service
 systemctl stop datamoon-gateway.service datamoon-auth.service
 systemctl stop datamoon-server@overworld.service datamoon-server@dungeon-1.service
 systemctl stop datamoon-api.service
@@ -102,6 +107,7 @@ for attempt in {1..30}; do
 done
 systemctl start datamoon-auth.service datamoon-gateway.service
 systemctl start datamoon-server@overworld.service datamoon-server@dungeon-1.service
+systemctl start datamoon-mailer.service
 systemctl start datamoon-web.service
 
 for unit in "${UNITS[@]}"; do systemctl is-active --quiet "$unit"; done

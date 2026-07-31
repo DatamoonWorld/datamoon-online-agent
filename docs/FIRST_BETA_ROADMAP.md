@@ -399,12 +399,12 @@ deve entrar silenciosamente na v0.04.
 
 ### Producao
 
-- recuperacao de senha;
-- validacao de e-mail;
+- recuperacao de senha, validacao e alteracao de e-mail implementadas; falta
+  deploy, acesso de producao do SES e validacao manual completa;
 - backup automatico e restauracao testada;
-- alertas externos;
+- alarmes essenciais CloudWatch/SNS configurados; ampliar somente por necessidade;
 - Grafana/Prometheus;
-- WAF/Fail2ban;
+- Fail2ban versionado e pendente de instalacao/validacao na VM; WAF futuro;
 - rotacao operacional de credenciais;
 - ferramenta administrativa para consultas de auditoria;
 - teste de carga com metas definidas.

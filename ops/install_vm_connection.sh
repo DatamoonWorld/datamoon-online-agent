@@ -22,8 +22,12 @@ test -f /etc/letsencrypt/live/datamoononline.com.br/privkey.pem || { echo "Missi
 if ! id datamoon >/dev/null 2>&1; then
   useradd --system --home "$SERVER_STATE_DIR" --shell /usr/sbin/nologin datamoon
 fi
+getent group datamoon-web >/dev/null 2>&1 || groupadd --system datamoon-web
 if ! id datamoon-web >/dev/null 2>&1; then
-  useradd --system --home "$WEB_STATE_DIR" --shell /usr/sbin/nologin datamoon-web
+  useradd --system --home "$WEB_STATE_DIR" --shell /usr/sbin/nologin --gid datamoon-web datamoon-web
+fi
+if ! id datamoon-mailer >/dev/null 2>&1; then
+  useradd --system --no-create-home --home /nonexistent --shell /usr/sbin/nologin --gid datamoon-web datamoon-mailer
 fi
 install -d -m 0750 -o root -g datamoon "$ENV_DIR"
 install -d -m 0755 /etc/systemd/journald.conf.d
@@ -55,6 +59,7 @@ done
 for service in api auth gateway web; do
   install -m 0644 "$AGENT_ROOT/ops/systemd/datamoon-$service.service" "/etc/systemd/system/datamoon-$service.service"
 done
+install -m 0644 "$AGENT_ROOT/ops/systemd/datamoon-mailer.service" /etc/systemd/system/datamoon-mailer.service
 install -m 0644 "$SERVER_ROOT/deploy/systemd/datamoon-server@.service" /etc/systemd/system/datamoon-server@.service
 install -m 0644 "$AGENT_ROOT/ops/datamoon-deploy.service" /etc/systemd/system/datamoon-deploy.service
 install -m 0755 "$AGENT_ROOT/ops/update_vm.sh" /usr/local/sbin/datamoon-update
@@ -77,5 +82,13 @@ systemctl disable --now datamoon-server.service 2>/dev/null || true
 systemctl disable --now datamoon-server@dungeon-2.service 2>/dev/null || true
 systemctl enable datamoon-api.service datamoon-auth.service datamoon-gateway.service \
   datamoon-server@overworld.service datamoon-server@dungeon-1.service \
-  datamoon-web.service
+  datamoon-mailer.service datamoon-web.service
+if command -v fail2ban-client >/dev/null 2>&1; then
+  install -m 0644 "$AGENT_ROOT/ops/fail2ban/filter.d/datamoon-nginx-rate-limit.conf" /etc/fail2ban/filter.d/datamoon-nginx-rate-limit.conf
+  install -m 0644 "$AGENT_ROOT/ops/fail2ban/jail.d/datamoon-web.local" /etc/fail2ban/jail.d/datamoon-web.local
+  systemctl enable --now fail2ban.service
+  fail2ban-client reload
+else
+  echo "Fail2ban is not installed; run ops/install_vm_security.sh." >&2
+fi
 echo "Connection configuration installed. Run datamoon-update to deploy and activate it."

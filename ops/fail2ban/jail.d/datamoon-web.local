@@ -1,0 +1,9 @@
+[datamoon-web-rate-limit]
+enabled = true
+port = http,https
+filter = datamoon-nginx-rate-limit
+logpath = /var/log/nginx/error.log
+backend = auto
+maxretry = 8
+findtime = 10m
+bantime = 15m

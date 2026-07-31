@@ -10,10 +10,11 @@ machine-readable examples such as `.env.example` and systemd unit files.
 - `/opt/datamoon/datamoon-online-gateway`: Godot WebSocket gateway, loopback `5100`.
 - `/opt/datamoon/datamoon-online-server`: Godot ENet workers.
 - `/opt/datamoon/datamoon-online-web`: web portal, loopback `3101`.
+- `datamoon-mailer`: isolated SES sender over `/run/datamoon-mailer/mailer.sock`.
 
 Active PBE systemd units are `datamoon-api`, `datamoon-auth`,
 `datamoon-gateway`, `datamoon-server@overworld`,
-`datamoon-server@dungeon-1` and `datamoon-web`. The legacy non-templated
+`datamoon-server@dungeon-1`, `datamoon-mailer` and `datamoon-web`. The legacy non-templated
 `datamoon-server.service` and `datamoon-server@dungeon-2` remain disabled to
 reduce resource usage during testing. The dungeon-2 environment template stays
 available for a future capacity increase.
@@ -45,6 +46,11 @@ available for a future capacity increase.
 - Web runs as the dedicated `datamoon-web` Unix account, not as the gameplay
   service account. Its systemd sandbox can read application code, write only its
   private state directory and open only loopback network connections.
+- Web never talks to SES directly. It submits one of three fixed transactional
+  templates over a group-restricted Unix socket. `datamoon-mailer` has no API,
+  database or session secret and is the only Web-side process allowed outbound
+  network access. It receives temporary AWS credentials through the EC2 role;
+  static AWS access keys are forbidden.
 - Web production startup requires `PUBLIC_ORIGIN` to exactly match its HTTPS
   origin. Session cookies use the `__Host-` prefix and the service state under
   `/var/lib/datamoon-web` contains encrypted, expiring server-side sessions.
@@ -172,6 +178,7 @@ defaults to a fail-closed posture when these variables are absent:
 ```env
 REGISTRATION_ENABLED=false
 MAINTENANCE_MODE=false
+TRANSACTIONAL_EMAIL_ENABLED=false
 ```
 
 `REGISTRATION_ENABLED=false` removes the registration link and returns `404`
@@ -180,6 +187,43 @@ account creation in the game client requires a coordinated Auth/Gateway/API
 control. `MAINTENANCE_MODE=true` keeps `/health` available but returns a public
 maintenance page with HTTP `503` and `Retry-After` for every user route. Restart
 `datamoon-web.service` after changing either value.
+
+Registration fails closed at startup if it is enabled while transactional
+e-mail is disabled. To activate account e-mail after SES is ready, set:
+
+```env
+TRANSACTIONAL_EMAIL_ENABLED=true
+DATAMOON_MAILER_SOCKET=/run/datamoon-mailer/mailer.sock
+AWS_REGION=us-east-1
+SES_FROM_EMAIL=no-reply@datamoononline.com.br
+SES_FROM_NAME=Datamoons Online
+```
+
+The SES identity, DKIM and custom MAIL FROM must all be `SUCCESS`. While SES is
+in sandbox, only verified recipients can receive mail; keep public registration
+closed. The EC2 role may only call `ses:SendEmail` for the verified domain and
+the exact From address. Never put AWS keys in either environment file.
+
+### Account E-mail Lifecycle
+
+The MySQL API owns verification, reset and e-mail-change state. Tokens contain
+32 random bytes, expire after 15 minutes, are single-use and are stored only as
+SHA-256 hashes. Password/e-mail changes increment `credential_version`, which
+invalidates every existing signed account session. An already-consumed gameplay
+ticket remains governed by the worker lease until disconnect. Public request
+responses are generic and do not reveal whether an account exists.
+
+Persistent emission limits are three requests per target per 24 hours, one per
+target per 15 minutes, three per source hash per 15 minutes and 100 actual
+deliveries globally per 24 hours. The mailer independently caps itself at 100
+deliveries/day and three per recipient/day. Nginx limits e-mail endpoints to
+three requests/minute. Token landing routes have Nginx access logging disabled
+because query strings contain credentials; application logs also exclude token,
+password, e-mail and raw IP values.
+
+E-mail-link `GET` only renders a confirmation page. Token consumption happens
+on same-origin `POST` with CSRF, preventing mail scanners from confirming or
+resetting accounts while previewing a link.
 
 The Web service emits structured `WARN` events named `login_ip_rate_limit`,
 `login_account_rate_limit` and `register_ip_rate_limit` when an application
@@ -204,10 +248,7 @@ account for 15 minutes after 8 invalid passwords in the same window. Public
 registration is disabled; if it is deliberately enabled later, its application
 limit is 5 attempts per IP per hour followed by a one-hour block.
 
-Application blocks return HTTP `429`. Requests rejected earlier by the current
-Nginx limit can return `503`; set an explicit Nginx `limit_req_status 429` in a
-reviewed configuration change before production so clients and monitoring can
-classify the event correctly. Check both protection layers:
+Application and Nginx blocks return HTTP `429`. Check both protection layers:
 
 ```bash
 journalctl -u datamoon-web.service --since "1 hour ago" --no-pager | grep 'rate_limit'
@@ -220,23 +261,27 @@ IP addresses; and repeated failures against a known username can intentionally
 deny that user access. AWS Security Groups restrict ports but do not provide
 HTTP brute-force detection.
 
-Before public production, connect the structured events to external operator
-notifications, add reviewed temporary edge/firewall blocking (for example,
-Fail2ban or an equivalent), place distributed rate limiting/WAF protection at
+Before public production, connect remaining structured events to external
+operator notifications and place distributed rate limiting/WAF protection at
 the public edge and use a shared limiter such as Redis if multiple Web instances
 are deployed. Review account-target limits so attackers cannot maintain an
 indefinite victim lockout. Never create automatic permanent IP bans: residential
 and mobile addresses are commonly shared or reassigned; prefer temporary,
 progressive blocks with an operator-visible audit trail.
 
-The following controls are intentionally deferred, not considered complete:
+Password recovery, e-mail verification and confirmed e-mail changes are
+implemented but are not release-approved until the schema is deployed, SES
+production access is granted and the complete manual matrix succeeds. Fail2ban
+configuration is versioned with 15-minute temporary bans after repeated Nginx
+rate-limit violations; install and validate it with:
 
-- Password recovery: use a random single-use token stored only as a hash, a
-  short expiry, session revocation after reset and a generic response that does
-  not reveal whether an e-mail exists.
-- E-mail validation: use a single-use expiring token and do not trust a new
-  address until ownership is confirmed. Requires a transactional mail provider
-  and bounce/abuse handling.
+```bash
+sudo /opt/datamoon/datamoon-online-agent/ops/install_vm_security.sh
+sudo fail2ban-client status datamoon-web-rate-limit
+```
+
+The following controls remain deferred:
+
 - Database backup: before production, implement automated encrypted MySQL
   backups, off-host retention, restricted restore credentials and a tested
   restore procedure. A backup that has not been restored in a drill is not a
@@ -248,9 +293,19 @@ The following controls are intentionally deferred, not considered complete:
   rewards, Guild and moderation without granting generic database access.
 - Online index scaling: replace deeper local character scans only when measured
   concurrency shows the current lookup cost is material.
-- Production edge hardening: external alert delivery, reviewed Fail2ban or
-  equivalent temporary blocking, WAF/rate limiting and shared limiter state
-  remain production work.
+- Production edge hardening: WAF/distributed rate limiting remains future work.
+  Redis/shared limiter state is needed only when more than one Web instance is
+  deployed; encrypted local sessions remain appropriate for the current single VM.
+
+### Manual Account Validation
+
+Run this matrix before enabling registration: new account receives verification,
+unverified login is rejected, confirmation works once, repeated/expired links
+fail, unknown reset requests look identical, password reset revokes old sessions,
+password change requires the current password, e-mail change applies only after
+confirmation, and all account sessions are revoked afterward. Confirm that
+`journalctl -u datamoon-web -u datamoon-mailer -u datamoon-api` contains only
+event names/user IDs and never token, password, address or raw IP data.
 
 Internal API tokens are high-entropy bearer secrets that identify Auth,
 Gateway, Server and Web to the loopback MySQL API. They are not player login
