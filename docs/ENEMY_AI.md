@@ -52,6 +52,9 @@ and `Death`.
 - Damage to any member activates `PANIC` for the whole spawn group.
 - Every member continuously flees from the attacking Datamoon while the target
   remains inside `engagement_radius`.
+- Each member keeps an individual short-lived flee target with angular/radial
+  variation and local separation, preventing the group from stacking at one
+  point while remaining inside the authored home circle.
 - New members finish spawn and inherit an active panic.
 - The group enters cooldown outside engagement range and calms after
   `calm_delay`.
