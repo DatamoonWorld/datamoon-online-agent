@@ -21,17 +21,18 @@ When deeper project context is needed, consult these files first:
 9. `docs/WORLD_BIBLE.md`
 10. `docs/LINK_SYSTEM.md`
 11. `docs/COMBAT_SYSTEM.md`
-12. `docs/ADVANTAGE_SYSTEM.md`
-13. `docs/ECONOMY.md`
-14. `docs/QUEST_DESIGN.md`
-15. `docs/DUNGEON_RULES.md`
-16. `docs/WORLD_EVENTS.md`
-17. `docs/SPECIES_DESIGN_GUIDE.md`
-18. `docs/DECISION_LOG.md`
-19. `docs/CODE_HEALTH.md`
-20. `docs/OPERATIONS.md`
-21. `docs/FIRST_BETA_ROADMAP.md`
-22. `docs/CHARACTER_CREATION.md`
+12. `docs/ENEMY_AI.md`
+13. `docs/ADVANTAGE_SYSTEM.md`
+14. `docs/ECONOMY.md`
+15. `docs/QUEST_DESIGN.md`
+16. `docs/DUNGEON_RULES.md`
+17. `docs/WORLD_EVENTS.md`
+18. `docs/SPECIES_DESIGN_GUIDE.md`
+19. `docs/DECISION_LOG.md`
+20. `docs/CODE_HEALTH.md`
+21. `docs/OPERATIONS.md`
+22. `docs/FIRST_BETA_ROADMAP.md`
+23. `docs/CHARACTER_CREATION.md`
 
 If this file is ever too brief for a decision, the files above win on detail.
 

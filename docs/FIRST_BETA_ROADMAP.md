@@ -58,7 +58,7 @@ uma metrica que justifique o custo.
 
 - sete quests iniciais e rewards idempotentes;
 - Moonlight Cavern, boss rastreado e retorno seguro;
-- Slimmoon e Nocmoon com behavior e combat profile data-driven;
+- Slimmoon e Nocmoon com personalidade de IA por especie, grupos por area e combat profile data-driven;
 - portais de mapa e dungeon data-driven;
 - poções autoritativas de 10% de HP/MP, arredondadas para cima;
 - projeteis e areas autoritativos;
@@ -106,9 +106,9 @@ destino e transferencia. O Client apenas apresenta opcoes e estado visual.
 
 ### Inimigos E Boss
 
-- Slimmoon de campo: `wild_easy`, passive, sem skills;
-- Nocmoon de campo: `wild_easy`, aggressive, sem skills;
-- Nocmoon de dungeon: `dungeon_easy`, aggressive, sem skills;
+- Slimmoon de campo: `wild_easy`, `slimmoon_coward`, sem skills;
+- Nocmoon de campo: `wild_easy`, `nocmoon_territorial`, sem skills;
+- Nocmoon de dungeon: `dungeon_easy`, `nocmoon_territorial`, sem skills;
 - boss: stats solo fixos, sem escala por quantidade da Party;
 - boss: HP x12, ATK x0.65, DEF x0.9 e attack speed 2.0;
 - boss: grace inicial de 1.8 s;
@@ -117,12 +117,10 @@ destino e transferencia. O Client apenas apresenta opcoes e estado visual.
 - conclusao depende da entidade exata do boss da instancia;
 - saida automatica ocorre 10 s depois da conclusao.
 
-Behavior e a unica autoridade da IA:
-
-- `aggressive`: detecta e avanca;
-- `passive`: ignora e foge quando atacado;
-- `defensive`: ignora e revida quando atacado;
-- `flee`: detecta e foge, mas revida quando atacado.
+`ai_behavior` seleciona a personalidade autoritativa da especie. Slimmoon usa
+panico coletivo ao receber dano; Nocmoon usa aggro territorial coletivo ao
+detectar ou receber dano. Estados e autoria estao definidos em
+`docs/ENEMY_AI.md`.
 
 ### Quests
 

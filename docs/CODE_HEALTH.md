@@ -91,7 +91,8 @@ Arquivos grandes atuais devem ser divididos por fronteira, nao por tamanho:
 
 - `movement_controller.gd`: input history, simulacao e apresentacao;
 - `portal_manager.gd`: catalogo, instancia e handoff;
-- `datamoon_enemy.gd`: IA, combate e replicacao;
+- `datamoon_enemy.gd`: entidade, configuracao de combate e rewards; decisao,
+  grupos, lifecycle e selecao de acao ficam nos componentes `enemy_ai`;
 - `inventory.gd`: uso, equipamento, rewards e operacoes;
 - handlers Go: agregado e use case.
 

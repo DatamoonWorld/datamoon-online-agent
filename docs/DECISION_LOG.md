@@ -189,6 +189,28 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
+## 2026-08-03 - Species enemy AI and spawn-group reactions
+
+Status: accepted
+
+Decision:
+- Enemy personality is selected by registered `ai_behavior`, not by the former
+  generic aggressive/passive behavior switch.
+- Runtime alarms belong to `space_id + area_id`; dungeon instances cannot share
+  targets or group state.
+- Slimmoon groups panic together after damage. Nocmoon groups acquire territorial
+  aggro together after detection or damage.
+- Lifecycle, group state, AI decisions and action animation states are separate.
+  Spawn and death block combat in both directions.
+- Behaviors return intentions only. Shared components own perception, movement,
+  combat selection and lifecycle, while the existing action FSM owns impact
+  timing.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-server`
+
 ## 2026-07-31 - Two-step authenticated credential changes
 
 Status: accepted

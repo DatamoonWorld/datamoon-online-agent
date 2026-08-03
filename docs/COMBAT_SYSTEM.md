@@ -213,19 +213,14 @@ Avoid overusing:
 
 ## Enemy Behavior Contract
 
-Enemy intent is defined only by the spawn `behavior`. Species templates do not
-carry a separate `hostile` flag.
+Enemy personality is selected by spawn `ai_behavior` and implemented by a
+registered species behavior. Per-area group state coordinates members without
+duplicating combat execution. Unknown ids use a defensive fallback and emit a
+server warning.
 
-| Behavior | Detection and reaction |
-| --- | --- |
-| `aggressive` | Detects nearby players, advances and attacks. |
-| `passive` | Ignores nearby players and flees when attacked. |
-| `defensive` | Ignores nearby players and fights the aggressor when attacked. |
-| `flee` | Detects and flees from nearby players, but fights the aggressor when attacked. |
-
-Unknown or absent values normalize to `passive`. Internal AI states such as
-`WANDER`, `CHASE`, `FLEE` and `RETURN` are runtime details and are not valid
-spawn behaviors.
+Lifecycle, group state, AI decisions and action states are separate contracts.
+Spawn and death block damage in both directions. Full architecture and the
+authoring procedure live in `docs/ENEMY_AI.md`.
 
 Enemy skill availability must be explicit:
 
