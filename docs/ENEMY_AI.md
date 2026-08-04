@@ -183,12 +183,11 @@ species behavior code.
 - Validate narrow passages with the largest enemy collision radius used there.
 - Navigation data is map content: visual map work must validate that chase,
   flee, wander and return paths do not cross blocked tiles.
-- The current Server scene contains provisional bounds for `digital_center`,
-  `moonlight_forest`, and `moonlight_cavern`. Before enemies spawn, the worker
-  bakes those bounds against collision layer 2 with a 12-pixel agent radius.
-  Each space has an isolated navigation layer so overlapping temporary
-  coordinates cannot connect. Replace this startup bake with authored polygons
-  when the final maps are ready.
+- The placeholder Moonlight Forest uses small authored navigation regions for
+  each current spawn group. Their layer and bounds are declared by spawn data;
+  targets outside a group's temporary region cancel aggro instead of pulling
+  enemies into map walls. Replace these provisional rectangles with authored
+  collision-aware polygons when the final map is ready.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
