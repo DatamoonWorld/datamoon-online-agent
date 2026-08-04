@@ -229,6 +229,51 @@ Repos affected:
 - `datamoon-online-server`
 - `datamoon-online-agent`
 
+## 2026-08-04 - Allied login position follows character authority
+
+Status: accepted
+
+Decision:
+- On a normal login, the active allied Datamoon starts at the character's
+  resolved safe login position instead of restoring its separately persisted
+  follower coordinate.
+- The Datamoon coordinate remains persistable for checkpoints and handoffs, but
+  it is not an independent login anchor because the active companion belongs to
+  the character's movement session.
+- Portal and worker handoff flows continue to place both entities through the
+  authoritative transition destination and keep their existing Spawn lifecycle.
+
+Reason:
+- A follower coordinate can lag behind the character or resolve against stale
+  world collision. Making it the first direct-control origin caused repeated
+  reconciliation pulls until control had been cycled once.
+
+Repos affected:
+- `datamoon-online-server`
+- `datamoon-online-agent`
+
+## 2026-08-04 - Enemy death is independent from reward eligibility
+
+Status: accepted
+
+Decision:
+- An enemy that reaches zero HP always enters its Death lifecycle and is
+  removed normally, even when no eligible attacker remains online.
+- Reward eligibility controls only reward and quest-credit delivery. It must
+  never restore enemy HP or call the spawn reset path as a fallback.
+- Disconnecting a character removes its entries from live enemy damage ledgers.
+  If that character owned first-hit attribution, the earliest remaining hit
+  becomes first hit.
+
+Reason:
+- Runtime death is authoritative combat state, while rewards are an optional
+  consequence. Coupling both allowed stale disconnected-session attribution to
+  revive an enemy at full HP when a later damage source completed the kill.
+
+Repos affected:
+- `datamoon-online-server`
+- `datamoon-online-agent`
+
 ## 2026-07-31 - Two-step authenticated credential changes
 
 Status: accepted
