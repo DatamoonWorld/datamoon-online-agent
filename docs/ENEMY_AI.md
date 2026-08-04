@@ -82,6 +82,9 @@ profile timeout and emits a counter plus structured warning.
 - Each member keeps an individual short-lived flee target with angular/radial
   variation and local separation, preventing the group from stacking at one
   point while remaining inside the authored home circle.
+- The preferred flee radius and orbit side are selected once per panic. Repath
+  updates preserve them so an enemy cannot alternate between inward and
+  tangential movement at the home boundary.
 - The individual alert enters cooldown outside engagement range and calms after
   `calm_delay`.
 - Flee targets are constrained to the authored home circle; `reset_distance` is
@@ -180,9 +183,12 @@ species behavior code.
 - Validate narrow passages with the largest enemy collision radius used there.
 - Navigation data is map content: visual map work must validate that chase,
   flee, wander and return paths do not cross blocked tiles.
-- The current Server scene contains provisional regions for `digital_center`,
-  `moonlight_forest`, and `moonlight_cavern`. They cover the active coordinates
-  but must be reshaped around the final obstacles whenever those maps change.
+- The current Server scene contains provisional bounds for `digital_center`,
+  `moonlight_forest`, and `moonlight_cavern`. Before enemies spawn, the worker
+  bakes those bounds against collision layer 2 with a 12-pixel agent radius.
+  Each space has an isolated navigation layer so overlapping temporary
+  coordinates cannot connect. Replace this startup bake with authored polygons
+  when the final maps are ready.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
