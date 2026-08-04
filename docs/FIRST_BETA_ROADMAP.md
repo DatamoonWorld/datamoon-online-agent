@@ -410,6 +410,10 @@ deve entrar silenciosamente na v0.04.
 - resume curto de sessao no mesmo worker implementado; falta validar queda em
   overworld, combate, Party e dungeon. Backup/restauracao e medicao de saturacao
   ficam para a preparacao de producao.
+- IA de inimigos usa perfis data-driven, panic individual para Slimmoon, aggro
+  coletivo para Nocmoon, soft leash sem cura/snap e retorno emergencial
+  observavel. Falta ajustar as malhas finais aos obstaculos dos mapas e validar
+  flee, chase, sleep, retorno e dungeon em jogo.
 
 ## Divisao Cena, Codigo E Dados
 

@@ -35,8 +35,9 @@ steering.
 
 Calm enemies with no player Datamoon within 1024 pixels suspend perception,
 decisions and pathfinding. They recheck through the world chunk index every
-750-1250 ms. Aggro groups never sleep, and movement still runs every physics
-tick while an enemy is active; only path creation is rate-limited.
+750-1250 ms. Sleeping enemies no longer call `move_and_slide()` after their
+velocity is already zero. Active enemies still move every physics tick; only
+path creation and local separation sampling are rate-limited.
 Prometheus exposes `enemy_navigation_paths_total`,
 `enemy_navigation_budget_deferred_total`, `enemy_ai_sleep_total`, and
 `enemy_ai_wake_total` for capacity validation.
@@ -54,31 +55,34 @@ bilateral combat for the authored timing, while the client only presents the
 replicated state. Species with zero-frame lifecycle timing transition
 immediately.
 
-Group states are `CALM`, `PANIC`, `AGGRO` and `COOLDOWN`. Group state belongs to
-one `space_id + area_id`, so dungeon instances never share alarms.
+Alert states are `CALM`, `PANIC`, `AGGRO` and `COOLDOWN`. An AI profile declares
+`alert_scope` as `individual` or `group`. Group state belongs to one
+`space_id + area_id`, so dungeon instances never share alarms. A returning
+member never clears the alert of unrelated members.
 
 AI decisions are `HOLD`, `WANDER`, `CHASE`, `FLEE` and `RETURN_HOME`. The action
 FSM remains independent and contains `Idle`, `Move`, `Attack`, `Skill`, `Spawn`
 and `Death`.
 
-Returning across the hard leash enters an internal Evade phase. The encounter
-alarm is cleared, the enemy returns home with full resources, remains unable to
-deal or receive damage for one second, and only then resumes wandering. Evade is
-an authoritative AI phase, not a separate Client animation state.
+Crossing only the soft wander boundary steers the enemy back through navigation
+without healing or teleporting. Crossing the hard leash enters an internal
+Evade phase. The enemy returns home with full resources, remains unable to deal
+or receive damage for one second, and then immediately selects a wander target.
+Path stalls request a new path; an emergency snap is allowed only after the
+profile timeout and emits a counter plus structured warning.
 
 ## Current Personalities
 
 ### Slimmoon
 
 - Calm Slimmoons wander and ignore nearby players.
-- Damage to any member activates `PANIC` for the whole spawn group.
-- Every member continuously flees from the attacking Datamoon while the target
-  remains inside `engagement_radius`.
+- Damage activates `PANIC` only for the attacked Slimmoon.
+- The attacked member flees while the target remains inside
+  `engagement_radius`; nearby Slimmoons keep their own state.
 - Each member keeps an individual short-lived flee target with angular/radial
   variation and local separation, preventing the group from stacking at one
   point while remaining inside the authored home circle.
-- New members finish spawn and inherit an active panic.
-- The group enters cooldown outside engagement range and calms after
+- The individual alert enters cooldown outside engagement range and calms after
   `calm_delay`.
 - Flee targets are constrained to the authored home circle; `reset_distance` is
   only the hard safety leash.
@@ -100,8 +104,10 @@ an authoritative AI phase, not a separate Client animation state.
   "id": "species_area_id",
   "type": "SpeciesName",
   "ai_behavior": "species_behavior_id",
+  "ai_profile": "species_behavior_id",
   "spawn_pos": [0, 0],
   "radius": 96,
+  "wander_range": 160,
   "engagement_radius": 160,
   "reset_distance": 320,
   "calm_delay": 3.0,
@@ -112,7 +118,8 @@ an authoritative AI phase, not a separate Client animation state.
 }
 ```
 
-- `radius`: circular spawn and wander region.
+- `radius`: circular spawn distribution only.
+- `wander_range`: soft roaming boundary. It may be larger than the spawn radius.
 - `AwarenessArea`: natural detection radius authored in the enemy scene.
 - `engagement_radius`: distance from the area center that retains group alarm.
 - `reset_distance`: absolute hard leash; it must be at least the engagement
@@ -123,6 +130,13 @@ an authoritative AI phase, not a separate Client animation state.
   another one. Longer intervals produce less abrupt path changes.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
+- `ai_profile`: entry in `enemy_ai_profiles.json`; defaults to `ai_behavior`.
+  Per-area `ai` values override that profile.
+
+AI profiles own alert scope, perception cadence, return watchdogs, emergency
+timeout, evade time, sleep checks, soft-boundary ratios, flee steering and
+lightweight movement separation. Values remain data-driven without duplicating
+species behavior code.
 
 ## Adding A New Species AI
 
@@ -148,6 +162,8 @@ an authoritative AI phase, not a separate Client animation state.
 - Use `worldstate.get_datamoons_near()` for bounded perception.
 - Behavior scripts must remain stateless; mutable runtime state belongs to the
   brain or spawn group.
+- Use individual alerts for isolated reactions and group alerts only when the
+  species design explicitly calls for social aggro.
 - Reward contribution and combat threat are separate concepts.
 - Death presentation and world removal follow authored lifecycle time and never
   wait for reward persistence. The hidden entity remains alive only until its
@@ -169,3 +185,7 @@ an authoritative AI phase, not a separate Client animation state.
   but must be reshaped around the final obstacles whenever those maps change.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
+
+Set `EnemyBrain.debug_draw` only in a local graphical Server run to display the
+soft wander boundary, hard leash and current navigation target. Keep it disabled
+in headless workers.

@@ -614,3 +614,24 @@ Repos affected:
 - `datamoon-online-client`
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
+
+## 2026-08-04 - Data-driven enemy alerts and soft leash
+
+Status: accepted
+
+Decision:
+- Enemy behavior remains Server-authoritative and hybrid: reusable components
+  in scenes, tuning in JSON profiles, runtime decisions in scripts.
+- Slimmoon panic is individual; Nocmoon territorial aggro remains group-scoped.
+- One returning member cannot clear the alert of an entire spawn group.
+- Spawn radius and wander range are independent. Exiting the soft range steers
+  inward; only hard-leash recovery may reset resources.
+- Path stalls repath first. Emergency snap is an eight-second safety fallback
+  with structured warning and metrics.
+- Calm sleeping enemies stop unnecessary physics movement, while active
+  wander/chase uses cached lightweight separation instead of global avoidance.
+- Final obstacle-aware navigation polygons remain map-authoring work.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-server`
