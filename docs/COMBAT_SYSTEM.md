@@ -527,8 +527,8 @@ Enemy removal derives exclusively from `combat_timing.death`. At 12 FPS,
 `total_frames: 0` means that no death animation exists and removal is immediate.
 Overworld respawn timing starts after removal, so the effective time is the
 death frame duration plus `respawn_seconds`. The Server replicates the resolved
-death duration and the Client uses it for the death fade; no independent visual
-delay is allowed.
+death duration and the Client keeps the entity fully opaque while presenting
+the authored death animation; no independent visual delay is allowed.
 
 Authoritative HP changes carry a monotonic `hp_version`. Clients must ignore an
 HP snapshot or combat event whose version is older than the last version

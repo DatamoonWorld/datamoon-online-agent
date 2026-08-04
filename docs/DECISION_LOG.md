@@ -211,6 +211,24 @@ Repos affected:
 - `datamoon-online-client`
 - `datamoon-online-server`
 
+## 2026-08-03 - Allied spawn presentation and opaque death
+
+Status: accepted
+
+Decision:
+- Allied Datamoons appear directly in `ACTIVE` on login. Recovery from death,
+  portal entry and worker handoff entry use their Spawn animation.
+- Enemy spawn lifecycle remains unchanged and continues to block combat.
+- Death presentation uses the authored animation without changing sprite
+  opacity.
+- Flee destination retention is spawn-data-driven so coward species can change
+  course less abruptly without changing their movement speed.
+
+Repos affected:
+- `datamoon-online-client`
+- `datamoon-online-server`
+- `datamoon-online-agent`
+
 ## 2026-07-31 - Two-step authenticated credential changes
 
 Status: accepted
@@ -250,6 +268,28 @@ Decision:
 Repos affected:
 - `datamoon-online-agent`
 - `datamoon-online-client`
+- `datamoon-online-server`
+
+## 2026-08-03 - Persistent world location
+
+Status: accepted
+
+Decision:
+- Character location persistence stores `space_id`, `posx` and `posy` as one
+  authoritative location. A normal reconnect restores the same registered
+  overworld map and coordinates.
+- Runtime dungeon instance IDs are never durable character locations. Dungeon
+  entry, checkpoints and disconnects persist the registered overworld return
+  map and position instead.
+- Missing, removed or invalid map IDs fall back to `digital_center` at its safe
+  default position rather than exposing an unloadable space to the Client.
+- Login activates an allied Datamoon directly without Spawn. Recovery from
+  death and completed portal/worker handoff loading continue to use Spawn;
+  death in a registered overworld map keeps that map.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
 ## 2026-07-25 - Hybrid world labels and quest completion contracts

@@ -32,10 +32,11 @@ blocked in every phase except `ACTIVE`; hitbox, hurtbox and body collision are
 disabled during spawn/death.
 
 Allied Datamoons use a smaller `DatamoonPetLifecycle` with `SPAWNING`, `ACTIVE`
-and `DYING`. Spawn runs on login, return from death and portal loading. The
-server blocks movement and bilateral combat for the authored timing, while the
-client only presents the replicated state. Species with zero-frame lifecycle
-timing transition immediately.
+and `DYING`. Login activates the companion directly; return from death and
+completed portal/handoff loading use Spawn. The server blocks movement and
+bilateral combat for the authored timing, while the client only presents the
+replicated state. Species with zero-frame lifecycle timing transition
+immediately.
 
 Group states are `CALM`, `PANIC`, `AGGRO` and `COOLDOWN`. Group state belongs to
 one `space_id + area_id`, so dungeon instances never share alarms.
@@ -84,6 +85,8 @@ and `Death`.
   "reset_distance": 320,
   "calm_delay": 3.0,
   "move_speed": 80,
+  "flee_retarget_min_seconds": 1.2,
+  "flee_retarget_max_seconds": 1.8,
   "max_mobs": 5
 }
 ```
@@ -94,6 +97,9 @@ and `Death`.
 - `reset_distance`: absolute hard leash; it must be at least the engagement
   radius.
 - `calm_delay`: hysteresis before clearing an alarm after the target leaves.
+- `flee_retarget_min_seconds` and `flee_retarget_max_seconds`: optional interval
+  during which a fleeing enemy keeps its individual destination before choosing
+  another one. Longer intervals produce less abrupt path changes.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
 

@@ -101,6 +101,20 @@ The updater intentionally aborts on dirty repositories. Schema migrations must
 remain backward-compatible because code rollback cannot undo a destructive DB
 migration.
 
+Character world persistence requires `dm_characters.space_id`. A clean install
+gets the column from `001_create_characters.sql`. For an existing PBE database,
+apply this additive change before deploying the API/Server release that reads
+the column:
+
+```sql
+ALTER TABLE dm_characters
+  ADD COLUMN space_id VARCHAR(128) NOT NULL DEFAULT 'digital_center' AFTER posy;
+```
+
+Existing rows intentionally start in `digital_center`; after the release, the
+next runtime checkpoint or clean logout records each character's current
+registered overworld map. Do not persist `dungeon:*` instance IDs manually.
+
 The beta dungeon day resets at midnight in Brasilia (`03:00 UTC`). Existing VM
 environment files override application defaults, so both
 `datamoon-api.env` and `datamoon-server.env` must contain:
