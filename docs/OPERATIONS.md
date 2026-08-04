@@ -301,10 +301,10 @@ and mobile addresses are commonly shared or reassigned; prefer temporary,
 progressive blocks with an operator-visible audit trail.
 
 Password recovery, e-mail verification and confirmed e-mail changes are
-implemented but are not release-approved until the schema is deployed, SES
-production access is granted and the complete manual matrix succeeds. Fail2ban
-configuration is versioned with 15-minute temporary bans after repeated Nginx
-rate-limit violations; install and validate it with:
+implemented, deployed and manually validated. SES production access, domain
+identity, DKIM and custom MAIL FROM were confirmed in 2026-08. Fail2ban uses
+15-minute temporary bans after repeated Nginx rate-limit violations and is
+installed and validated with:
 
 ```bash
 sudo /opt/datamoon/datamoon-online-agent/ops/install_vm_security.sh

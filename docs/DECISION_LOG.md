@@ -337,6 +337,69 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-server`
 
+## 2026-08-04 - One-shot space readiness
+
+Status: accepted
+
+Decision:
+- A same-worker map transition creates one server-owned pending readiness record
+  containing the expected `space_id` and a 30-second deadline.
+- The first matching Client acknowledgement consumes that record before the
+  allied Spawn lifecycle starts. Unsolicited, mismatched and replayed readiness
+  messages cannot restart Spawn or disable combat collisions.
+- Failure to acknowledge before the deadline disconnects the peer rather than
+  leaving an invulnerable entity in the world.
+- Teleports that remain in the same `space_id` start their timed Spawn directly;
+  they never wait for a scene-loading acknowledgement that the Client will not
+  emit.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-server`
+
+## 2026-08-04 - Enemy navigation, evade and non-blocking death
+
+Status: accepted
+
+Decision:
+- Enemy movement requires `NavigationAgent2D` and synchronized authoritative map
+  navigation. Repath is adaptive by activity, jittered across frames and capped
+  at 16 new paths per worker physics frame. Calm enemies outside a 1024-pixel
+  player radius suspend AI and recheck through the chunk index at a distributed
+  interval. Missing navigation halts the enemy and reports a configuration
+  error; direct steering is not a rollout fallback.
+- Godot avoidance is disabled by default; species separation remains explicit
+  and bounded so pathfinding does not introduce an all-agent CPU cost.
+- Hard-leash return clears group threat and enters one second of authoritative
+  Evade after restoring the enemy at home with full HP/MP.
+- Death lifecycle, worldstate removal and respawn scheduling never wait for the
+  persistence API. Reward delivery remains idempotent, and the hidden enemy node
+  is retained only while that asynchronous operation resolves.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-server`
+
+## 2026-08-04 - Same-worker short session resume
+
+Status: implemented; manual validation pending
+
+Decision:
+- An unexpected gameplay disconnect preserves the authoritative character,
+  Datamoon, Party and dungeon membership for 30 seconds on the same worker.
+- A rotating opaque token is held only in memory, has a 60-second rolling TTL,
+  is claimed atomically and consumed once. Login tickets are never reused.
+- The disconnected entity is stopped but remains vulnerable. A successful
+  rebind changes the control epoch and sends a fresh world baseline plus
+  inventory, equipment, HUD, social, dungeon and cooldown snapshots.
+- Explicit logout, handoff, durable lease loss, timeout and worker shutdown use
+  definitive cleanup. Worker crash recovery remains outside this feature.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-server`
+
 ## 2026-07-25 - Hybrid world labels and quest completion contracts
 
 Status: accepted

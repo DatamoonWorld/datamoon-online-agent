@@ -24,6 +24,22 @@ DatamoonEnemy
 `EnemyBrain` turns species decisions into movement intentions. Behaviors never
 deal damage directly. `EnemyCombatController` chooses skill, basic attack or
 approach, while the existing action FSM owns animation timing and impact windows.
+Movement requires a reusable `NavigationAgent2D` and synchronized authoritative
+navigation regions. Repath cadence is adaptive: 100-180 ms for close pursuit,
+250-400 ms for distant pursuit, 150-250 ms while fleeing, 200-300 ms while
+returning, and 750-1000 ms while wandering. Jitter distributes work across
+frames, and the worker admits at most 16 new paths per physics frame. Avoidance
+remains disabled by default to bound CPU cost. Missing navigation halts the
+enemy and reports one configuration error instead of silently using direct
+steering.
+
+Calm enemies with no player Datamoon within 1024 pixels suspend perception,
+decisions and pathfinding. They recheck through the world chunk index every
+750-1250 ms. Aggro groups never sleep, and movement still runs every physics
+tick while an enemy is active; only path creation is rate-limited.
+Prometheus exposes `enemy_navigation_paths_total`,
+`enemy_navigation_budget_deferred_total`, `enemy_ai_sleep_total`, and
+`enemy_ai_wake_total` for capacity validation.
 
 ## State Layers
 
@@ -44,6 +60,11 @@ one `space_id + area_id`, so dungeon instances never share alarms.
 AI decisions are `HOLD`, `WANDER`, `CHASE`, `FLEE` and `RETURN_HOME`. The action
 FSM remains independent and contains `Idle`, `Move`, `Attack`, `Skill`, `Spawn`
 and `Death`.
+
+Returning across the hard leash enters an internal Evade phase. The encounter
+alarm is cleared, the enemy returns home with full resources, remains unable to
+deal or receive damage for one second, and only then resumes wandering. Evade is
+an authoritative AI phase, not a separate Client animation state.
 
 ## Current Personalities
 
@@ -128,5 +149,23 @@ and `Death`.
 - Behavior scripts must remain stateless; mutable runtime state belongs to the
   brain or spawn group.
 - Reward contribution and combat threat are separate concepts.
+- Death presentation and world removal follow authored lifecycle time and never
+  wait for reward persistence. The hidden entity remains alive only until its
+  idempotent reward operation finishes.
 - Add new decisions/components when a capability is reusable; do not grow a
   species script into a second `DatamoonEnemy`.
+
+## Map Navigation Authoring
+
+- Prefer navigation polygons authored in the map TileSet for ordinary world
+  tiles, or a `NavigationRegion2D` for irregular walkable geometry.
+- Bake only walkable ground and exclude walls, props and portal blockers.
+- Keep navigation regions in the same world as the authoritative enemy nodes.
+- Validate narrow passages with the largest enemy collision radius used there.
+- Navigation data is map content: visual map work must validate that chase,
+  flee, wander and return paths do not cross blocked tiles.
+- The current Server scene contains provisional regions for `digital_center`,
+  `moonlight_forest`, and `moonlight_cavern`. They cover the active coordinates
+  but must be reshaped around the final obstacles whenever those maps change.
+- A new map is incomplete until its authoritative navigation region is present;
+  enemies deliberately stop and report a configuration error without one.

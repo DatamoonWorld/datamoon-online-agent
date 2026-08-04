@@ -397,15 +397,19 @@ deve entrar silenciosamente na v0.04.
 
 ### Producao
 
-- recuperacao de senha, validacao e alteracao de e-mail implementadas; falta
-  deploy, acesso de producao do SES e validacao manual completa;
+- recuperacao de senha, validacao e alteracao de e-mail implementadas,
+  publicadas e validadas manualmente; acesso de producao do SES confirmado;
 - backup automatico e restauracao testada;
 - alarmes essenciais CloudWatch/SNS configurados; ampliar somente por necessidade;
-- Grafana/Prometheus;
-- Fail2ban versionado e pendente de instalacao/validacao na VM; WAF futuro;
+- metricas internas Prometheus ainda precisam de coleta e alertas externos;
+- Nginx rate limit e Fail2ban instalados e validados na VM; WAF continua futuro
+  e condicionado a exposicao/escala que justifique o custo;
 - rotacao operacional de credenciais;
 - ferramenta administrativa para consultas de auditoria;
-- teste de carga com metas definidas.
+- teste de carga com metas definidas sera executado durante o beta;
+- resume curto de sessao no mesmo worker implementado; falta validar queda em
+  overworld, combate, Party e dungeon. Backup/restauracao e medicao de saturacao
+  ficam para a preparacao de producao.
 
 ## Divisao Cena, Codigo E Dados
 

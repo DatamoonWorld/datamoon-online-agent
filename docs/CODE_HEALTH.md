@@ -230,6 +230,39 @@ Metricas prioritarias:
 - handoff por resultado;
 - reconciliacao por distancia aplicada.
 
+## Baseline Para Producao Media
+
+O runtime possui a estrutura necessaria para uma producao media: interest por
+chunk e `space_id`, snapshot limitado por peer, backpressure da API, pool MySQL
+configuravel, drain gracioso, metricas Prometheus e deploy coordenado.
+
+A simulacao de inimigos tambem possui repath adaptativo, limite global de 16
+novos caminhos por physics frame, percepcao indexada por chunk e suspensao de IA
+fora do raio de 1024 pixels de um Datamoon de jogador. Caminhos, adiamentos por
+orcamento, sleeps e wakes possuem metricas proprias.
+
+Isso nao elimina os gates de producao:
+
+1. Ajustar a navegacao autoritativa junto das colisoes finais de cada mapa
+   durante a finalizacao visual.
+2. Fazer durante o beta teste de carga com players, inimigos, snapshots,
+   projeteis, latencia, perda de pacotes e backpressure da API.
+3. Implementar resume de sessao curto, de uso unico e vinculado ao worker para quedas
+   inesperadas.
+4. Instalar futuramente backup MySQL criptografado fora da VM e validar uma
+   restauracao antes da producao definitiva.
+5. Ligar metricas internas de saude, seguranca e saturacao a alertas externos.
+6. Adotar rate limit e sessoes compartilhados apenas quando Web ou Gateway
+   tiverem mais de uma instancia.
+
+O fluxo de contas, a borda atual de instancia unica e o acesso de producao do
+SES foram validados em 2026-08-04. CloudWatch/SNS ja cobre os alarmes essenciais
+da VM; a pendencia de observabilidade e coletar as metricas internas dos
+servicos, nao repetir a configuracao basica da AWS.
+
+Redis nao e requisito do Web atual em instancia unica. Pool de projeteis e VFX
+continua sendo uma decisao guiada por profiler, nao uma complexidade antecipada.
+
 ## Gate De Qualidade
 
 Antes de publicar uma alteracao:

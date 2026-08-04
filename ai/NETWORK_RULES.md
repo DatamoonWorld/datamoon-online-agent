@@ -118,6 +118,24 @@ Always consider:
 
 When a change can break compatibility, document it and deploy carefully.
 
+## Short Session Resume
+
+- Unexpected gameplay disconnects may retain the authoritative entity for 30
+  seconds on the same worker.
+- The entity remains stopped and vulnerable; resume cannot be used as combat
+  logout or invulnerability.
+- Resume uses a rotating 256-bit opaque token kept only in Server memory. It is
+  distinct from the login ticket, valid for at most 60 seconds, reserved by the
+  first claimant, consumed once, and never logged.
+- Successful resume atomically rebinds the old peer to the new peer, increments
+  the control epoch, clears prediction history, forces a reliable baseline and
+  refreshes persistent/social UI snapshots.
+- Explicit logout, handoff, lease loss, grace expiration and graceful shutdown
+  invalidate resume. Worker restart is intentionally not recovered by this
+  first version.
+- Failed resume returns to the normal login flow; it never weakens ticket or
+  durable-lease validation.
+
 ---
 
 ## Chunk And Interest Rules
