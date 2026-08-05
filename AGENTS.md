@@ -33,6 +33,7 @@ When deeper project context is needed, consult these files first:
 21. `docs/OPERATIONS.md`
 22. `docs/FIRST_BETA_ROADMAP.md`
 23. `docs/CHARACTER_CREATION.md`
+24. `docs/LEGAL_AND_PRIVACY.md`
 
 If this file is ever too brief for a decision, the files above win on detail.
 
