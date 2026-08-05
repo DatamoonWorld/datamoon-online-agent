@@ -635,3 +635,24 @@ Decision:
 Repos affected:
 - `datamoon-online-agent`
 - `datamoon-online-server`
+
+## 2026-08-05 - First-party account support desk
+
+Status: accepted
+
+Decision:
+- Support is an authenticated first-party portal backed by scoped MySQL API
+  operations, not generic database access or inbound SES processing.
+- Players can access only their own tickets. Account-level `is_admin` grants the
+  administrative queue and state controls.
+- SES sends event notifications containing a portal link; replies remain inside
+  the authenticated site. Attachments and public anonymous tickets are deferred.
+- Ticket content is persistent operational data but is never duplicated into
+  journald or generic audit metadata. State changes have a separate event trail.
+- Web pages remain server-rendered. Domain CSS is modular in source and bundled
+  into one response; JavaScript is added only for interactions that require it.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-mysqlapi`
+- `datamoon-online-web`

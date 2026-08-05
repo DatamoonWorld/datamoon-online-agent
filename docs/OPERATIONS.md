@@ -213,6 +213,7 @@ DATAMOON_MAILER_SOCKET=/run/datamoon-mailer/mailer.sock
 AWS_REGION=us-east-1
 SES_FROM_EMAIL=no-reply@datamoononline.com.br
 SES_FROM_NAME=Datamoons Online
+SUPPORT_NOTIFICATION_EMAIL=datamoon.game+support@gmail.com
 ```
 
 The SES identity, DKIM and custom MAIL FROM must all be `SUCCESS`. While SES is
@@ -242,7 +243,9 @@ responses are generic and do not reveal whether an account exists.
 Persistent emission limits are three requests per target per 24 hours, one per
 target per 15 minutes, three per source hash per 15 minutes and 100 actual
 deliveries globally per 24 hours. The mailer independently caps itself at 100
-deliveries/day and three per recipient/day. Nginx limits e-mail endpoints to
+deliveries/day, ten account messages per recipient/day and 50 support messages
+per recipient/day. Support traffic never consumes the recipient quota reserved
+for account security. Nginx limits e-mail endpoints to
 three requests/minute. Token landing routes have Nginx access logging disabled
 because query strings contain credentials; application logs also exclude token,
 password, e-mail and raw IP values.
@@ -255,6 +258,54 @@ database address changes only after the new-address link is confirmed.
 E-mail-link `GET` only renders a confirmation page. Token consumption happens
 on same-origin `POST` with CSRF, preventing mail scanners from confirming or
 resetting accounts while previewing a link.
+
+### Support Desk
+
+The account portal includes an authenticated support desk. The MySQL API is the
+authority for ticket ownership, staff authorization and every state mutation.
+The Web service renders forms, validates same-origin CSRF and calls only scoped
+support routes. A normal account can list, read and reply only to its own
+tickets. Accounts mirrored with `dm_users.is_admin=1` in the game database see
+the administrative queue and can update status, priority and assignment.
+
+Ticket IDs contain 64 random bits and use `DM-XXXXXXXXXXXXXXXX`. New tickets are
+limited to five per account per 24 hours and replies to ten per account per
+minute. Subjects contain 4-120 bytes, messages contain 2-4096 bytes and
+attachments are intentionally unavailable. A response carries at most the 12
+latest messages so the existing 64 KiB Web/API contract cannot be exceeded.
+The portal indicates when older history exists.
+
+Support content is stored only in `dm_support_messages`. Journald receives the
+ticket ID, actor user ID, role, action, state and result, never message bodies or
+e-mail addresses. `dm_support_events` stores state/priority changes separately
+from conversation content. There is no automatic deletion during beta; define
+the legal/privacy retention period before public production, then delete only
+closed tickets in bounded batches. Cascading foreign keys remove their messages
+and events together.
+
+SES sends notifications but does not receive ticket replies. Every message
+links back to `/support/ticket`, where the authenticated player responds. New
+tickets and player replies notify `SUPPORT_NOTIFICATION_EMAIL`; administrator
+replies and state changes notify the account's current e-mail. A mail failure is
+logged without rolling back the already-persisted ticket action.
+
+The Web remains server-rendered. Shared account styles stay in `account.css`,
+support-specific styles stay in `support.css`, and the router concatenates them
+into one cached `/styles.css` response. Pages do not receive JavaScript unless a
+future interaction genuinely requires client-side behavior.
+
+Validate manually with one normal and one admin account:
+
+- create up to one ticket in each category and confirm ownership isolation;
+- confirm another normal account receives `404` for the ticket ID;
+- reply as player and observe `waiting_support`;
+- reply as admin and observe `waiting_player` plus an account notification;
+- change priority, assign the ticket, resolve, close and confirm closed replies
+  return `409`;
+- confirm the sixth ticket in 24 hours and eleventh reply in one minute return
+  `429`;
+- inspect `journalctl -u datamoon-web -u datamoon-mailer -u datamoon-api` and
+  verify that message content and e-mail addresses are absent.
 
 The Web service emits structured `WARN` events named `login_ip_rate_limit`,
 `login_account_rate_limit` and `register_ip_rate_limit` when an application

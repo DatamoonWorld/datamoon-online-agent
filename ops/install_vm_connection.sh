@@ -73,6 +73,7 @@ ensure_env_default "$ENV_DIR/datamoon-web.env" DATAMOON_MAILER_SOCKET /run/datam
 ensure_env_default "$ENV_DIR/datamoon-web.env" AWS_REGION us-east-1
 ensure_env_default "$ENV_DIR/datamoon-web.env" SES_FROM_EMAIL no-reply@datamoononline.com.br
 ensure_env_default "$ENV_DIR/datamoon-web.env" SES_FROM_NAME 'Datamoons Online'
+ensure_env_default "$ENV_DIR/datamoon-web.env" SUPPORT_NOTIFICATION_EMAIL datamoon.game+support@gmail.com
 
 if test ! -e "$ENV_DIR/datamoon-api-secrets.env"; then
   "$AGENT_ROOT/ops/generate_vm_secrets.sh"

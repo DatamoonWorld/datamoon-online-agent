@@ -199,8 +199,10 @@ delta, resulting value and UTC timestamp when those fields apply.
 
 Do not write frame, movement, combat tick, heartbeat, ordinary accepted chat,
 Party presence or worker health events to MySQL audit tables. Those belong in
-structured service logs and metrics. Never persist passwords, tokens, tickets or
-chat content in audit metadata.
+structured service logs and metrics. Never persist passwords, tokens,
+authentication/handoff tickets or chat content in audit metadata. Support case
+content belongs only to its dedicated tables; generic logs and audits may
+contain only the non-secret public case ID.
 
 Audit and idempotency records use `DATAMOON_AUDIT_RETENTION_DAYS`, defaulting to
 180 days in every environment including PBE. Cleanup must run in bounded batches

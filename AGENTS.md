@@ -93,7 +93,8 @@ Use these defaults unless the code in the target folder clearly establishes a ne
   mutations, with a 180-day default retention even in PBE. New sensitive
   features must define audit and cleanup behavior before release.
 - Keep movement, combat ticks, presence, heartbeat and ordinary chat out of
-  database audits. Never record passwords, tokens, tickets or chat content.
+  database audits. Never record passwords, tokens, authentication/handoff
+  tickets or chat content. A support case may log only its non-secret public ID.
 
 ## Implementation Checklist
 
