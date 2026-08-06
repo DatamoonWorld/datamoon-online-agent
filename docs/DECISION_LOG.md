@@ -295,6 +295,29 @@ Repos affected:
 - `datamoon-online-mysqlapi`
 - `datamoon-online-web`
 
+## 2026-08-06 - Public Moonpedia catalog
+
+Status: accepted
+
+Decision:
+- The public Datamoon encyclopedia is named Moonpedia and uses dynamic pages at
+  `/moonpedia/{sprite}`.
+- Canonical stats and skills remain in the Server Datamoon JSON files. The MySQL
+  API embeds a synchronized read-only copy and exposes sanitized data only to
+  the Web service.
+- Moonpedia numbering follows the insertion order of `datamoon_types.json`.
+  Per-Datamoon metadata records that stable position, while `enabled` controls
+  whether an entry is public. Missing art therefore does not renumber entries.
+- The Web renders base stats, per-level increments, levels 50 and 100, plus
+  skill base power by skill level. Runtime combat modifiers are explicitly not
+  presented as guaranteed final damage.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-mysqlapi`
+- `datamoon-online-server`
+- `datamoon-online-web`
+
 ## 2026-07-27 - Global active quest log and level-interval rewards
 
 Status: accepted
