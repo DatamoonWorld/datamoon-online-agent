@@ -226,3 +226,45 @@ collision during migration.
 Set `EnemyBrain.debug_draw` only in a local graphical Server run to display the
 soft wander boundary, hard leash and current navigation target. Keep it disabled
 in headless workers.
+
+### Client vegetation and authoritative blockers
+
+Dense vegetation is authored once as visual content in the Client and reduced
+to gameplay geometry for the Server. Do not reproduce every decorative cell as
+an individual Server body.
+
+- Keep dense, inaccessible tree patterns in a dedicated Client
+  `TileMapLayer` with Y-sort disabled.
+- Keep nearby trees that may overlap characters in a separate Y-sorted
+  container. Their scene origin must be at the trunk base; their collision must
+  cover only the physical trunk footprint.
+- Static one-frame scenery uses `Sprite2D`, not an idle
+  `AnimatedSprite2D`. Animated foliage may opt into animation when it has real
+  frames and should not run unnecessary per-instance scripts.
+- Keep the map root, gameplay containers and nearby scenery in the established
+  Y-sort hierarchy. Background TileMap cells must not join that sort.
+- Export occupied blocker cells with `TileMapLayer.get_used_cells()`, merge
+  adjacent cells, discard internal edges and simplify the outer contours.
+- Write the resulting polygons below the matching Server map's
+  `StaticObjects`, then bake or author the walkable `NavigationRegion2D` around
+  those polygons. Client tiles are presentation; Server polygons remain the
+  movement authority.
+- Keep Client and Server roots at position `(0, 0)`, scale `(1, 1)` and the same
+  tile/world coordinate system. Viewport scaling does not change world
+  coordinates.
+
+The first Moonlight Forest composition is a preliminary authoring baseline:
+
+- visual map grid: `256 x 128` cells at `16 x 16` pixels;
+- dense tree layer: 25,844 occupied cells, bounded by cells `(2, 0)` and
+  `(253, 122)`;
+- seven nearby tree scene instances are currently placed around the first
+  clearing under `TreeObjects`;
+- the composition establishes a western clearing, central route and
+  northeastern clearing, but remains subject to visual iteration;
+- no final Server collision or navigation polygon was generated from this
+  baseline yet.
+
+Re-export authoritative contours after any change to the blocking tree layer.
+Moving decoration that is not part of that layer does not require a navigation
+rebake unless its Server collision also changes.

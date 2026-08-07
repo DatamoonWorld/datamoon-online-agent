@@ -679,3 +679,27 @@ Repos affected:
 - `datamoon-online-agent`
 - `datamoon-online-mysqlapi`
 - `datamoon-online-web`
+
+## 2026-08-07 - Client-authored maps and reduced server geometry
+
+Status: accepted
+
+Decision:
+- Each playable space has a visual Client scene and a corresponding
+  authoritative Server scene in the same world coordinate system.
+- Artists author terrain, decoration and dense forest patterns in the Client.
+  The Server receives only simplified blockers, navigation, markers and
+  interactive authoritative objects.
+- Dense background vegetation stays outside Y-sort. Nearby reusable tree scenes
+  share Y-sort with world entities and use an origin at the trunk base.
+- Blocking TileMap cells are exported, merged and simplified into Server
+  polygons. Copying one physics body per decorative 16-pixel tile is rejected
+  for maintainability and runtime cost.
+- Moonlight Forest's current 256-by-128 visual layout is an initial composition,
+  not final authoritative navigation. Server geometry will be generated after
+  its blocking layout stabilizes.
+
+Repos affected:
+- `datamoon-online-agent`
+- `datamoon-online-client`
+- `datamoon-online-server`

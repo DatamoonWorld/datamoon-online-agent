@@ -91,6 +91,13 @@ Digital Center, Moonlight Forest e Moonlight Cavern ainda precisam receber
 TileMaps, colisoes e composicao visual finais. Cada mapa deve ser uma cena
 propria. O registro `space_id -> PackedScene` e o fluxo de troca ja existem.
 
+A primeira composicao visual da Moonlight Forest foi iniciada no Client em uma
+grade de `256 x 128` celulas. A massa de floresta inacessivel, as primeiras
+clareiras e sete arvores de primeiro plano ja existem, com fundo fora do Y-sort
+e objetos proximos em `TreeObjects`. O desenho ainda nao e final e seus tiles
+bloqueadores ainda nao foram convertidos em colisoes e navegacao autoritativas
+do Server. Essa conversao deve agrupar contornos, nao criar um corpo por tile.
+
 ### Portais
 
 Uma unica cena compartilhada recebe comportamento data-driven:
@@ -242,7 +249,8 @@ Nao bloqueiam a v0.04:
 
 ## Pendencias Visuais
 
-- criar as tres cenas finais de mapa;
+- concluir a composicao iniciada da Moonlight Forest e criar as cenas visuais
+  finais de Digital Center e Moonlight Cavern;
 - finalizar TileMaps, colisoes e pontos de entrada/retorno;
 - finalizar Player, Slimmoon, Nocmoon e Fang Strike;
 - produzir camadas e mascaras da criacao de personagem;
