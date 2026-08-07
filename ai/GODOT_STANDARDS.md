@@ -153,6 +153,28 @@ If a change can break startup, plan a verification step.
 
 ---
 
+## Server Physics Layer Contract
+
+Use the named physics layers from the server `project.godot` consistently:
+
+| Purpose | Layer | Bit value | Layer / mask contract |
+| --- | ---: | ---: | --- |
+| Entity movement | 1 | 1 | `CharacterBody2D`: layer `1`, mask `2` |
+| Ground collision | 2 | 2 | walls, trees and blockers: layer `2`, mask `1` |
+| Combat hitbox | 10 | 512 | layer `512`, mask `1024` |
+| Combat hurtbox | 11 | 1024 | layer `1024`, mask `512` |
+
+Movement bodies deliberately do not mask layer 1, so players, allied
+Datamoons and enemies do not physically block one another. World geometry must
+use Ground Collision instead of Entity or combat layers.
+
+Pure data/sensor areas such as enemy spawn regions may use layer and mask `0`
+when overlap callbacks are not required. Enemy awareness areas are configured
+at runtime by the AI controller and must remain separate from the root movement
+body.
+
+---
+
 ## Checklist
 
 Before making a Godot-side change, answer:

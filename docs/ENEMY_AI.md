@@ -215,11 +215,11 @@ collision during migration.
 - Validate narrow passages with the largest enemy collision radius used there.
 - Navigation data is map content: visual map work must validate that chase,
   flee, wander and return paths do not cross blocked tiles.
-- The placeholder Moonlight Forest uses small authored navigation regions for
-  each current spawn group. Their layer and bounds are declared by spawn data;
-  targets outside a group's temporary region cancel aggro instead of pulling
-  enemies into map walls. Replace these provisional rectangles with authored
-  collision-aware polygons when the final map is ready.
+- Moonlight Forest uses separate collision-aware navigation polygons for the
+  Slimmoon and Nocmoon fields. Spawn data selects the matching navigation layer;
+  the polygon itself is the movement boundary, so do not add a rectangular
+  `navigation_bounds` that clips valid authored paths. Bounds remain available
+  only for provisional maps that still use broad or shared navigation regions.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
