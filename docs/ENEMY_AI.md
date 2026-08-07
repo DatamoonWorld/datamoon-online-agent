@@ -176,6 +176,38 @@ species behavior code.
 
 ## Map Navigation Authoring
 
+The authoritative server map is split into one scene per playable space under
+`datamoon-online-server/scenes/maps/`. `main_map.tscn` remains the runtime root
+for shared entity containers and legacy TileMap compatibility, while each map
+scene owns its navigation regions and new static collision objects.
+
+- Add map-specific navigation only to that map's `Navigation` node.
+- Add non-interactive blockers such as trees, rocks, and walls below
+  `StaticObjects`; do not register them as synchronized world objects.
+- Keep the client sprite and server collision at the same world position.
+- Use a world object only when the object has gameplay state or interaction
+  that clients must receive from the server.
+
+### Adding a server map
+
+1. Create a scene named after the playable space in both client and server
+   `scenes/maps/` directories.
+2. Keep visual TileMap layers, decoration, lighting and sprites in the client
+   scene. Keep navigation, collision and authoritative blockers in the server
+   scene.
+3. Give the server scene `Navigation` and `StaticObjects` children, then
+   instance it below `MainMap/Maps` without changing its world coordinates.
+4. Assign navigation layers that match the spawn-area configuration and verify
+   wander, flee, chase and return behavior against the final collision layout.
+5. Place ordinary scenery collision below `StaticObjects`. Create a synchronized
+   world object only for stateful or interactive content such as portals,
+   harvestables or destructible props.
+
+The shared `MainMap` TileMap is a compatibility layer for existing collision
+and fishing queries. Migrate its content into the matching map scene only when
+all consumers of the shared TileMap have been updated; do not duplicate active
+collision during migration.
+
 - Prefer navigation polygons authored in the map TileSet for ordinary world
   tiles, or a `NavigationRegion2D` for irregular walkable geometry.
 - Bake only walkable ground and exclude walls, props and portal blockers.
