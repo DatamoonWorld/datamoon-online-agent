@@ -220,6 +220,12 @@ collision during migration.
   the polygon itself is the movement boundary, so do not add a rectangular
   `navigation_bounds` that clips valid authored paths. Bounds remain available
   only for provisional maps that still use broad or shared navigation regions.
+- At runtime each enemy binds to the closest `NavigationRegion2D` that shares
+  its configured navigation layer. Spawn points, requested targets, path
+  endpoints and the final steering displacement must remain inside that region.
+  A navigation path that is empty, stale or belongs outside the selected field
+  stops the enemy and requests a fresh path; it must never fall back to the
+  world origin or reuse a waypoint from another field.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
