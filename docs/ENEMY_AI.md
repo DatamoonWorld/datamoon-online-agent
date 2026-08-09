@@ -145,6 +145,22 @@ roaming hops. Fleeing species may tune `flee_candidate_samples`,
 alert measures retention from the spawn-group center or from the member itself.
 Values remain data-driven without duplicating species behavior code.
 
+Navigation progress is watched independently from path validity. While an enemy
+requests movement, the brain samples its real displacement. If it moves less
+than `navigation_stuck_min_progress` during `navigation_stuck_timeout`, wander
+and flee choose a new target; chase and return-home temporarily route through a
+nearby lateral waypoint before resuming their original target. Recovery tuning
+uses `navigation_recovery_distance`, `navigation_recovery_duration` and
+`navigation_recovery_samples`. This recovery path never teleports the enemy;
+the existing hard-leash emergency snap remains the final bounded fallback.
+
+Stalls emit the structured log `Enemy navigation stall detected` and increment
+`enemy_navigation_stuck_total`. Successful alternate waypoints increment
+`enemy_navigation_recovery_waypoint_total`; labels contain species and
+navigation mode, while entity-specific position and target remain only in logs
+to avoid high-cardinality metrics. With `debug_draw` enabled, the active path is
+yellow and a temporary recovery waypoint is orange.
+
 ## Adding A New Species AI
 
 1. Create `utils/scripts/enemy_ai/<species>_behavior.gd` extending
