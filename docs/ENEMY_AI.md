@@ -31,7 +31,9 @@ returning, and 750-1000 ms while wandering. Jitter distributes work across
 frames, and the worker admits at most 16 new paths per physics frame. Avoidance
 remains disabled by default to bound CPU cost. Missing navigation halts the
 enemy and reports one configuration error instead of silently using direct
-steering.
+steering. An active mover keeps its last valid waypoint during the single tick
+in which a replacement path synchronizes, preventing chase and flee movement
+from stuttering every time a moving target requires a repath.
 
 Calm enemies with no player Datamoon within 1024 pixels suspend perception,
 decisions and pathfinding. They recheck through the world chunk index every
@@ -78,17 +80,20 @@ profile timeout and emits a counter plus structured warning.
 - Calm Slimmoons wander and ignore nearby players.
 - Damage activates `PANIC` only for the attacked Slimmoon.
 - The attacked member flees while the target remains inside
-  `engagement_radius`; nearby Slimmoons keep their own state.
-- Each member keeps an individual short-lived flee target with angular/radial
-  variation and local separation, preventing the group from stacking at one
-  point while remaining inside the authored home circle.
-- The preferred flee radius and orbit side are selected once per panic. Repath
-  updates preserve them so an enemy cannot alternate between inward and
-  tangential movement at the home boundary.
+  `engagement_radius` measured from that Slimmoon; nearby Slimmoons keep their
+  own state. This lets panic continue across the navigation field while the
+  player keeps pursuing it.
+- Each member samples distant points from its entire authored NavigationRegion
+  and scores them by distance from the threat, travel distance and directional
+  continuity. Local separation prevents multiple members from selecting the
+  same escape line.
+- A flee destination remains stable until reached, invalidated, or the attacker
+  cuts ahead of the route. Repaths do not select a new destination, preventing
+  timer-driven zig-zag and short panic hops.
+- Panic may carry a Slimmoon beyond its normal wander and hard-leash circles.
+  Once the alert clears, the regular hard leash returns it home safely.
 - The individual alert enters cooldown outside engagement range and calms after
   `calm_delay`.
-- Flee targets are constrained to the authored home circle; `reset_distance` is
-  only the hard safety leash.
 
 ### Nocmoon
 
@@ -115,8 +120,6 @@ profile timeout and emits a counter plus structured warning.
   "reset_distance": 320,
   "calm_delay": 3.0,
   "move_speed": 80,
-  "flee_retarget_min_seconds": 1.2,
-  "flee_retarget_max_seconds": 1.8,
   "max_mobs": 5
 }
 ```
@@ -128,9 +131,6 @@ profile timeout and emits a counter plus structured warning.
 - `reset_distance`: absolute hard leash; it must be at least the engagement
   radius.
 - `calm_delay`: hysteresis before clearing an alarm after the target leaves.
-- `flee_retarget_min_seconds` and `flee_retarget_max_seconds`: optional interval
-  during which a fleeing enemy keeps its individual destination before choosing
-  another one. Longer intervals produce less abrupt path changes.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
 - `ai_profile`: entry in `enemy_ai_profiles.json`; defaults to `ai_behavior`.
@@ -138,8 +138,12 @@ profile timeout and emits a counter plus structured warning.
 
 AI profiles own alert scope, perception cadence, return watchdogs, emergency
 timeout, evade time, sleep checks, soft-boundary ratios, flee steering and
-lightweight movement separation. Values remain data-driven without duplicating
-species behavior code.
+lightweight movement separation. `wander_min_distance_ratio` prevents trivial
+roaming hops. Fleeing species may tune `flee_candidate_samples`,
+`flee_min_travel_distance`, `flee_cutoff_margin`, `flee_spread_degrees` and
+`flee_direction_inertia`. `engagement_anchor` chooses whether an individual
+alert measures retention from the spawn-group center or from the member itself.
+Values remain data-driven without duplicating species behavior code.
 
 ## Adding A New Species AI
 
@@ -224,8 +228,9 @@ collision during migration.
   its configured navigation layer. Spawn points, requested targets, path
   endpoints and the final steering displacement must remain inside that region.
   A navigation path that is empty, stale or belongs outside the selected field
-  stops the enemy and requests a fresh path; it must never fall back to the
-  world origin or reuse a waypoint from another field.
+  requests a fresh path; it must never fall back to the world origin or reuse a
+  waypoint from another field. While a changed target's new path synchronizes,
+  the agent may finish its last validated waypoint from the same field.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
