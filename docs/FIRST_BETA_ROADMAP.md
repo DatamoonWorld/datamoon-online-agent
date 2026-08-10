@@ -310,6 +310,9 @@ que devem permanecer nitidos.
 - Player e Datamoon controlados separadamente;
 - basic e Slime Spikes em movimento;
 - soltar input logo depois da skill;
+- basic/skill previstos nao piscam para idle antes da confirmacao;
+- parar durante salto conclui o ciclo de pouso antes de entrar em idle;
+- rejeicao, loading e troca por TAB limpam a acao visual anterior;
 - dano no frame de impacto;
 - nenhum snapshot antigo restaurando HP;
 - reconectar no mesmo mapa;

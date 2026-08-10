@@ -581,6 +581,43 @@ Rendering correction is separate from simulation state and must not become an
 input to later physics. HP loss, rewards, hits and cooldown legality remain
 Server-authoritative.
 
+### Client Visual State Resolution
+
+Replicated simulation state and rendered animation state are separate Client
+contracts. `Entity.state` stores the latest requested simulation state, while
+`Entity.visual_state` is selected by `EntityVisualStateResolver` using this
+priority:
+
+1. hard lifecycle states such as spawn and death;
+2. a pending or confirmed combat action;
+3. an authored locomotion-stop transition;
+4. ordinary move or idle presentation.
+
+The locally controlled entity starts attack or skill presentation immediately
+with `client_action_id`. `combat_action_started` attaches `action_id` to that
+same presentation and must not restart it. A stale idle or move snapshot cannot
+cancel an active action. Only the matching finish, rejection, lifecycle override
+or explicit presentation reset may release it.
+
+When confirmation includes an authoritative start tick, the Client compares the
+current animation position with the resolved elapsed action time. Drift inside
+the configured tolerance is ignored. Larger drift is corrected by restarting
+and advancing the AnimationTree in the same update so frame zero is not rendered
+as a separate flash. This timeline correction never changes damage timing or
+Server authority.
+
+Locomotion stop behavior is authored per entity through the scene Inspector:
+
+- `Immediate` changes from move to idle at once;
+- `Finish Move Cycle` keeps the move animation until `locomotion_stop_phase`;
+- `Landing Marker` waits for `notify_visual_marker()` from an animation method
+  track and uses the configured phase as a safe fallback.
+
+Use `Finish Move Cycle` for simple looping jumps such as Slimmoon. Prefer a
+`Landing Marker` for future animations with an explicit contact frame or
+variable timing. Loading, character-control handoff and session reset must clear
+pending visual actions before applying a new baseline.
+
 Enemy XP and Link EXP use an explicit object contract:
 
 ```json
