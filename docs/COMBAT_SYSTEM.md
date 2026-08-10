@@ -599,6 +599,15 @@ same presentation and must not restart it. A stale idle or move snapshot cannot
 cancel an active action. Only the matching finish, rejection, lifecycle override
 or explicit presentation reset may release it.
 
+The predicted frame duration starts the local presentation deadline and the
+confirmed `action_duration` recalibrates its remaining time. Reaching that
+deadline ends only the visual attack/skill presentation. The entity may then
+render its current move or idle intent, while the resolver keeps the
+authoritative action IDs and prevents stale snapshots from restarting the
+finished presentation until the matching finish event arrives. This prevents
+non-looping animations from holding their last frame for one network trip
+without making the Client authoritative over action legality or completion.
+
 When confirmation includes an authoritative start tick, the Client compares the
 current animation position with the resolved elapsed action time. Drift inside
 the configured tolerance is ignored. Larger drift is corrected by restarting
