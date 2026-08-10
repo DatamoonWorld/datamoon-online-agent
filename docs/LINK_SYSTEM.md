@@ -70,11 +70,12 @@ Novas funcionalidades poderão ser adicionadas futuramente.
 
 # Sincronização com Equipamentos
 
-O nível de Link define quanto dos bônus brutos dos equipamentos o Datamoon
-consegue sincronizar. Essa eficiência é individual para cada Datamoon:
+Cada estrela de Link completa define quanto dos bônus brutos dos equipamentos o
+Datamoon consegue sincronizar. Essa eficiência é individual para cada Datamoon:
 
-| Link | Bônus sincronizado |
+| Estrelas completas | Bônus sincronizado |
 | ---: | ---: |
+| 0 | 0% |
 | 1 | 10% |
 | 2 | 20% |
 | 3 | 30% |
@@ -85,13 +86,14 @@ consegue sincronizar. Essa eficiência é individual para cada Datamoon:
 | 8 | 80% |
 | 9 | 90% |
 | 10 | 100% |
+| Link MAX | 150% |
 
 A regra se aplica somente aos stats fornecidos pelos equipamentos. Stats-base
 da espécie e do nível, buffs e modificadores de encontro não recebem esse
 multiplicador. O Server calcula o valor efetivo e continua sendo a autoridade.
 
-Exemplo: um conjunto que forneça 180 ATK concede 18 ATK no Link 1, 90 ATK no
-Link 5 e 180 ATK no Link 10.
+Exemplo: um conjunto que forneça 180 ATK concede 0 ATK com zero estrelas, 18 ATK
+com uma estrela, 90 ATK com cinco, 180 ATK com dez e 270 ATK no Link MAX.
 
 Essa progressão numérica complementa o Link, mas não substitui suas funções de
 vínculo, evolução, habilidades e desbloqueios.
@@ -143,14 +145,9 @@ Exemplos de influências:
 
 O Link aumenta através das experiências compartilhadas entre humano e Datamoon.
 
-Exemplos:
-
-* Combates;
-* Exploração;
-* Missões;
-* Eventos;
-* Descobertas;
-* Momentos importantes da narrativa.
+As fontes canônicas da v1 são combate, quests, dungeons e pesca. Exploração,
+eventos, descobertas e momentos narrativos podem virar fontes futuras somente
+quando forem observáveis e validados pelo Server.
 
 O objetivo é incentivar o jogador a utilizar e desenvolver sua relação com o Datamoon ao longo da jornada.
 
@@ -223,3 +220,142 @@ O Link é a conexão digital entre um humano e um Datamoon.
 Ele representa o crescimento da parceria entre ambos e atua como um dos pilares centrais da progressão em Datamoons Online.
 
 Seu propósito é fortalecer o vínculo entre jogador e criatura, desbloqueando novas possibilidades de evolução, habilidades e experiências ao longo da jornada.
+
+---
+
+# Contrato Técnico da Progressão por Estrelas
+
+## Product Contract
+
+- Link progression belongs to one persisted Datamoon instance.
+- Link has ten stars. Partial progress never counts as a completed star.
+- Every completed star synchronizes another 10% of equipment bonuses.
+- Ten completed stars synchronize 100% of equipment bonuses.
+- Link MAX is a separate permanent milestone and synchronizes 150% of equipment
+  bonuses. It is not an eleventh star.
+- Link multipliers affect equipment bonuses only. Base stats, flat buffs and
+  multiplicative buffs keep their existing formulas.
+- Progress is server authoritative and is persisted by the MySQL API.
+
+## Star Curve
+
+Star costs are individual, not cumulative:
+
+| Star | Required Link EXP |
+|---:|---:|
+| 1 | 1,000 |
+| 2 | 2,000 |
+| 3 | 4,000 |
+| 4 | 8,000 |
+| 5 | 15,000 |
+| 6 | 30,000 |
+| 7 | 40,000 |
+| 8 | 60,000 |
+| 9 | 90,000 |
+| 10 | 250,000 |
+
+The total cap is 500,000 Link EXP.
+
+## Sources
+
+Canonical v1 source IDs are:
+
+- `combat`
+- `quest`
+- `dungeon`
+- `fishing`
+
+The reward operation `source_type` is the source of truth. Unknown or missing
+sources cannot grant Link EXP.
+
+Stars may override their allowed sources per Datamoon family. The Nocmoon
+family accepts every canonical source for stars 1-9 and only `combat` for star
+10. Families without an override accept every canonical source.
+
+## Segmented Grant Algorithm
+
+Link EXP is applied one target star at a time while holding the Datamoon row
+lock in the reward transaction:
+
+1. Resolve the current target star and its partial progress.
+2. Stop if the target star is above the Datamoon's unlocked star cap.
+3. Stop if the operation source is not accepted by the target star.
+4. Apply only the amount required to fill that star.
+5. Continue with the remaining amount against the next star.
+
+This means a quest reward may finish star 9 but cannot spill into Nocmoon's
+combat-only star 10. EXP rejected by a cap or source rule is not banked.
+
+The API response and audit metadata distinguish requested, applied and rejected
+Link EXP and expose a stable rejection reason.
+
+## Evolution Caps
+
+The permanent unlocked progression stage controls the available star cap:
+
+- Code/base form: 5 stars.
+- Nex/intermediate form: 7 stars.
+- Omega/advanced form: 10 stars.
+
+The cap belongs to the Datamoon instance and does not decrease when an active
+temporary form regresses. Evolution unlock code must promote the persisted cap;
+temporary transformation state must not control it.
+
+## Link MAX
+
+- Completing star 10 makes the family-specific Link MAX quest available.
+- The quest is bound to a specific `datamoon_id` when accepted.
+- Completion atomically marks that Datamoon instance as Link MAX.
+- A character owning multiple Datamoons of the same family must unlock Link MAX
+  independently for each instance.
+- Link MAX cannot be removed by regression, logout, death or archive changes.
+
+The quest definitions and content are intentionally deferred. Persistence and
+runtime contracts may be implemented before the first Link MAX quest exists.
+
+## Client Payload
+
+The server sends resolved data; the client never derives eligibility:
+
+```json
+{
+  "link_total_exp": 1200,
+  "link_level": 1,
+  "link_star_cap": 5,
+  "link_max_unlocked": false,
+  "link_stars": [
+    {
+      "star": 1,
+      "current_exp": 1000,
+      "required_exp": 1000,
+      "completed": true,
+      "available": true,
+      "allowed_sources": ["combat", "quest", "dungeon", "fishing"]
+    },
+    {
+      "star": 2,
+      "current_exp": 200,
+      "required_exp": 2000,
+      "completed": false,
+      "available": true,
+      "allowed_sources": ["combat", "quest", "dungeon", "fishing"]
+    }
+  ]
+}
+```
+
+The future reusable `link_stars.tscn` and `link_star.tscn` scenes consume this
+payload in the Datamoon information and archive interfaces. Each star tooltip
+shows its individual progress, allowed sources and evolution-lock reason.
+
+## Runtime Stat Rules
+
+Equipment synchronization is:
+
+```text
+completed_stars / 10.0
+```
+
+Link MAX overrides that value with `1.5`. HP and MP recalculation caused by a
+Link transition must preserve the current resource percentage and must not act
+as a free heal.

@@ -64,7 +64,8 @@ uma metrica que justifique o custo.
 - projeteis e areas autoritativos;
 - sincronizacao de impacto por frames;
 - conteudo desativado por `enabled: false`;
-- Link aplicando de 10% a 100% dos stats de equipamento;
+- Link aplicando de 0% a 100% dos stats de equipamento pelas dez estrelas completas;
+- Link MAX persistente preparado para aplicar 150% dos stats de equipamento apos a quest exclusiva;
 - hashes de catalogo entre Client, Server e API.
 
 ### Em Andamento Nesta Revisao
@@ -78,6 +79,25 @@ uma metrica que justifique o custo.
 - polling de respawn, instancias e sessao de NPC desacelerado;
 - VSync habilitado por padrao no Client;
 - consolidacao de documentos e inventario de performance.
+
+### Roadmap Do Link Por Estrelas
+
+- `EM ANDAMENTO`: catálogo com dez custos individuais, fontes canônicas e
+  override de combate para a décima estrela do Nocmoon;
+- `EM ANDAMENTO`: concessão segmentada e transacional na MySQL API, com cap,
+  regra por fonte, auditoria e proteção contra checkpoint sobrescrevendo Link;
+- `EM ANDAMENTO`: runtime com 0%-100% dos bônus de equipamento, persistência do
+  cap e suporte ao override Link MAX de 150%;
+- `EM ANDAMENTO`: payload não visual das dez estrelas para HUD, janela de
+  informações e Archive, com chaves de idioma para tooltips;
+- `PENDENTE`: aplicar o `ALTER TABLE` documentado em `OPERATIONS.md`, publicar e
+  validar no PBE as fronteiras de fonte/cap e a preservação percentual de HP/MP;
+- `PENDENTE`: cenas visuais `link_star.tscn` e `link_stars.tscn`, que serão
+  fornecidas pelo fluxo de arte do Client;
+- `PENDENTE`: integração do unlock permanente de evolução promovendo o cap de
+  5 para 7 e 10 estrelas;
+- `FUTURO`: quests Link MAX vinculadas a uma instância específica de Datamoon,
+  com conclusão e unlock de MAX na mesma transação.
 
 ## Conteudo Canonico Da v0.04
 
@@ -283,7 +303,7 @@ que devem permanecer nitidos.
 - terminar aproximadamente entre levels 12 e 13;
 - validar todos os rewards uma unica vez;
 - equipar/desequipar e confirmar HP/MP atual e maximo;
-- validar Link de 10% a 100%.
+- validar Link de 0% a 100%, fontes por estrela, caps 5/7/10 e o futuro Link MAX de 150%.
 
 ### Combate E Rede
 

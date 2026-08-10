@@ -115,6 +115,31 @@ Existing rows intentionally start in `digital_center`; after the release, the
 next runtime checkpoint or clean logout records each character's current
 registered overworld map. Do not persist `dungeon:*` instance IDs manually.
 
+Link star progression adds persistent cap and MAX state to `dm_datamoons`. A
+clean install gets the final columns from `002_create_datamoons.sql`. Existing
+PBE databases must apply the following additive change before deploying the
+API/Server release that reads these columns:
+
+```sql
+ALTER TABLE dm_datamoons
+  ADD COLUMN link_star_cap TINYINT UNSIGNED NOT NULL DEFAULT 5 AFTER link_exp,
+  ADD COLUMN link_max_unlocked TINYINT(1) NOT NULL DEFAULT 0 AFTER link_star_cap,
+  ADD COLUMN link_max_unlocked_at TIMESTAMP NULL DEFAULT NULL AFTER link_max_unlocked,
+  ADD CONSTRAINT chk_dm_datamoons_link_star_cap
+    CHECK (link_star_cap >= 1 AND link_star_cap <= 10);
+
+UPDATE dm_datamoons
+SET link_exp = LEAST(link_exp, 30000),
+    link_star_cap = 5,
+    link_max_unlocked = 0,
+    link_max_unlocked_at = NULL;
+```
+
+The update deliberately normalizes current Code-form Datamoons to the five-star
+cap under the new individual-cost curve. Future permanent evolution unlocks
+promote `link_star_cap` to `7` (Nex) and `10` (Omega); temporary transformation
+must never lower it. Run the coordinated updater only after this SQL succeeds.
+
 The beta dungeon day resets at midnight in Brasilia (`03:00 UTC`). Existing VM
 environment files override application defaults, so both
 `datamoon-api.env` and `datamoon-server.env` must contain:
