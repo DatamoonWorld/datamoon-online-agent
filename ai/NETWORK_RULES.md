@@ -136,6 +136,29 @@ When a change can break compatibility, document it and deploy carefully.
 - Failed resume returns to the normal login flow; it never weakens ticket or
   durable-lease validation.
 
+## Movement Replication Contract
+
+- The Server is the only movement authority. The Client sends normalized input
+  commands with a monotonic input tick and never sends an accepted position.
+- Only the locally controlled Player or Datamoon is predicted. Reconciliation
+  rewinds to the acknowledged authoritative state, discards acknowledged
+  commands and replays the remaining command history.
+- Remote players, allied Datamoons, enemies and objects are rendered from the
+  snapshot buffer. They are interpolated slightly in the past and are never
+  locally simulated as authoritative gameplay entities.
+- Replicated entities carry an explicit semantic kind. Client dispatch must not
+  infer gameplay type from node-name prefixes.
+- Slow, Root and future movement-affecting effects expose one authoritative
+  movement contract: `multiplier`, `blocked` and a monotonic `version`. Action
+  phase movement remains a separate multiplier and both are composed during
+  Server simulation and local prediction.
+- Control changes, map transitions and resume baselines reset local prediction,
+  movement-contract versions and pending command history before accepting new
+  input.
+- Large divergence may hard-snap the simulation root. Small divergence is
+  corrected visually over time; increasing snapshot frequency is not a fix for
+  invalid prediction rules.
+
 ---
 
 ## Chunk And Interest Rules

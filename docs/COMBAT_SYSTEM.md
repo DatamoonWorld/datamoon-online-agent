@@ -391,12 +391,13 @@ captured when the effect is applied. Later Attack Up, Attack Down, equipment or
 other runtime changes do not modify an already-active DOT; they affect only a
 new application.
 
-When multiple applications of the same stackable DOT are active, only the
-strongest captured tick deals damage. Weaker applications cannot evict or
-replace, refresh or extend the strongest active value. An equal application also
-leaves the existing DOT unchanged. Only a later application with higher
-captured damage replaces the value and renews its duration. Persisted effects
-retain this ATK snapshot even when their original source no longer exists.
+When multiple applications of the same stackable DOT are active, every retained
+application contributes its captured tick damage up to the effect-specific
+limit. The Server sums those values into one authoritative damage event and the
+Client displays only that consolidated damage, never the stack count. New
+applications refresh the shared effect duration; when the limit is exceeded,
+the weakest captured application is discarded. Persisted effects retain their
+ATK snapshots even when an original source no longer exists.
 
 ### Conditional skill effects
 
@@ -656,3 +657,81 @@ above the enemy receives zero XP and zero Link EXP.
 
 Dungeon completion rewards are a separate contract. They are not enemy rewards
 and are not multiplied by an enemy level.
+
+## Effect Contract
+
+Effect percentages use fractions in JSON: `0.20` means 20%. The Server owns all
+calculations; Client effect values are presentation only. Different
+`stack_group` values coexist, while the strongest reapplication in the same
+group replaces or refreshes the current effect according to that effect's rule.
+
+Supported percentage modifiers:
+
+- `CRIT_UP` / `CRIT_DOWN`: add or subtract critical chance.
+- `SKILL_DAMAGE_UP` / `SKILL_DAMAGE_DOWN`: add or subtract final skill power.
+- `COOLDOWN_UP` / `COOLDOWN_DOWN`: multiply skill cooldown; final cooldown has
+  an absolute floor of 0.5 seconds. Their net modifier is capped at 80% in
+  either direction.
+- `DAMAGE_REDUCTION`: reduces final incoming damage, capped at 80%.
+- `VULNERABLE`: increases final incoming damage.
+- `SLOW`: reduces movement speed, capped at 80%.
+- `OVERCLOCK` / `DESYNC`: reduce or increase the basic attack interval by a
+  percentage. Their net modifier is capped at 80% in either direction and the
+  final interval has an absolute floor of 0.2 seconds. An action still cannot
+  start while the previous attack or skill state is active, regardless of its
+  modified interval.
+- `WEAKENED`: combines configurable percentage reductions to ATK and DEF.
+
+Control effects:
+
+- `ROOT`: blocks movement but permits basic attacks and skills.
+- `SILENCE`: blocks skills but permits movement and basic attacks.
+- `DISARM`: blocks basic attacks but permits movement and skills.
+- `MARKED`: has no direct modifier. Skills may query `target_has_effect` with
+  `effect_id: marked` to trigger additional behavior.
+
+All runtime decisions use semantic queries from `BuffManager` rather than
+checking individual effect IDs at each call site. Movement asks
+`blocks_movement()`, skills ask `blocks_skills()`, and basic attacks ask
+`blocks_basic_attack()`. `Datamoon.blocks_combat_action()` combines those effect
+rules with death, lifecycle and active-action locks before an action starts.
+This central contract applies equally to player-controlled Datamoons and enemy
+AI; Client presentation never overrides it.
+
+`SHIELD` absorbs damage before HP. It supports a fixed amount, a percentage of
+authoritative maximum HP, or both:
+
+```json
+{
+  "buff_debuff_id": "SHIELD",
+  "buff_debuff_bonus": 250,
+  "buff_debuff_time": 10.0,
+  "buff_debuff_data": {
+    "fixed": 250,
+    "max_hp_percent": 0.1,
+    "stack_group": "skill"
+  }
+}
+```
+
+The resulting capacity is `ceil(fixed + max_hp * max_hp_percent)`. The current
+absorption, source category, percentage/value and remaining duration are
+replicated for HUD presentation.
+
+### Effect HUD
+
+- The Server replicates every effect with an explicit `kind`: `buff` or
+  `debuff`. New effects must define this classification in the authoritative
+  effect catalog before they are exposed to the Client.
+- Buffs occupy the upper HUD row and debuffs occupy the lower row. Effects in
+  one category never displace effects into the other category.
+- Each timed icon displays its remaining duration below the icon using the main
+  game font at 16 px. Durations through 60 seconds use seconds (`35s`); longer
+  durations use ceiling minutes (`7M`) and update only when the displayed
+  minute changes.
+- Permanent effects omit the timer label. Tooltips show the effect description
+  and source without repeating remaining duration or exposing stack counts.
+- Periodic-damage tooltips show consolidated authoritative damage per tick and
+  its interval. Shield tooltips show initial capacity; remaining capacity stays
+  internal. A Shield is removed immediately when remaining capacity reaches
+  zero, even when duration remains.

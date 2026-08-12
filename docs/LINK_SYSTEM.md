@@ -116,6 +116,42 @@ Exemplos de benefícios possíveis:
 
 O foco deve ser aumentar possibilidades de gameplay e não apenas aumentar números.
 
+## Limite de Skill por Link
+
+Skills comuns começam no nível 1. Link 0 e Link 1 mantêm esse nível-base;
+dos Links 2 a 10, o nível de Link define o nível efetivo máximo da skill.
+
+| Link | Nível efetivo máximo da skill |
+| ---: | ---: |
+| 0-1 | 1 |
+| 2 | 2 |
+| 3 | 3 |
+| 4 | 4 |
+| 5 | 5 |
+| 6 | 6 |
+| 7 | 7 |
+| 8 | 8 |
+| 9 | 9 |
+| 10 | 10 |
+
+Link MAX não cria um nível 11. Ele habilita a Mastery opcional definida pela
+própria skill. O Server aplica essa regra e envia ao Client somente valores
+resolvidos para apresentação.
+
+```json
+"link_max_mastery": {
+  "damage_multiplier": 1.15,
+  "buff_bonus_add": 0.0,
+  "buff_duration_add": 2.0,
+  "effect_chance_add": 0.1,
+  "description_key": "SKILL_EXAMPLE_LINK_MAX_MASTERY"
+}
+```
+
+Todos os campos são opcionais. Sem esse bloco, Link MAX não altera a skill.
+Os bônus só ficam ativos para um Datamoon aliado com dez estrelas completas e
+o marco persistente Link MAX desbloqueado.
+
 ---
 
 # Evolução e Link
@@ -344,9 +380,12 @@ The server sends resolved data; the client never derives eligibility:
 }
 ```
 
-The future reusable `link_stars.tscn` and `link_star.tscn` scenes consume this
-payload in the Datamoon information and archive interfaces. Each star tooltip
-shows its individual progress, allowed sources and evolution-lock reason.
+The reusable `link_stars.tscn` and `link_star.tscn` scenes consume this payload
+in the Datamoon information and archive interfaces. Each star tooltip shows
+status, individual progress, allowed sources, previous-Link and evolution
+requirements, equipment synchronization and skill-level cap. The Link level
+label summarizes active and next bonuses; Link 10 previews Link MAX, while Link
+MAX has no next-bonus section.
 
 ## Runtime Stat Rules
 

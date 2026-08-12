@@ -252,6 +252,67 @@ Repos affected:
 - `datamoon-online-server`
 - `datamoon-online-agent`
 
+## 2026-08-12 - Semantic action gates and replicated movement contract
+
+Status: accepted
+
+Decision:
+- Combat permissions are queried through semantic gates for movement, basic
+  attacks and skills. Lifecycle, action and effect locks are tracked by source
+  instead of competing over one mutable boolean.
+- Slow and movement blocks are replicated with a monotonic version and are
+  composed with per-action START, IMPACT and RECOVERY movement on both Server
+  simulation and local prediction.
+- Only the controlled entity uses input prediction and replay. Other entities
+  remain snapshot-interpolated.
+- Entity replication carries an explicit kind, and role scenes inherit shared
+  visual bases instead of relying on name-prefix classification or duplicated
+  scene trees.
+- Structured chat payloads are now the only accepted chat protocol. Removed
+  visual and chat fallbacks are not compatibility promises for older Clients.
+
+Reason:
+- Multiple systems could previously overwrite the same combat flag, while the
+  Client predicted movement without the authoritative Slow/Root contract. This
+  created contradictory decisions and avoidable reconciliation. Explicit
+  contracts keep new effects and entity roles composable without granting the
+  Client authority.
+
+Rollback:
+- Pre-refactor local state is preserved in the named stash
+  `checkpoint-before-replication-refactor-2026-08-12` in every affected
+  repository until manual gameplay validation is complete.
+
+Repos affected:
+- `datamoon-online-client`
+- `datamoon-online-server`
+- `datamoon-online-agent`
+
+## 2026-08-12 - Consolidated effect HUD and stackable periodic damage
+
+Status: accepted; supersedes the strongest-only DOT rule from 2026-07-23.
+
+Decision:
+- Buffs and debuffs use separate HUD rows and timed icons show a compact live
+  duration below them.
+- Tooltips omit remaining duration and stack count. They show description and
+  source; periodic effects additionally show consolidated damage per tick and
+  interval.
+- Retained Bleed, Poison and Burn applications sum their captured damage into
+  one authoritative tick up to each effect's stack limit.
+- Shield presents its initial capacity and expires immediately when remaining
+  absorption reaches zero.
+
+Reason:
+- Players need the actual gameplay consequence, not implementation details.
+  Consolidated values preserve readability while the Server remains the only
+  damage and absorption authority.
+
+Repos affected:
+- `datamoon-online-client`
+- `datamoon-online-server`
+- `datamoon-online-agent`
+
 ## 2026-08-04 - Enemy death is independent from reward eligibility
 
 Status: accepted

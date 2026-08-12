@@ -134,6 +134,12 @@ Preferir codigo para comportamento dinamico:
 Nao montar por codigo uma arvore visual estavel que seria mais clara e barata de
 manter como cena.
 
+Entidades com a mesma hierarquia visual devem usar uma cena-base e variantes
+herdadas por papel. Player local/remoto e Datamoon aliado/inimigo nao devem
+duplicar toda a arvore apenas para trocar script, colisao ou apresentacao. O
+papel de rede continua explicito no payload e no factory; a especie define a
+base visual reutilizavel.
+
 ### JSON
 
 Preferir dados para conteudo ajustavel:
@@ -194,6 +200,12 @@ Cuidados:
 - indice espacial adicional somente quando scans aparecerem no profiler;
 - manter Dungeon 1 apenas no PBE enquanto nao houver necessidade de capacidade;
 - nao aumentar snapshot rate para mascarar interpolacao ou prediction incorreta.
+- prever somente a entidade controlada localmente; entidades remotas usam o
+  buffer de snapshots;
+- centralizar permissoes de acao em consultas semanticas e locks por origem,
+  evitando booleanos globais alterados por lifecycle, state e efeitos;
+- versionar contratos autoritativos que mudam a simulacao prevista, como
+  multiplicador e bloqueio de movimento por buff/debuff.
 
 ## Performance Da API E Banco
 
