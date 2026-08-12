@@ -288,6 +288,16 @@ power = damage + damage_inc * skill_level
 
 Skills do not crit.
 
+Formula coefficients and mana cost may also grow with the effective skill
+level. The optional `*_scale_inc` fields are added once per skill level, using
+the same level semantics as `damage_inc`. `mana_cost_inc` follows that rule as
+well:
+
+```text
+effective_scale = base_scale + scale_inc * skill_level
+effective_mana_cost = mana_cost + mana_cost_inc * skill_level
+```
+
 `skill_damage` is a final float multiplier for skills. For example, `skill_damage = 1.5` means +150% final skill damage.
 
 Damage does not use a random variance or a level-gap multiplier. Level still
@@ -346,12 +356,15 @@ fields are zero:
   "damage_inc": 60,
   "damage_formula": {
     "atk_scale": 1.0,
+    "atk_scale_inc": 0.0,
     "hp_scale": 0.1,
+    "hp_scale_inc": 0.0,
     "mp_scale": 0.0,
     "def_scale": 0.0,
     "flat": 0.0
   },
   "mana_cost": 30,
+  "mana_cost_inc": 0,
   "cooldown": 4.0,
   "timing": {
     "fps": 12,
@@ -365,7 +378,9 @@ fields are zero:
 
 The formula fields are coefficients, not percentages. `atk_scale = 1.5` adds
 150% of effective ATK to power; `hp_scale = 0.1` adds 10% of effective maximum
-HP. Equipment bonuses are part of those effective stats.
+HP. Equipment bonuses are part of those effective stats. Link MAX mastery may
+replace resolved coefficients through `damage_formula_override`; it does not
+modify the base catalog values.
 
 ### Damage-over-time contract
 

@@ -143,6 +143,19 @@ Stage mapping:
 - `Kainemoon`: `Nex`
 - `Bathorymoon`: `Omega`
 
+The Slimmoon family also has its primary line registered for future runtime
+implementation:
+
+- `Slimmoon`: `Code`;
+- `Slimmoon Fighter Mode` (`slimmoonFM`): `Nex`, requiring level 20, Link 3,
+  and one `sword_blueprint`;
+- `Slimmoon Bastion Mode` (`slimmoonBM`): `Omega`, requiring the Nex unlock,
+  level 60, Link 6, and one `armor_blueprint`.
+
+Catalog registration does not by itself unlock transformation. Persistence,
+item consumption, authoritative validation and form scenes remain part of the
+runtime delivery described below.
+
 ---
 
 ## Recommended Storage Shape

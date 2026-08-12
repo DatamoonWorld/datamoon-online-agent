@@ -211,7 +211,7 @@ this safe interaction cannot be used as combat healing.
 
 ### Main item upgrades
 
-For the current beta target, upgradeable equipment stops at `+5`. An `Upgrade
+Upgradeable equipment stops at `+10`. An `Upgrade
 Chip` is the dungeon material used for an upgrade attempt. Every attempt consumes
 one chip. Failure leaves the equipment at its current level and never destroys or
 downgrades it.
@@ -225,23 +225,27 @@ Upgrade success is rolled by the authoritative backend using the target level:
 | `+3` | 80% |
 | `+4` | 70% |
 | `+5` | 60% |
+| `+6` | 45% |
+| `+7` | 35% |
+| `+8` | 20% |
+| `+9` | 5% |
+| `+10` | 1% |
 
 The planned stat values by upgrade level are:
 
-| Stat | +0 | +1 | +2 | +3 | +4 | +5 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Attack | 40 | 60 | 80 | 100 | 120 | 160 |
-| Defense | 10 | 15 | 20 | 25 | 30 | 40 |
-| Critical chance | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 |
-| Skill damage | 0.05 | 0.08 | 0.11 | 0.14 | 0.17 | 0.22 |
-| HP | 500 | 700 | 900 | 1100 | 1300 | 1800 |
-| MP | 90 | 150 | 210 | 270 | 330 | 420 |
+| Stat | +0 | +1 | +2 | +3 | +4 | +5 | +6 | +7 | +8 | +9 | +10 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Attack | 30 | 40 | 52 | 66 | 82 | 100 | 124 | 154 | 190 | 232 | 280 |
+| Defense | 10 | 14 | 19 | 25 | 32 | 40 | 50 | 62 | 76 | 92 | 110 |
+| Critical chance | 0.01 | 0.02 | 0.03 | 0.04 | 0.05 | 0.06 | 0.08 | 0.09 | 0.11 | 0.12 | 0.14 |
+| Skill damage | 0.02 | 0.04 | 0.06 | 0.08 | 0.10 | 0.12 | 0.16 | 0.20 | 0.24 | 0.28 | 0.32 |
+| HP | 200 | 240 | 285 | 335 | 390 | 450 | 530 | 630 | 750 | 890 | 1050 |
+| MP | 60 | 80 | 103 | 129 | 158 | 190 | 230 | 278 | 334 | 398 | 470 |
 
-The table represents cumulative values. Upgrades `+1` through `+4` add the
-regular increment; `+5` adds the larger final increment. Every stat entry uses
-the full value for the item's current upgrade level, and one successful upgrade
-advances all three entries together. Therefore, two `ATK` entries at `+2` grant
-`80 + 80 = 160 ATK`.
+The table represents cumulative values. Every stat entry uses the full value
+for the item's current upgrade level, and one successful upgrade advances all
+three entries together. Therefore, two `ATK` entries at `+2` grant
+`52 + 52 = 104 ATK`.
 
 ### Unscan equipment boxes
 
