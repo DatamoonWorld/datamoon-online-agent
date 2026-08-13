@@ -1,6 +1,6 @@
 # Code Health And Performance Contract
 
-Ultima revisao estrutural: 2026-07-31.
+Ultima revisao estrutural: 2026-08-13.
 
 ## Finalidade
 
@@ -69,6 +69,10 @@ nao substitui profiler, teste manual ou carga. Nao declarar um sistema
 - removidos fallbacks para catalogos agregados inexistentes;
 - removidos formatos antigos de skill unica e servico unico de NPC;
 - formato atual de Bits deixou de ser chamado incorretamente de legado;
+- removidos fallbacks de tooltip, metadata nula e itens órfãos depois das
+  migrations de catálogo do PBE;
+- o deploy compara semanticamente os campos de gameplay dos itens entre Server
+  e MySQL API, impedindo divergência silenciosa de balanceamento;
 - hotbar, loading e resource preloader nao processam quando ociosos;
 - respawn, timeout de instancia e range de NPC usam polling limitado;
 - estado completo do mundo e coletado na taxa de snapshot, nao tres vezes mais;
@@ -86,6 +90,27 @@ nao substitui profiler, teste manual ou carga. Nao declarar um sistema
 8. Nunca ampliar tolerancias para esconder divergencia de simulacao.
 9. Medir antes e depois de uma otimizacao relevante.
 10. Reverter uma otimizacao se legibilidade ou jogabilidade piorar sem ganho real.
+
+## Classificacao De Limpeza
+
+Antes de apagar codigo ou dados, classificar o alvo:
+
+- `descartavel confirmado`: nao possui produtor, consumidor, referencia
+  dinamica, persistencia nem plano aprovado;
+- `compatibilidade temporaria`: possui criterio objetivo de remocao e deve ser
+  apagada depois do rollout coordenado correspondente;
+- `fluxo em construcao`: possui contrato aprovado e nao e codigo morto apenas
+  porque a interface ou os assets finais ainda nao existem;
+- `fluxo final`: esta validado e deve ser alterado somente por requisito novo,
+  bug reproduzido ou metrica;
+- `infraestrutura contratual`: RPCs vazios, callbacks, classes-base, migrations
+  e fallbacks operacionais podem parecer ociosos, mas exigem prova de ausencia de
+  uso antes de remocao.
+
+O inventario operacional dessas categorias vive exclusivamente em
+`FIRST_BETA_ROADMAP.md`. Este documento define apenas os criterios. Analise
+estatica nao prova ausencia total de codigo morto em Godot porque RPCs, cenas,
+signals e chamadas por nome podem ser resolvidos dinamicamente.
 
 Arquivos grandes atuais devem ser divididos por fronteira, nao por tamanho:
 

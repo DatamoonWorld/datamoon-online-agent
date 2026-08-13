@@ -441,8 +441,10 @@ Use `sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log` for TLS an
 upgrade failures.
 
 There are no automated functional test files. Source gates are Godot headless
-import, Go formatting/vet/build, Node syntax and Bash syntax. Gameplay acceptance
-is manual and must be supported by structured event logs.
+import, Go formatting/vet/build, Node syntax, Bash syntax and semantic equality
+of gameplay item fields between Server and MySQL API catalogs. Presentation-only
+item fields may differ. Gameplay acceptance is manual and must be supported by
+structured event logs.
 
 ### Manual social validation
 

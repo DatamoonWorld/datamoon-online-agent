@@ -149,6 +149,11 @@ Unlock persistence, item consumption, sequential validation, Link-cap
 promotion and audit are implemented. Runtime Transform/Regress and the final
 form scenes remain separate work.
 
+The Server exports every registered line in `evolution_lines`; it no longer
+discards branches after the first entry. The Client keeps a selected line and
+can switch that selection without changing authoritative state. A visible line
+selector is required only when a second line is registered.
+
 The Stats evolution slots use these controls:
 
 - right click on a locked form requests Unlock after every requirement is met;
@@ -164,9 +169,9 @@ authoritative transaction.
 
 ---
 
-## Recommended Storage Shape
+## Transform Persistence Contract
 
-Persistent unlock storage should be modeled by Datamoon instance, for example:
+Unlock storage remains modeled by Datamoon instance:
 
 - `datamoon_id`
 - `base_type`
@@ -174,6 +179,12 @@ Persistent unlock storage should be modeled by Datamoon instance, for example:
 - `form_type`
 - `stage_index`
 - `unlocked_at`
+
+Before Transform/Regress is implemented, `dm_datamoons` must gain explicit
+`family_id` and `active_form_id` fields. The existing `type` field must not be
+repurposed because current progression and species contracts use it as the base
+identity. That migration, its write paths and runtime scene swap are one atomic
+delivery and remain deferred until the form sprites/scenes are ready.
 
 Recommended semantics:
 
@@ -191,4 +202,5 @@ Recommended semantics:
 3. Add mysqlapi migration and endpoints for unlock persistence. (complete)
 4. Add the minimal client Unlock interaction and persistent state. (complete)
 5. Implement runtime Transform/Regress on the server. (pending)
-6. Add the branched line selector before registering a second line. (pending)
+6. Replicate and retain every branched line. (complete)
+7. Add the visible branched-line selector before registering a second line. (pending)

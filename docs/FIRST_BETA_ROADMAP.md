@@ -1,6 +1,6 @@
 # Datamoons Online - Roadmap Principal
 
-Ultima consolidacao: 2026-07-31.
+Ultima consolidacao: 2026-08-13.
 
 ## Uso Deste Documento
 
@@ -68,36 +68,69 @@ uma metrica que justifique o custo.
 - Link MAX persistente preparado para aplicar 150% dos stats de equipamento apos a quest exclusiva;
 - hashes de catalogo entre Client, Server e API.
 
-### Em Andamento Nesta Revisao
+### Mapa De Maturidade Dos Fluxos
 
-- remocao do RPC antigo de movimento e de fallbacks de catalogo inexistentes;
-- tokens internos obrigatoriamente distintos e com no minimo 32 caracteres;
-- rate limit Web contabilizando falhas de login e toda tentativa de cadastro,
-  com limpeza de entradas expiradas;
-- processamento ocioso reduzido em hotbar, loading e resource preloader;
-- refresh do estado de mundo alinhado aos snapshots de 20 Hz;
-- polling de respawn, instancias e sessao de NPC desacelerado;
-- VSync habilitado por padrao no Client;
-- consolidacao de documentos e inventario de performance.
+Fluxos finais, que devem receber apenas correcoes, conteudo e otimizacoes
+medidas:
+
+- login WSS, ticket curto, Gateway, selecao de worker e retomada curta de sessao;
+- movimento autoritativo com prediction, ACK, replay e reconciliacao;
+- controle alternado de Player e Datamoon;
+- combate, critico, defesa, impacto por frames, projeteis e areas;
+- inventario, equipamentos, Unscan, Upgrade, Alternate e HP/MP persistente;
+- Link 1-10 e Unlock permanente de evolucao com consumo e auditoria;
+- quests e rewards idempotentes;
+- Party cross-worker, handoff, Chat, Fishing, Hatchery, Craft/Cooking e Guild;
+- auditorias, suporte Web, ciclo seguro de conta e deploy coordenado.
+
+Fluxos em construcao, que ainda nao devem ser tratados como contrato final de
+runtime ou apresentacao:
+
+- Transform/Regress, forma evoluida ativa e troca autoritativa de cena;
+- cenas, sprites, animacoes e hitboxes de Slimmoon FM e Slimmoon WM;
+- seletor visual de linha antes da segunda ramificacao evolutiva;
+- criacao atomica de personagem, escolha inicial de Datamoon e visual em camadas;
+- mapas finais, colisoes, navegacao, entradas e posicoes autoritativas;
+- Fang Strike, HUD do boss e apresentacao final da Moonlight Cavern;
+- quest de Link MAX e integracao visual de equipamentos ao personagem;
+- conteudo futuro preservado, mas sem fonte de acesso na v0.04.
+
+Potenciais descartes devem permanecer ate seus substitutos estarem publicados e
+validados:
+
+- compatibilidade temporaria de rollout com API antiga;
+- `main_map.tscn` e geometria/fallbacks temporarios dos mapas;
+- campos de payload consumidos somente por Clients antigos;
+- o rotulo diagnostico `legacy_lock`, que pode ser renomeado sem alterar o fluxo;
+- selecao interna de linha evolutiva, removivel apenas se ramificacoes forem
+  abandonadas definitivamente.
+
+Nao sao descartaveis: superficies RPC com `pass`, callbacks, classes-base,
+migrations historicas, fallbacks operacionais documentados e sistemas
+desativados planejados para versoes futuras. Nenhum deles deve ser removido por
+busca textual sem provar a ausencia de produtor, consumidor e estado persistido.
 
 ### Roadmap Do Link Por Estrelas
 
-- `EM ANDAMENTO`: catálogo com dez custos individuais, fontes canônicas e
+- `VALIDADO`: catálogo com dez custos individuais, fontes canônicas e
   override de combate para a décima estrela do Nocmoon;
-- `EM ANDAMENTO`: concessão segmentada e transacional na MySQL API, com cap,
+- `VALIDADO`: concessão segmentada e transacional na MySQL API, com cap,
   regra por fonte, auditoria e proteção contra checkpoint sobrescrevendo Link;
-- `EM ANDAMENTO`: runtime com 0%-100% dos bônus de equipamento, persistência do
+- `VALIDADO`: runtime com 0%-100% dos bônus de equipamento, persistência do
   cap e suporte ao override Link MAX de 150%;
-- `EM ANDAMENTO`: payload não visual das dez estrelas para HUD, janela de
+- `VALIDADO`: payload das dez estrelas para HUD, janela de
   informações e Archive, com chaves de idioma para tooltips;
-- `PENDENTE`: aplicar o `ALTER TABLE` documentado em `OPERATIONS.md`, publicar e
-  validar no PBE as fronteiras de fonte/cap e a preservação percentual de HP/MP;
-- `PENDENTE`: cenas visuais `link_star.tscn` e `link_stars.tscn`, que serão
-  fornecidas pelo fluxo de arte do Client;
-- `IMPLEMENTADO; VALIDACAO PBE PENDENTE`: Unlock permanente por instância de
+- `VALIDADO`: migrations de Link aplicadas no PBE, incluindo fronteiras de
+  fonte/cap e preservação percentual de HP/MP;
+- `VALIDADO`: apresentação das estrelas usa `link_star.tscn` e os payloads
+  especializados de Link no Client;
+- `VALIDADO`: Unlock permanente por instância de
   Datamoon, com requisitos autoritativos, consumo atômico, auditoria e promoção
   do cap de Link de 5 para 7 e 10 estrelas;
 - `PENDENTE`: Transform/Regress temporário e cenas finais das formas evoluídas;
+- `IMPLEMENTADO`: Server replica todas as linhas evolutivas e o Client mantém
+  seleção determinística; o controle visual de escolha será exigido antes de
+  cadastrar uma segunda linha;
 - `FUTURO`: quests Link MAX vinculadas a uma instância específica de Datamoon,
   com conclusão e unlock de MAX na mesma transação.
 
