@@ -138,16 +138,29 @@ The Slimmoon family is the first authoritative Unlock implementation:
 - `Slimmoon`: `Code`;
 - `Slimmoon Fighter Mode` (`slimmoon_fm`): `Nex`, requiring level 20, Link 3,
   and one `sword_blueprint`;
-- `Slimmoon Bastion Mode` (`slimmoon_bm`): `Omega`, requiring the Nex unlock,
+- `Slimmoon Warrior Mode` (`slimmoon_wm`): `Omega`, requiring the Nex unlock,
   level 60, Link 6, and one `armor_blueprint`.
 
 Line identifiers always use the final Omega form. Therefore the registered
-line is `slimmoon_bm`, not an arbitrary branch name. A future alternate branch
+line is `slimmoon_wm`, not an arbitrary branch name. A future alternate branch
 ending in `slimmoon_am` must use `slimmoon_am` as its line identifier.
 
 Unlock persistence, item consumption, sequential validation, Link-cap
 promotion and audit are implemented. Runtime Transform/Regress and the final
 form scenes remain separate work.
+
+The Stats evolution slots use these controls:
+
+- right click on a locked form requests Unlock after every requirement is met;
+- the confirmation explicitly authorizes permanent material consumption;
+- left click on an unlocked form is reserved for Transform/Regress;
+- Transform/Regress intentionally remains inactive until its authoritative
+  runtime state and animation contract are implemented.
+
+Locked-form tooltips show live requirement status for level, Link, previous
+form and inventory materials. Colors are informational only; the mysqlapi
+revalidates ownership, progression, sequential unlocks and materials inside the
+authoritative transaction.
 
 ---
 
