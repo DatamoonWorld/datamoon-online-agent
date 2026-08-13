@@ -288,6 +288,11 @@ power = damage + damage_inc * skill_level
 
 Skills do not crit.
 
+`crit_to_atk_scale` is an explicit formula coefficient. When set to `1.0`,
+the caster's effective Critical Chance is added to `atk_scale`; for example,
+50% Critical Chance adds `0.5` to the ATK coefficient. This does not roll a
+critical hit and therefore preserves the rule that skills do not crit.
+
 Formula coefficients and mana cost may also grow with the effective skill
 level. The optional `*_scale_inc` fields are added once per skill level, using
 the same level semantics as `damage_inc`. `mana_cost_inc` follows that rule as
@@ -580,9 +585,11 @@ are `recovery`. Supported movement modes are `free`, `reduced` and `locked`.
 
 `animation_speed`, `cast_time`, `impact_time`, `impact_ratio` and
 `death_delay` are not part of the current contract. Species and skills without
-positive `total_frames` cannot execute that action. `attack_speed` remains the
-interval in seconds between basic-attack starts and does not control animation
-duration.
+positive `total_frames` cannot execute that action. `attack_speed` is the
+recovery interval that starts after a basic attack completes and does not
+control animation duration. Therefore the interval between attack starts is
+`animation duration + attack_speed`. Interrupted attacks do not start this
+recovery interval.
 
 The resolved frame contract and `action_start_input_tick` are included in
 `combat_action_started`. Client and Server derive the movement phase from the

@@ -531,7 +531,7 @@ WHERE table_schema = 'datamoon_game_server'
   AND table_name IN ('dm_inventory_audit', 'dm_inventory_ops',
                      'dm_reward_audit', 'dm_reward_operations',
                      'dm_value_audit', 'dm_chat_moderation_audit',
-                     'dm_guild_audit')
+                     'dm_guild_audit', 'dm_datamoon_evolution_audit')
 ORDER BY total_mb DESC;
 ```
 

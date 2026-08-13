@@ -131,30 +131,23 @@ This is preferred because forms may differ in:
 
 ---
 
-## First Official Line
+## First Implemented Line
 
-The first official evolution line for implementation and validation is:
-
-- `Nocmoon -> Kainemoon -> Bathorymoon`
-
-Stage mapping:
-
-- `Nocmoon`: `Code`
-- `Kainemoon`: `Nex`
-- `Bathorymoon`: `Omega`
-
-The Slimmoon family also has its primary line registered for future runtime
-implementation:
+The Slimmoon family is the first authoritative Unlock implementation:
 
 - `Slimmoon`: `Code`;
-- `Slimmoon Fighter Mode` (`slimmoonFM`): `Nex`, requiring level 20, Link 3,
+- `Slimmoon Fighter Mode` (`slimmoon_fm`): `Nex`, requiring level 20, Link 3,
   and one `sword_blueprint`;
-- `Slimmoon Bastion Mode` (`slimmoonBM`): `Omega`, requiring the Nex unlock,
+- `Slimmoon Bastion Mode` (`slimmoon_bm`): `Omega`, requiring the Nex unlock,
   level 60, Link 6, and one `armor_blueprint`.
 
-Catalog registration does not by itself unlock transformation. Persistence,
-item consumption, authoritative validation and form scenes remain part of the
-runtime delivery described below.
+Line identifiers always use the final Omega form. Therefore the registered
+line is `slimmoon_bm`, not an arbitrary branch name. A future alternate branch
+ending in `slimmoon_am` must use `slimmoon_am` as its line identifier.
+
+Unlock persistence, item consumption, sequential validation, Link-cap
+promotion and audit are implemented. Runtime Transform/Regress and the final
+form scenes remain separate work.
 
 ---
 
@@ -181,7 +174,8 @@ Recommended semantics:
 ## Initial Delivery Order
 
 1. Document the system and official line in the agent.
-2. Create the evolution catalog JSON for the first family.
-3. Add mysqlapi migration and endpoints for unlock persistence.
-4. Implement runtime transform/regress on the server.
-5. Add minimal client UI for unlock and transform states.
+2. Create the evolution catalog JSON for the first family. (complete)
+3. Add mysqlapi migration and endpoints for unlock persistence. (complete)
+4. Add the minimal client Unlock interaction and persistent state. (complete)
+5. Implement runtime Transform/Regress on the server. (pending)
+6. Add the branched line selector before registering a second line. (pending)

@@ -94,8 +94,10 @@ uma metrica que justifique o custo.
   validar no PBE as fronteiras de fonte/cap e a preservação percentual de HP/MP;
 - `PENDENTE`: cenas visuais `link_star.tscn` e `link_stars.tscn`, que serão
   fornecidas pelo fluxo de arte do Client;
-- `PENDENTE`: integração do unlock permanente de evolução promovendo o cap de
-  5 para 7 e 10 estrelas;
+- `IMPLEMENTADO; VALIDACAO PBE PENDENTE`: Unlock permanente por instância de
+  Datamoon, com requisitos autoritativos, consumo atômico, auditoria e promoção
+  do cap de Link de 5 para 7 e 10 estrelas;
+- `PENDENTE`: Transform/Regress temporário e cenas finais das formas evoluídas;
 - `FUTURO`: quests Link MAX vinculadas a uma instância específica de Datamoon,
   com conclusão e unlock de MAX na mesma transação.
 
