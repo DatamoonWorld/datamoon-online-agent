@@ -87,7 +87,7 @@ for service in api auth gateway web; do
 done
 install -m 0644 "$AGENT_ROOT/ops/systemd/datamoon-mailer.service" /etc/systemd/system/datamoon-mailer.service
 install -m 0644 "$SERVER_ROOT/deploy/systemd/datamoon-server@.service" /etc/systemd/system/datamoon-server@.service
-install -m 0644 "$AGENT_ROOT/ops/datamoon-deploy.service" /etc/systemd/system/datamoon-deploy.service
+install -m 0644 "$AGENT_ROOT/ops/systemd/datamoon-deploy.service" /etc/systemd/system/datamoon-deploy.service
 install -m 0755 "$AGENT_ROOT/ops/update_vm.sh" /usr/local/sbin/datamoon-update
 
 install -m 0644 "$AGENT_ROOT/ops/nginx/datamoon-gateway-limits.conf" /etc/nginx/conf.d/datamoon-gateway-limits.conf

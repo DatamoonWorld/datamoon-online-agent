@@ -1,318 +1,116 @@
-# Code Health And Performance Contract
+# Contrato De Qualidade E Performance
 
-Ultima revisao estrutural: 2026-08-13.
+Este documento define o padrao permanente de qualidade. Status e melhorias
+planejadas vivem em `FIRST_BETA_ROADMAP.md`; regras de implementacao vivem em
+`../ai/CODE_RULES.md`.
 
-## Finalidade
+## Objetivo
 
-Este documento define como manter o codigo coeso, seguro e eficiente. Ele nao e
-um backlog. Prioridades, bloqueios e criterios de release vivem somente em
-`FIRST_BETA_ROADMAP.md`.
+Uma alteracao deve reduzir complexidade, risco, custo de runtime ou duplicacao
+sem esconder comportamento. Menos linhas, por si so, nao representam melhoria.
 
-Reducao de linhas nao e objetivo isolado. Uma mudanca e boa quando reduz pelo
-menos um destes custos sem esconder comportamento:
+## Coesao
 
-- decisoes duplicadas;
-- acoplamento;
-- processamento ocioso;
-- alocacao;
-- trafego;
-- round-trips;
-- superficie de ataque;
-- caminhos legados sem consumidor.
+- Cada responsabilidade possui um repositorio e uma camada proprietaria.
+- Regra de dominio possui uma implementacao autoritativa.
+- IDs, payloads e estados usam nomes consistentes entre produtores e
+  consumidores.
+- Cenas compoem elementos visuais; JSON descreve conteudo; codigo coordena
+  comportamento e estado dinamico.
+- Modulos extraidos precisam ter fronteira real, lifecycle claro e API menor
+  que o acoplamento removido.
+- Documentos nao repetem status, formulas ou comandos pertencentes a outro
+  proprietario.
 
-## Baseline Arquitetural
+## Limpeza
 
-A direcao atual deve ser preservada:
+Classifique antes de remover:
 
-- Client cuida de input, prediction, reconciliacao, animacao e apresentacao;
-- Server e autoridade de movimento, combate, inventario, rewards e mundo;
-- Auth cuida de credenciais e sessao;
-- Gateway cuida de entrada, handshake e selecao de worker;
-- MySQL API concentra persistencia e operacoes transacionais;
-- MySQL nao participa do loop por frame ou por ataque;
-- Overworld e dungeons possuem workers separados;
-- `space_id` e chunks limitam interesse;
-- snapshots usam baseline/delta, 20 Hz e budget por peer;
-- operacoes economicas sensiveis sao idempotentes e auditadas;
-- deploy e observabilidade sao coordenados pelo Agent.
+- `ativo`: possui produtor e consumidor atuais;
+- `preparado`: ainda sem fluxo final, mas possui decisao e uso futuro aprovado;
+- `compatibilidade`: atende consumidor real durante migracao;
+- `morto`: sem produtor, consumidor ou futuro aprovado;
+- `desconhecido`: exige rastreamento antes de qualquer exclusao.
 
-Essa base e adequada para beta pequena. Ela ainda nao prova capacidade de MMO
-em larga escala; isso exige carga representativa, metas e perfil.
+Somente codigo morto comprovado deve ser apagado imediatamente. Caminho
+preparado precisa estar descrito em `GAMEPLAY_FEATURES.md`; compatibilidade
+precisa de prazo no roadmap.
 
-## Cobertura Da Revisao
+## Godot Hibrido
 
-A revisao de 2026-07-31 inventariou todos os repositorios e todos os arquivos de
-codigo, cena e dados rastreados. Foram executados:
+Use cenas para hierarquia visual, anchors, colisores, animacoes e composicoes
+reutilizaveis. Use codigo para estado runtime, rede, regras, factories e
+variacoes data-driven. Use JSON para stats, itens, skills, NPCs, spawns,
+portais, quests, dungeons e receitas.
 
-- contagem e ranking de arquivos grandes;
-- busca global por legado, fallback, TODO, segredo e endpoint inseguro;
-- inventario de loops `_process` e `_physics_process`;
-- verificacao de referencias de cenas e formatos JSON atuais;
-- comparacao byte a byte do contrato RPC espelhado;
-- import/parse headless de Client, Server, Auth e Gateway;
-- verificacao de diff e whitespace;
-- leitura profunda dos caminhos de movimento, snapshots, catalogos, rate limit,
-  tokens internos, preloading, spawn, NPC e portal.
+Evite cenas gigantes com dados embutidos, criacao visual integral por codigo,
+nodes sem lifecycle e duplicacao da mesma entidade friend/enemy quando uma cena
+parametrizada resolve com clareza.
 
-Uma revisao estatica integral encontra incoerencias e hotspots provaveis, mas
-nao substitui profiler, teste manual ou carga. Nao declarar um sistema
-"otimizado" sem medida de runtime.
+## Client
 
-## Correcoes Estruturais Aplicadas
+- Processar apenas nodes ativos e visiveis.
+- Respeitar VSync e pixel crisp no viewport definido.
+- Precarregar recursos frequentes e evitar load sincrono durante combate.
+- Usar pooling somente quando profiler demonstrar churn relevante.
+- Interpolar entidades remotas; predizer apenas o dono local.
+- Aplicar snapshots por versao/tick e descartar estado antigo.
+- Nao fazer polling de UI quando sinais ou eventos resolvem.
 
-- removido o token interno compartilhado como fallback;
-- tokens de Auth, Gateway, Server e Web precisam ser distintos e fortes;
-- rate limit Web conta falhas de login e toda tentativa de cadastro; sucesso de
-  login nao apaga o historico de falhas do IP;
-- entradas expiradas do limiter sao limpas periodicamente;
-- removido RPC antigo de direcao; movimento usa apenas comandos sequenciados;
-- removidos fallbacks para catalogos agregados inexistentes;
-- removidos formatos antigos de skill unica e servico unico de NPC;
-- formato atual de Bits deixou de ser chamado incorretamente de legado;
-- removidos fallbacks de tooltip, metadata nula e itens órfãos depois das
-  migrations de catálogo do PBE;
-- o deploy compara semanticamente os campos de gameplay dos itens entre Server
-  e MySQL API, impedindo divergência silenciosa de balanceamento;
-- hotbar, loading e resource preloader nao processam quando ociosos;
-- respawn, timeout de instancia e range de NPC usam polling limitado;
-- estado completo do mundo e coletado na taxa de snapshot, nao tres vezes mais;
-- VSync e o padrao do Client para evitar renderizacao irrestrita.
+## Server
 
-## Regras De Refatoracao
+- Manter estado quente em memoria e persistir por evento/checkpoint.
+- Filtrar por worker, `space_id`, chunk e interesse antes de iterar entidades.
+- Limitar pathfinding, percepcao, snapshots e trabalho caro por tick.
+- Distribuir repath e tarefas periodicas para evitar picos de frame.
+- Nao aguardar rede ou banco dentro da simulacao critica.
+- Separar lifecycle visual de rewards persistentes idempotentes.
+- Medir tick time, filas, entidades, bytes e operacoes antes de escalar workers.
 
-1. Preservar contratos de RPC, API, JSON e persistencia em mudancas mecanicas.
-2. Separar alteracao funcional de movimentacao/extracao de codigo.
-3. Nao criar abstracao generica sem dois consumidores estaveis.
-4. Nao dividir um arquivo apenas pelo numero de linhas.
-5. Extrair quando houver responsabilidades, lifecycle ou dependencias distintas.
-6. Remover fallback somente depois de provar que nao ha produtor nem consumidor.
-7. Manter logs correlacionaveis para fluxos multi-etapa.
-8. Nunca ampliar tolerancias para esconder divergencia de simulacao.
-9. Medir antes e depois de uma otimizacao relevante.
-10. Reverter uma otimizacao se legibilidade ou jogabilidade piorar sem ganho real.
+## API E Banco
 
-## Classificacao De Limpeza
+- Endpoint representa operacao de dominio e menor privilegio.
+- Usar transacao, ownership, fence, request hash e `operation_id` onde cabivel.
+- Indexar consultas reais, nao hipoteses.
+- Reter auditorias por 180 dias por padrao e limpar por job controlado.
+- Nunca executar escrita por movimento, frame ou ataque comum.
+- Medir latencia p50/p95/p99, conexoes, locks e queries lentas.
 
-Antes de apagar codigo ou dados, classificar o alvo:
+## Rede
 
-- `descartavel confirmado`: nao possui produtor, consumidor, referencia
-  dinamica, persistencia nem plano aprovado;
-- `compatibilidade temporaria`: possui criterio objetivo de remocao e deve ser
-  apagada depois do rollout coordenado correspondente;
-- `fluxo em construcao`: possui contrato aprovado e nao e codigo morto apenas
-  porque a interface ou os assets finais ainda nao existem;
-- `fluxo final`: esta validado e deve ser alterado somente por requisito novo,
-  bug reproduzido ou metrica;
-- `infraestrutura contratual`: RPCs vazios, callbacks, classes-base, migrations
-  e fallbacks operacionais podem parecer ociosos, mas exigem prova de ausencia de
-  uso antes de remocao.
-
-O inventario operacional dessas categorias vive exclusivamente em
-`FIRST_BETA_ROADMAP.md`. Este documento define apenas os criterios. Analise
-estatica nao prova ausencia total de codigo morto em Godot porque RPCs, cenas,
-signals e chamadas por nome podem ser resolvidos dinamicamente.
-
-Arquivos grandes atuais devem ser divididos por fronteira, nao por tamanho:
-
-- `movement_controller.gd`: input history, simulacao e apresentacao;
-- `portal_manager.gd`: catalogo, instancia e handoff;
-- `datamoon_enemy.gd`: entidade, configuracao de combate e rewards; decisao,
-  grupos, lifecycle e selecao de acao ficam nos componentes `enemy_ai`;
-- `inventory.gd`: uso, equipamento, rewards e operacoes;
-- handlers Go: agregado e use case.
-
-Essas extracoes devem ocorrer depois do release gate quando o fluxo afetado ja
-possuir um roteiro manual reproduzivel.
-
-## Estrategia Godot Hibrida
-
-### Cenas
-
-Preferir cenas para estruturas visuais e autoradas:
-
-- entidades;
-- mapas e colisoes;
-- janelas e componentes de UI;
-- AnimationTree;
-- anchors e markers;
-- shaders e materiais;
-- variantes visuais reutilizaveis.
-
-Uma cena deve tornar hierarquia e contrato visual legiveis no editor. Evitar
-cenas duplicadas que diferem apenas por cor ou valor de catalogo.
-
-### Codigo
-
-Preferir codigo para comportamento dinamico:
-
-- rede;
-- prediction e reconciliacao;
-- autoridade;
-- state machines;
-- streaming;
-- pooling;
-- lifecycle;
-- validacao;
-- persistencia;
-- composicao runtime orientada por dados.
-
-Nao montar por codigo uma arvore visual estavel que seria mais clara e barata de
-manter como cena.
-
-Entidades com a mesma hierarquia visual devem usar uma cena-base e variantes
-herdadas por papel. Player local/remoto e Datamoon aliado/inimigo nao devem
-duplicar toda a arvore apenas para trocar script, colisao ou apresentacao. O
-papel de rede continua explicito no payload e no factory; a especie define a
-base visual reutilizavel.
-
-### JSON
-
-Preferir dados para conteudo ajustavel:
-
-- stats e timings;
-- drops e rewards;
-- quests;
-- receitas;
-- portais;
-- spawns;
-- NPCs;
-- disponibilidade;
-- presets e paletas.
-
-JSON nao deve conter autoridade secreta que o Client possa alterar para obter
-vantagem. O Server carrega e valida o contrato canonico.
-
-## Performance Do Client
-
-Metas iniciais de perfil:
-
-- 60 FPS sustentados em hardware alvo;
-- frame de CPU e GPU abaixo de 16,67 ms no p95;
-- sem stutter perceptivel em troca de mapa;
-- memoria estabiliza depois de carregar/descarregar conteudo;
-- nenhuma fila de recursos permanece processando quando vazia.
-
-Cuidados:
-
-- palette swap compartilha shader e atualiza uniforms apenas quando a aparencia
-  muda;
-- camadas de personagem aumentam draw calls; ocultar camadas vazias e evitar
-  materiais unicos sem necessidade;
-- usar nearest e alinhamento inteiro para pixel art;
-- carregar por mapa/manifesto quando o catalogo crescer;
-- pool apenas quando o profiler mostrar churn em projeteis, efeitos ou textos;
-- VSync fica ligado por padrao e um limite configuravel pode ser adicionado;
-- renderer Compatibility so deve substituir Forward Plus depois de comparar
-  shaders, visual, GPU e compatibilidade em hardware real.
-
-## Performance Do Server
-
-Metas iniciais de perfil:
-
-- physics tick sem overruns;
-- snapshot build abaixo do budget de tick;
-- trafego limitado por peer;
-- nenhuma operacao MySQL no caminho por frame;
-- memoria por worker estabiliza apos cleanup de instancia;
-- filas de API e logs permanecem limitadas.
-
-Cuidados:
-
-- atualizar estado replicado na frequencia realmente publicada;
-- manter interest management por chunk e `space_id`;
-- evitar scan global por evento de combate;
-- batch de presenca quando a escala justificar;
-- indice espacial adicional somente quando scans aparecerem no profiler;
-- manter Dungeon 1 apenas no PBE enquanto nao houver necessidade de capacidade;
-- nao aumentar snapshot rate para mascarar interpolacao ou prediction incorreta.
-- prever somente a entidade controlada localmente; entidades remotas usam o
-  buffer de snapshots;
-- centralizar permissoes de acao em consultas semanticas e locks por origem,
-  evitando booleanos globais alterados por lifecycle, state e efeitos;
-- versionar contratos autoritativos que mudam a simulacao prevista, como
-  multiplicador e bloqueio de movimento por buff/debuff.
-
-## Performance Da API E Banco
-
-- tokens por servico e comparacao em tempo constante;
-- endpoints especificos, nunca SQL generico;
-- transacoes curtas e idempotentes;
-- pool de conexoes limitado;
-- indices guiados por consultas reais;
-- cleanup de auditoria em batches;
-- sem persistencia por frame, movimento ou ataque;
-- medir p50, p95, p99, erros e saturacao antes de ampliar pool;
-- usar slow-query log durante teste de carga, nao logging detalhado permanente.
+- Mensagens pequenas, tipadas, limitadas e validadas.
+- Sequencias e versoes monotonicas protegem contra reorder e replay.
+- Dados confiaveis apenas para eventos que nao podem ser perdidos.
+- Baseline/delta e budget por peer limitam snapshots.
+- Correcao visual nao pode mascarar divergencia autoritativa crescente.
 
 ## Observabilidade
 
-INFO registra transicoes importantes, bloqueios e operacoes sensiveis. DEBUG
-pode conter snapshots completos temporarios. Nunca registrar:
+- INFO para transicoes relevantes, bloqueios, erros e operacoes administrativas.
+- DEBUG para snapshots completos e diagnostico temporario.
+- `operation_id` somente em fluxos com varias etapas.
+- Logs estruturados em journald, sem JSONL duplicado.
+- Nunca logar senha, token, ticket ou conteudo normal do chat.
 
-- senha;
-- token;
-- ticket;
-- conteudo de chat;
-- movimento por frame;
-- cada ataque aceito.
+## Escala
 
-Metricas prioritarias:
+A arquitetura e adequada a uma producao media somente depois de carga
+representativa. Antes de aumentar capacidade, medir:
 
-- frame/tick time;
-- entidades e peers;
-- bytes e tamanho de snapshot;
-- fila e latencia da API;
-- conexoes e slow queries;
-- memoria por worker;
-- handoff por resultado;
-- reconciliacao por distancia aplicada.
+- CPU, memoria e swap por servico;
+- tick time e atraso de loop do Server;
+- jogadores e entidades por worker/space/chunk;
+- snapshot bytes/s, fila e descartes;
+- API p95/p99 e saturacao do pool;
+- locks, slow queries e tamanho do banco;
+- latencia, jitter, perda e reconnections.
 
-## Baseline Para Producao Media
+## Gate De Entrega
 
-O runtime possui a estrutura necessaria para uma producao media: interest por
-chunk e `space_id`, snapshot limitado por peer, backpressure da API, pool MySQL
-configuravel, drain gracioso, metricas Prometheus e deploy coordenado.
-
-A simulacao de inimigos tambem possui repath adaptativo, limite global de 16
-novos caminhos por physics frame, percepcao indexada por chunk e suspensao de IA
-fora do raio de 1024 pixels de um Datamoon de jogador. Caminhos, adiamentos por
-orcamento, sleeps e wakes possuem metricas proprias.
-
-Isso nao elimina os gates de producao:
-
-1. Ajustar a navegacao autoritativa junto das colisoes finais de cada mapa
-   durante a finalizacao visual.
-2. Fazer durante o beta teste de carga com players, inimigos, snapshots,
-   projeteis, latencia, perda de pacotes e backpressure da API.
-3. Implementar resume de sessao curto, de uso unico e vinculado ao worker para quedas
-   inesperadas.
-4. Instalar futuramente backup MySQL criptografado fora da VM e validar uma
-   restauracao antes da producao definitiva.
-5. Ligar metricas internas de saude, seguranca e saturacao a alertas externos.
-6. Adotar rate limit e sessoes compartilhados apenas quando Web ou Gateway
-   tiverem mais de uma instancia.
-
-O fluxo de contas, a borda atual de instancia unica e o acesso de producao do
-SES foram validados em 2026-08-04. CloudWatch/SNS ja cobre os alarmes essenciais
-da VM; a pendencia de observabilidade e coletar as metricas internas dos
-servicos, nao repetir a configuracao basica da AWS.
-
-Redis nao e requisito do Web atual em instancia unica. Pool de projeteis e VFX
-continua sendo uma decisao guiada por profiler, nao uma complexidade antecipada.
-
-## Gate De Qualidade
-
-Antes de publicar uma alteracao:
-
-- `git diff --check`;
-- import/parse Godot nos repos afetados;
-- JSON valido e referencias existentes;
-- RPC espelhado quando alterado;
-- `gofmt`, `go vet ./...` e `go build ./...` para API;
-- sintaxe Node para Web;
-- roteiro manual do fluxo afetado;
-- logs sem erro novo;
-- documentacao contratual e roadmap atualizados quando aplicavel.
-
-O projeto nao mantem arquivos de teste automatizado por decisao atual. Build,
-parse, analise estatica e validacao manual continuam obrigatorios.
+- Formatadores e parsers passam.
+- Projetos Godot importam em headless sem erro de script.
+- Catalogos sincronizados passam no gate semantico.
+- `git diff --check` nao encontra whitespace invalido.
+- Nao ha segredo ou artefato gerado no diff.
+- Documentacao proprietaria foi atualizada.
+- Fluxo manual afetado foi executado e seus riscos residuais registrados.

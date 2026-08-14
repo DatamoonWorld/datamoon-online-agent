@@ -17,21 +17,6 @@ Quests should:
 
 ---
 
-## Current Baseline
-
-The active project has a working data-driven quest flow with Server acceptance
-and progress authority, MySQL API persistence, NPC interactions, Client
-snapshots/UI, dependencies and repeatable/non-repeatable entries.
-
-The exact live count and IDs are tracked in `FIRST_BETA_ROADMAP.md`; content
-authors must inspect the current Server catalog instead of copying historical
-quest IDs from this specification.
-
-For the copyable JSON contract, linear-chain pattern, NPC definition, runtime
-lifecycle and implementation checklist, see `docs/QUEST_AUTHORING_TEMPLATE.md`.
-
----
-
 ## Quest Identity
 
 Quests should feel like guided MMO objectives inside the Datamoons world.

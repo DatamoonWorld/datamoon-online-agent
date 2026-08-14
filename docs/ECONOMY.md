@@ -169,9 +169,8 @@ Bad sinks feel like taxes with no strategic value.
 
 ## Equipment Progression
 
-This specification is implemented in the PBE codebase. Generated equipment,
-upgrade and alternate mutations are authoritative, transactional, idempotent,
-and inventory-audited. Equipment is character-owned, but
+Generated equipment, Upgrade and Alternate mutations must be authoritative,
+transactional, idempotent and inventory-audited. Equipment is character-owned, but
 its combat bonuses apply to whichever Datamoon is currently active. Switching
 the active Datamoon must remove the bonuses from the previous active Datamoon
 and apply them to the new one immediately.
@@ -196,8 +195,11 @@ Stat curves and target-level upgrade chances also belong to the equipment item
 catalog. Client and Server must read those values from item data rather than
 maintaining mirrored constants in scripts.
 
-There is no equipment rarity or quality system. Critical Damage and Attack Speed
-are not valid equipment stats in this version and are reserved for a future pass.
+There is no equipment rarity or quality system in v0.04. Rarity is a planned
+future mechanic, but it must not be inferred from upgrade level, stat count or
+item quality. Its tiers, drop impact, equipment interaction and economy rules
+must be approved before implementation. Critical Damage and Attack Speed are not
+valid equipment stats in this version and are reserved for a future pass.
 
 Equipment changes are blocked while the character is in combat. Outside combat,
 equipping, unequipping, or switching an item recalculates the active Datamoon's
@@ -313,6 +315,23 @@ unequipped; the Client filters it and the MySQL API independently rejects an
 equipped row. Alternate presents the three generated stat entries as mutually
 exclusive checkboxes and submits only the selected index. The backend remains
 the sole authority for the replacement result.
+
+---
+
+## Player Trade And Vendors
+
+Player trade must use an authoritative, atomic bilateral transaction: both
+players review the final offer, both confirm
+the same version, and the backend locks ownership, capacity and value before
+committing. Cancellation, disconnect or validation failure grants nothing and
+returns control without moving value. Every completed trade requires an
+`operation_id` and economic audit.
+
+Map vendors are data-driven NPCs. They may sell progression utilities and
+other approved supplies for Bits. The backend owns price, stock rules, purchase
+limits, inventory capacity and currency deduction. Vendors should create useful
+currency sinks that help control inflation rather than provide mandatory
+pay-to-win power.
 
 ---
 

@@ -22,6 +22,8 @@ The current quest runtime supports these objective types:
 | --- | --- | --- | --- |
 | `kill_enemy_type` | Exact enemy type, such as `Slimmoon` | Server-confirmed enemy defeat | Progress is persisted as enemies die |
 | `collect_item` | Exact item id, such as `data_nocmoon_dna` | Current authoritative inventory quantity | Required items are consumed atomically at turn-in |
+| `talk_to_npc` | Exact NPC id | Valid authoritative dialogue completion | Completion is accepted only for the active NPC interaction |
+| `complete_dungeon` | Exact dungeon template id | Completion of the authoritative instance | Progress follows the exact completed dungeon |
 
 The current reward types are:
 
@@ -31,16 +33,8 @@ The current reward types are:
 | `item` | `itemid`, `amount` | Grants an inventory item |
 | `datamoon_xp` | `amount` | Grants XP to the active Datamoon |
 
-The following planned beta objectives are not implemented yet:
-
-- speaking to a specific NPC;
-- interacting with Hatchery, Craft/Cooking or Archive;
-- reaching or interacting with a portal;
-- entering a dungeon;
-- completing a dungeon or defeating its boss as a dungeon objective.
-
-These require explicit server-side objective types and event hooks before their
-quest JSONs can become functional.
+Any new objective category requires an explicit Server event hook and API
+persistence support before its JSON can become functional.
 
 ## Copyable JSON
 
@@ -229,17 +223,7 @@ Before testing each quest:
 11. Verify the next quest becomes available.
 12. Run the server catalog validation before deployment.
 
-## Initial Beta Authoring Boundary
-
-Q07 and Q08 can be authored now with `kill_enemy_type`.
-
-Q01-Q06, Q09 and Q10 should have their narrative, ids, NPCs, rewards and
-prerequisites drafted now, but their functional JSON should wait until the
-corresponding interaction and dungeon objective types are implemented.
-
-## Planned Dialogue Quest Contract
-
-Status: accepted design, not implemented.
+## Dialogue Quest Contract
 
 A dialogue quest remains associated with its required NPC. Accepting the quest
 does not complete its dialogue objective.
@@ -285,9 +269,6 @@ The intended future definition is:
 }
 ```
 
-These fields are documentation only until `talk_to_npc`, dialogue sessions and
-the final server RPC are implemented.
-
 ### Dialogue Authority Rules
 
 - The client may render balloons, but it cannot mark the quest complete.
@@ -298,9 +279,7 @@ the final server RPC are implemented.
 - Reading cannot be technically proven; the authoritative event is the valid
   final acknowledgement while the player remains eligible and in range.
 
-## Planned Dungeon Quest Contract
-
-Status: accepted design, not implemented.
+## Dungeon Quest Contract
 
 Dungeon quests use a server-observed objective:
 

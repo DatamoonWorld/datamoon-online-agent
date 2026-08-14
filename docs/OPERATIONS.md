@@ -38,8 +38,8 @@ available for a future capacity increase.
 - Each Godot service receives only its corresponding token through
   `DATAMOON_INTERNAL_API_TOKEN`.
 - Database, API, Auth and observability ports are blocked from the public network.
-- Public ports are TCP `80/443` and worker UDP `5000/5010/5020`. Legacy Gateway
-  UDP `5100` is removed only after successful WSS validation.
+- Public ports are TCP `80/443` and worker UDP `5000/5010/5020`. Gateway port
+  `5100` is loopback TCP behind Nginx and must not be exposed publicly.
 - Web binds only `127.0.0.1:3101`, talks only to the loopback MySQL API and must
   never be exposed directly. Nginx terminates HTTPS, overwrites `X-Real-IP` and
   applies public login/register request and connection limits.
@@ -91,7 +91,7 @@ readiness checks and code/binary rollback on validation or activation failure.
 
 ```bash
 sudo install -m 0755 /opt/datamoon/datamoon-online-agent/ops/update_vm.sh /usr/local/sbin/datamoon-update
-sudo install -m 0644 /opt/datamoon/datamoon-online-agent/ops/datamoon-deploy.service /etc/systemd/system/
+sudo install -m 0644 /opt/datamoon/datamoon-online-agent/ops/systemd/datamoon-deploy.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl start datamoon-deploy.service
 sudo journalctl -u datamoon-deploy.service -n 200 --no-pager
@@ -101,44 +101,12 @@ The updater intentionally aborts on dirty repositories. Schema migrations must
 remain backward-compatible because code rollback cannot undo a destructive DB
 migration.
 
-Character world persistence requires `dm_characters.space_id`. A clean install
-gets the column from `001_create_characters.sql`. For an existing PBE database,
-apply this additive change before deploying the API/Server release that reads
-the column:
-
-```sql
-ALTER TABLE dm_characters
-  ADD COLUMN space_id VARCHAR(128) NOT NULL DEFAULT 'digital_center' AFTER posy;
-```
-
-Existing rows intentionally start in `digital_center`; after the release, the
-next runtime checkpoint or clean logout records each character's current
-registered overworld map. Do not persist `dungeon:*` instance IDs manually.
-
-Link star progression adds persistent cap and MAX state to `dm_datamoons`. A
-clean install gets the final columns from `002_create_datamoons.sql`. Existing
-PBE databases must apply the following additive change before deploying the
-API/Server release that reads these columns:
-
-```sql
-ALTER TABLE dm_datamoons
-  ADD COLUMN link_star_cap TINYINT UNSIGNED NOT NULL DEFAULT 5 AFTER link_exp,
-  ADD COLUMN link_max_unlocked TINYINT(1) NOT NULL DEFAULT 0 AFTER link_star_cap,
-  ADD COLUMN link_max_unlocked_at TIMESTAMP NULL DEFAULT NULL AFTER link_max_unlocked,
-  ADD CONSTRAINT chk_dm_datamoons_link_star_cap
-    CHECK (link_star_cap >= 1 AND link_star_cap <= 10);
-
-UPDATE dm_datamoons
-SET link_exp = LEAST(link_exp, 30000),
-    link_star_cap = 5,
-    link_max_unlocked = 0,
-    link_max_unlocked_at = NULL;
-```
-
-The update deliberately normalizes current Code-form Datamoons to the five-star
-cap under the new individual-cost curve. Future permanent evolution unlocks
-promote `link_star_cap` to `7` (Nex) and `10` (Omega); temporary transformation
-must never lower it. Run the coordinated updater only after this SQL succeeds.
+Character `space_id`, Link caps, Link MAX and evolution unlock structures are
+part of the current SQL baseline and migration chain. Do not run ad-hoc
+`ALTER TABLE` commands during a normal deploy. The coordinated updater applies
+pending migrations; the Beta launch procedure recreates the databases from the
+clean baseline. Manual repair SQL requires a diagnosed schema mismatch and an
+explicit, reviewed recovery procedure.
 
 The beta dungeon day resets at midnight in Brasilia (`03:00 UTC`). Existing VM
 environment files override application defaults, so both

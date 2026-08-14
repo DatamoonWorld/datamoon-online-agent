@@ -280,18 +280,9 @@ an individual Server body.
   tile/world coordinate system. Viewport scaling does not change world
   coordinates.
 
-The first Moonlight Forest composition is a preliminary authoring baseline:
-
-- visual map grid: `256 x 128` cells at `16 x 16` pixels;
-- dense tree layer: 25,844 occupied cells, bounded by cells `(2, 0)` and
-  `(253, 122)`;
-- seven nearby tree scene instances are currently placed around the first
-  clearing under `TreeObjects`;
-- the composition establishes a western clearing, central route and
-  northeastern clearing, but remains subject to visual iteration;
-- no final Server collision or navigation polygon was generated from this
-  baseline yet.
-
-Re-export authoritative contours after any change to the blocking tree layer.
-Moving decoration that is not part of that layer does not require a navigation
-rebake unless its Server collision also changes.
+Moonlight Forest currently uses provisional, collision-aware navigation fields
+for Slimmoon and Nocmoon. Their exact polygons, occupied cells and object counts
+are map content rather than an architectural contract and must be inspected in
+the current Client and Server scenes. Re-export authoritative contours after a
+change to blocking tiles and rebake navigation whenever authoritative collision
+changes.

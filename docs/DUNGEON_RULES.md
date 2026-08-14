@@ -17,24 +17,6 @@ Dungeons should provide:
 
 ---
 
-## Current Baseline
-
-The project already has a live dungeon template pattern.
-
-Current implementation includes:
-
-- data-driven dungeon templates in server JSON;
-- data-driven overworld selector portals and per-instance exit portals;
-- per-instance space ids;
-- instance timers;
-- party-aware instance reuse;
-- completion rewards;
-- forced ejection on timeout or party invalidation.
-
-`moonlight_cavern` is the current reference template.
-
----
-
 ## Dungeon Identity
 
 Dungeons are not just closed combat rooms.
@@ -207,7 +189,7 @@ Do not let dungeon rewards trivialize overworld progression.
 
 ### Equipment progression rewards
 
-This reward configuration is implemented for `moonlight_cavern`.
+`moonlight_cavern` is the reference configuration for this reward contract.
 
 The current dungeon grants one `Upgrade Chip` on eligible completion and rolls
 an independent 5% chance to grant one `Alternate Chip`. These materials are

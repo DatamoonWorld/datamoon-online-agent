@@ -52,6 +52,25 @@ Start with simple event forms before building global multi-phase structures.
 
 ---
 
+## First Planned Format: Glitch Anomalies
+
+Anomalies are localized Glitch disturbances that temporarily affect a bounded
+map area. While active, they may:
+
+- replace or reinforce local spawns with more aggressive Datamoons;
+- alter combat profiles without changing the underlying species catalog;
+- increase explicitly configured drop opportunities;
+- present a timer, area marker and clear participation rules;
+- cleanly restore the normal zone state when the event ends.
+
+The Server owns location, duration, spawn changes, aggression, eligibility and
+reward rolls. Increased drops must use bounded event tables and auditable reward
+operations; the Client only presents state and effects. Anomalies are the first
+planned world-event format, but remain future work until their schedule,
+participation threshold, rewards and anti-alt limits are approved.
+
+---
+
 ## Authority Rules
 
 World events are server-authoritative.

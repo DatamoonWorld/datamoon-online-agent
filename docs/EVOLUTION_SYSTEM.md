@@ -131,7 +131,7 @@ This is preferred because forms may differ in:
 
 ---
 
-## First Implemented Line
+## First Reference Line
 
 The Slimmoon family is the first authoritative Unlock implementation:
 
@@ -145,22 +145,16 @@ Line identifiers always use the final Omega form. Therefore the registered
 line is `slimmoon_wm`, not an arbitrary branch name. A future alternate branch
 ending in `slimmoon_am` must use `slimmoon_am` as its line identifier.
 
-Unlock persistence, item consumption, sequential validation, Link-cap
-promotion and audit are implemented. Runtime Transform/Regress and the final
-form scenes remain separate work.
-
-The Server exports every registered line in `evolution_lines`; it no longer
-discards branches after the first entry. The Client keeps a selected line and
-can switch that selection without changing authoritative state. A visible line
-selector is required only when a second line is registered.
+The Server exports every registered line in `evolution_lines`. The Client keeps
+a selected line and can switch that selection without changing authoritative
+state. A visible line selector is required when more than one line exists.
 
 The Stats evolution slots use these controls:
 
 - right click on a locked form requests Unlock after every requirement is met;
 - the confirmation explicitly authorizes permanent material consumption;
-- left click on an unlocked form is reserved for Transform/Regress;
-- Transform/Regress intentionally remains inactive until its authoritative
-  runtime state and animation contract are implemented.
+- left click on an unlocked form requests Transform or Regress under the
+  authoritative runtime and animation contract.
 
 Locked-form tooltips show live requirement status for level, Link, previous
 form and inventory materials. Colors are informational only; the mysqlapi
@@ -180,11 +174,11 @@ Unlock storage remains modeled by Datamoon instance:
 - `stage_index`
 - `unlocked_at`
 
-Before Transform/Regress is implemented, `dm_datamoons` must gain explicit
-`family_id` and `active_form_id` fields. The existing `type` field must not be
-repurposed because current progression and species contracts use it as the base
-identity. That migration, its write paths and runtime scene swap are one atomic
-delivery and remain deferred until the form sprites/scenes are ready.
+Transform/Regress persistence requires explicit `family_id` and
+`active_form_id` fields in `dm_datamoons`. The existing `type` field must not be
+repurposed because progression and species contracts use it as the base
+identity. Migration, write paths and runtime scene swap form one atomic
+delivery.
 
 Recommended semantics:
 
@@ -195,12 +189,5 @@ Recommended semantics:
 
 ---
 
-## Initial Delivery Order
-
-1. Document the system and official line in the agent.
-2. Create the evolution catalog JSON for the first family. (complete)
-3. Add mysqlapi migration and endpoints for unlock persistence. (complete)
-4. Add the minimal client Unlock interaction and persistent state. (complete)
-5. Implement runtime Transform/Regress on the server. (pending)
-6. Replicate and retain every branched line. (complete)
-7. Add the visible branched-line selector before registering a second line. (pending)
+Implementation status and delivery order live only in
+`FIRST_BETA_ROADMAP.md`.
