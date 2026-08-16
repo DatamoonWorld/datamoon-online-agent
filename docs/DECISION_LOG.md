@@ -60,7 +60,9 @@ pertencem a `FIRST_BETA_ROADMAP.md`.
 - Link representa o vinculo com o Datamoon e controla a porcentagem dos stats
   de equipamento e o nivel efetivo de skills.
 - Evolucao segue `Code -> Nex -> Omega`, separando Unlock persistente de
-  Transform/Regress. A forma Omega identifica a linha evolutiva.
+  Transform/Regress. A forma Omega identifica a linha evolutiva. Forma ativa e
+  cooldown de transformacao existem apenas na sessao; login sempre retorna a
+  Code e nao exige coluna de banco.
 - `Datapedia` e o nome oficial do catalogo de especies no jogo e na Web.
 
 ## Conta, Web E Operacao

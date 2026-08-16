@@ -70,10 +70,11 @@ pacote comemorativo serao preservadas conforme os termos publicados.
 
 ### Evolucao
 
-- Concluir Transform e Regress entre Slimmoon e Slimmoon Fighter Mode.
+- Validar Transform e Regress entre Slimmoon e Slimmoon Fighter Mode: atalhos,
+  bloqueios, cooldown, recursos, hotbar, morte, relog e dungeon.
 - Criar Slimmoon Warrior Mode e sua transicao apos os assets ficarem prontos.
-- Bloquear acao durante a apresentacao e trocar a entidade sem perder estado,
-  ownership ou ordenacao de snapshots.
+- Substituir o fallback visual Code pelas cenas runtime do Fighter Mode sem
+  perder estado, ownership ou ordenacao de snapshots.
 - Criar a quest futura que libera Link MAX depois da ultima evolucao.
 
 ### Boss E Dungeon

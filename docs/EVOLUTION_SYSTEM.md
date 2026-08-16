@@ -69,13 +69,16 @@ Sequential rule:
 
 ## Transform Rules
 
-- Transformation can happen anywhere.
-- Transformation cannot happen while the Datamoon is in action.
-- Examples of blocked states:
-  - combat action;
-  - skill cast;
-  - fishing;
-  - other gameplay gimmicks that mark the Datamoon as busy.
+- Transformation can happen in the overworld, during combat and inside a
+  dungeon.
+- A defeated Datamoon cannot transform.
+- A new Transform/Regress request is rejected while a basic attack, skill or
+  another evolution transition is active.
+- Transform and Regress use a two-second authoritative action lock.
+- A three-second cooldown starts when the transition completes and applies to
+  every later Transform or Regress request.
+- The Client exposes nine form slots above the combat hotbar. Their keyboard
+  contract is `ALT+1` through `ALT+9`.
 
 On successful transform:
 
@@ -83,6 +86,13 @@ On successful transform:
 - MP is restored to full.
 - Buffs remain active.
 - Skill cooldowns reset.
+- equipment and Link modifiers are recalculated before HP and MP are filled;
+- the persistent hotbar layout remains, while skill actions are resolved again
+  from the active form's combat slots.
+
+Regress follows the same resource, cooldown and hotbar rules. Death performs
+an automatic Regress to Code without healing the defeated Datamoon; the normal
+revive lifecycle owns the later resource restoration.
 
 ---
 
@@ -129,6 +139,12 @@ This is preferred because forms may differ in:
 - sprite and animation setup;
 - combat behavior details.
 
+Until a form owns complete mirrored Client and Server scenes, its catalog can
+remain runtime-incomplete. The runtime still applies its authoritative stats
+and skills, but explicitly reuses the Code visual and valid Code timing as a
+temporary content fallback. Set `runtime_ready` only after both projects have
+the final scene, sprite, collisions and action timings.
+
 ---
 
 ## First Reference Line
@@ -174,11 +190,11 @@ Unlock storage remains modeled by Datamoon instance:
 - `stage_index`
 - `unlocked_at`
 
-Transform/Regress persistence requires explicit `family_id` and
-`active_form_id` fields in `dm_datamoons`. The existing `type` field must not be
-repurposed because progression and species contracts use it as the base
-identity. Migration, write paths and runtime scene swap form one atomic
-delivery.
+Active form is session-only state owned by the Game Server. It is not written
+to MySQL and requires no migration. The existing `dm_datamoons.type` remains
+the permanent Code identity; runtime checkpoints persist resources and
+progress without changing that identity. Login always rebuilds the Datamoon in
+Code form.
 
 Recommended semantics:
 

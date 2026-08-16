@@ -171,8 +171,14 @@ temporario sao conceitos diferentes. Familias podem possuir linhas ramificadas.
 - replicacao de todas as linhas registradas;
 - selecao interna deterministica de linha no Client;
 - slots e tooltips de requisitos na janela de stats;
-- Transform, Regress, forma ativa e troca de cena ainda nao fazem parte do
-  runtime disponivel.
+- Transform e Regress autoritativos com nove atalhos `ALT+1` a `ALT+9`;
+- bloqueio de dois segundos, cooldown compartilhado de tres segundos e
+  recuperacao total de HP/MP depois do recalculo de equipamentos;
+- forma ativa temporaria por sessao, retorno a Code no login e regressao
+  automatica na morte;
+- hotbar reidratada pelas skills da forma ativa;
+- troca visual completa depende das cenas runtime de cada forma. Enquanto o
+  Slimmoon Fighter Mode nao possui essas cenas, ele usa fallback visual Code.
 
 ## Passe De Batalha
 
