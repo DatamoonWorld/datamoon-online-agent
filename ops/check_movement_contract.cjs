@@ -19,6 +19,14 @@ const clientFile = path.join(
   "movement_contract.gd"
 );
 
+// The Client is not installed on the production VM. Keep the cross-repository
+// check active in development environments, but do not block a server deploy
+// when the optional client checkout is unavailable.
+if (!fs.existsSync(clientFile)) {
+  console.log("Movement contract check skipped: Client repository is not installed.");
+  process.exit(0);
+}
+
 function readConstants(file) {
   const source = fs.readFileSync(file, "utf8");
   const constants = new Map();

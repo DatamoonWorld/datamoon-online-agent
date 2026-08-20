@@ -13,7 +13,9 @@ procedimento humano completo pertence a `../docs/OPERATIONS.md`.
 - `check_catalog_sync.cjs`: compara semanticamente itens do Server e da MySQL
   API, ignorando apenas campos de apresentacao.
 - `check_movement_contract.cjs`: compara as chaves do contrato de movimento
-  entre Client e Server antes do deploy.
+  entre Client e Server antes do deploy quando o checkout do Client estiver
+  disponivel; a VM de producao nao instala o Client e registra o check como
+  ignorado nesse caso.
 
 ## Instalacao
 
