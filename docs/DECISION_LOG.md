@@ -36,6 +36,15 @@ pertencem a `FIRST_BETA_ROADMAP.md`.
 - Snapshots antigos nao podem sobrescrever estado mais novo de posicao ou HP.
 - `space_id` identifica cada espaco autoritativo. Digital Center e Moonlight
   Forest permanecem no worker Overworld; dungeons usam instancias reservadas.
+- Dataworld e organizado em Nodes. `NODE-01` e a primeira macro-regiao
+  canonica; Digital Center e o hub publico que exerce a funcao de Datacenter
+  fora dos Nodes.
+- Moonlight Depths e o nome narrativo e tecnico canonico da primeira dungeon,
+  com ID `moonlight_depths`.
+- Devmoon classifica Nodes para fins tecnicos; habitantes usam os nomes
+  regionais. Sub-regioes podem existir dentro de um mapa sem novo `space_id`.
+- Estados de descoberta de Node e conexoes diretas/indiretas entre Nodes nao
+  fazem parte da regra vigente.
 - Mapas visuais sao cenas do Client. Geometria, spawns, portais e navegacao que
   afetam autoridade possuem representacao equivalente no Server.
 - Handoff preserva Party e sessao; desconexao curta pode retomar no mesmo
@@ -63,7 +72,7 @@ pertencem a `FIRST_BETA_ROADMAP.md`.
   Transform/Regress. A forma Omega identifica a linha evolutiva. Forma ativa e
   cooldown de transformacao existem apenas na sessao; login sempre retorna a
   Code e nao exige coluna de banco.
-- `Datapedia` e o nome oficial do catalogo de especies no jogo e na Web.
+- `Moonpedia` e o nome oficial do catalogo de especies no jogo e na Web.
 
 ## Conta, Web E Operacao
 

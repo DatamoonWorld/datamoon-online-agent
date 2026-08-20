@@ -12,6 +12,8 @@ procedimento humano completo pertence a `../docs/OPERATIONS.md`.
   coordenado por `/usr/local/sbin/datamoon-update`.
 - `check_catalog_sync.cjs`: compara semanticamente itens do Server e da MySQL
   API, ignorando apenas campos de apresentacao.
+- `check_movement_contract.cjs`: compara as chaves do contrato de movimento
+  entre Client e Server antes do deploy.
 
 ## Instalacao
 

@@ -14,8 +14,8 @@ Treat Godot 4.7 as the default project baseline.
 
 For the current beta runtime context:
 
-- local development has already moved to Godot `4.7.1 rc1`;
-- VM gameplay services were aligned to Godot `4.7.1 rc1`;
+- local development uses Godot `4.7.1 stable`;
+- VM gameplay services use Godot `4.7.1 stable`;
 - docs should still refer to the project baseline as Godot 4.7 unless a narrower runtime note matters.
 
 Do not assume 4.6-era metadata or behavior is still the active default.

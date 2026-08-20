@@ -15,7 +15,7 @@ aos documentos tematicos; o desenho completo das funcionalidades pertence a
 
 Entregar uma primeira jornada jogavel e segura com conta verificada, criacao de
 personagem, escolha de Datamoon, Digital Center, Moonlight Forest, sete quests,
-Moonlight Cavern, progressao inicial, Party e operacao recuperavel.
+Moonlight Depths, progressao inicial, Party e operacao recuperavel.
 
 O jogador enfrenta Slimmoon antes de Nocmoon e termina a jornada por volta dos
 niveis 12-13. O Beta pode sofrer wipe completo; a conta e a elegibilidade ao
@@ -51,7 +51,7 @@ pacote comemorativo serao preservadas conforme os termos publicados.
 ### Jornada Jogavel
 
 - Criar cenas finais de `digital_center`, `moonlight_forest` e
-  `moonlight_cavern`.
+  `moonlight_depths`.
 - Espelhar no Server colisao, NavigationRegion, spawns, pontos de entrada,
   portais e retorno seguro dos mapas finais.
 - Posicionar apenas Devmoon e o conteudo habilitado da v0.04.
@@ -61,7 +61,7 @@ pacote comemorativo serao preservadas conforme os termos publicados.
 ### Conteudo Do Beta
 
 - Slimmoon selvagem nivel 1-3 antes de Nocmoon nivel 3-6.
-- Nocmoon nivel 7-8 na Moonlight Cavern e boss Nocmoon nivel 13.
+- Nocmoon nivel 7-8 em Moonlight Depths e boss Nocmoon nivel 13.
 - Conclusao da dungeon: 10.000 EXP, 100 Link EXP, 500 Bits, 1 Upgrade
   Chip e 5% de Alternate Chip.
 - Boss: 5% de `data_nocmoon_dna` e drops configurados no encontro.
@@ -100,7 +100,7 @@ pacote comemorativo serao preservadas conforme os termos publicados.
   Datamoon sem estado parcial.
 - Completar as sete quests e confirmar nivel, rewards e idempotencia.
 - Testar combate, morte, reconnect, troca de controle e evolucao.
-- Completar Moonlight Cavern solo e em Party, incluindo reconnect, handoff,
+- Completar Moonlight Depths solo e em Party, incluindo reconnect, handoff,
   recompensa diaria e retorno.
 - Conferir hashes de catalogo entre Client, Server e API.
 - Validar baseline SQL em banco descartavel.

@@ -463,6 +463,113 @@ files on the VM because they duplicate the journal. Full metrics snapshots are
 DEBUG-only and metrics remain available through each worker observability
 endpoint.
 
+The worker also exposes Prometheus-compatible metrics locally:
+
+```bash
+curl -fsS http://127.0.0.1:5001/metrics
+```
+
+The endpoint contains bounded counters, gauges and p50/p95/p99 samples for
+movement ticks, snapshots, combat reconciliation, internal API capacity,
+workers and readiness. Values are in memory and reset when the worker restarts;
+historical retention belongs to the monitoring system, not the Game Server.
+
+For the current PBE, journald plus the local endpoint are sufficient. For a
+medium production deployment, run Prometheus on a private monitoring host or
+inside the same private network and scrape each worker's endpoint through a
+protected collector. Use Grafana only as the dashboard and alerting layer over
+Prometheus. Do not expose port `5001` publicly or proxy it through the game
+domain.
+
+CPU, memory, swap, disk and network are host metrics, not gameplay metrics.
+Keep those in CloudWatch using the EC2/CloudWatch Agent path and send only
+essential alarms through SNS. Prometheus/Grafana should retain gameplay and
+service latency history; CloudWatch remains the source for AWS billing and VM
+health.
+
+## Gameplay Metrics Roadmap
+
+Gameplay metrics are permanent operational signals, not a per-action history.
+They must remain bounded in memory, use counters, gauges and histograms, and be
+exported through the worker metrics endpoint or an equivalent aggregate path.
+Do not persist metrics per frame, movement command, attack or packet.
+
+### Current Server Coverage
+
+The Game Server already measures the main runtime risks:
+
+- simulation tick duration, late ticks and process duration;
+- connected peers, loading clients, readiness and worker heartbeats;
+- movement commands, input sequence resynchronization and action blocking;
+- snapshot build time, compression, bytes, entity counts, fragmentation and
+  interest-management deferrals;
+- combat action duration, watchdogs, authority error, prediction adjustment,
+  visual correction and hard-snap candidates;
+- internal API latency, queue depth, in-flight requests, circuit state and
+  backpressure;
+- AI navigation paths, invalid paths, stuck enemies, recovery waypoints,
+  emergency returns and sleep/wake activity;
+- runtime checkpoints, pending-save age and failed or superseded entries;
+- RPC admission results, inventory replication and loading handshake outcomes.
+
+### P0 Before Broader Production
+
+Add or confirm dashboards and alerts for:
+
+- tick p95/p99 and late-tick rate;
+- connected players and active entities by `space_id`;
+- snapshot age, bytes, fragmentation and deferred entities;
+- input age at ACK, RTT estimate, reconciliation distance and hard snaps;
+- internal API p95/p99, errors, queue depth and circuit-open state;
+- checkpoint failures and oldest pending checkpoint age;
+- AI stuck, invalid-path and emergency-return rates;
+- worker heartbeat and readiness state.
+
+RTT and packet-loss measurements should be aggregate connection signals. They
+must not create a time series per player or entity. Alert thresholds should be
+chosen from beta baselines, then revisited after real traffic is measured.
+
+### P1 After Beta Validation
+
+Add aggregate product-flow metrics for:
+
+- login, character creation and Datamoon selection;
+- quest starts and completions;
+- dungeon entry, completion, abandonment, handoff and return;
+- evolution unlocks and transformations;
+- reconnect success, expiration and failure;
+- player population by map and worker;
+- rewards, idempotency conflicts and economy operation outcomes.
+
+These signals belong to Server or MySQL API operations, depending on the
+authority. They complement database audit tables and must not replace them.
+
+### P2 At Scale
+
+Consider only after multiple workers or materially higher concurrency:
+
+- shard and worker capacity by space;
+- handoff queue depth and reservation duration;
+- database pool saturation and query latency by safe route class;
+- cache hit rate and distributed queue health;
+- future Trade, Guild, Vendor, Battle Pass and Anomaly flow metrics.
+
+### Metric Contract
+
+- Counters use a `_total` suffix for accumulated events.
+- Gauges represent current state, such as peers or queued operations.
+- Histograms represent duration, latency, age or distance distributions.
+- Labels are limited to bounded values such as `worker_id`, `space_id`,
+  `operation`, `result`, `reason` and `action_type`.
+- Never use player IDs, usernames, IP addresses, tickets, entity IDs or raw
+  payload values as metric labels.
+- Logs explain an individual incident; metrics show its frequency and trend;
+  database audits prove sensitive economic or administrative changes.
+
+Client performance and prediction values remain local diagnostics unless a
+future privacy-reviewed telemetry path is explicitly approved. The Client
+must not become a source of authority or economic metrics.
+
 Keep the journal compressed, capped at 200 MB, with 3 GB reserved for the system
 and seven days of retention. Use a drop-in at
 `/etc/systemd/journald.conf.d/datamoon.conf`, installed from
@@ -507,3 +614,147 @@ ORDER BY total_mb DESC;
 
 Third-party asset licenses and their bundled READMEs stay next to the assets and
 are not project documentation.
+
+## Observability Inventory By Repository
+
+The runtime logging contract is stdout plus systemd-journald. JSONL files under
+the Godot user directory are disabled on the VM by
+DATAMOON_LOG_FILES=false; they remain only as a controlled local fallback.
+Never add passwords, tokens, tickets, e-mail addresses, raw IP addresses, chat
+content or full request bodies to a log.
+
+### datamoon-online-agent
+
+The Agent does not run a permanent gameplay logger. Its deployment and
+operational scripts write their command output to the coordinated deployment
+journal.
+
+```bash
+journalctl -u datamoon-deploy.service -n 200 --no-pager
+```
+
+The useful events are source checkout, validation gates, migration/startup
+progress, health checks, rollback and deployment completion/failure. Future
+Agent diagnostics should remain bounded command output or structured
+deployment events; temporary shell transcripts and copied terminal dumps do not
+belong in the repository.
+
+### datamoon-online-auth
+
+Auth uses connection_logger.gd and emits structured connection/auth events to
+stdout. On the VM:
+
+```bash
+journalctl -u datamoon-auth.service --since "15 minutes ago" --no-pager -o cat
+```
+
+Keep connection accepted/closed, authentication result, session rejection and
+API failure events. Future additions may include bounded authentication latency
+and rejection reason counters, but never credentials, bearer tokens or raw
+account secrets.
+
+### datamoon-online-gateway
+
+Gateway uses connection_logger.gd for WebSocket lifecycle and route selection.
+Inspect it with:
+
+```bash
+journalctl -u datamoon-gateway.service --since "15 minutes ago" --no-pager -o cat
+```
+
+Keep listener/TLS failures, client connection lifecycle, login answer and
+worker route events. Future diagnostics may add bounded handshake latency,
+route rejection counts and active session gauges.
+
+### datamoon-online-client
+
+The Client connection logger writes structured events to the Godot process
+console. It is local diagnostic output, not a server audit source. Inspect it
+in the Godot editor output or the process launcher output.
+
+Keep gateway connection, authentication result, selected game route, loading
+readiness and user-visible protocol errors. Client prediction/reconciliation
+values are diagnostic-only and should be enabled through an explicit local
+diagnostic build or bounded event path when needed; they must not become
+per-frame production logs. The removed remote-debug export hook and enemy
+worldstate debug printer were development tools, not runtime contracts.
+
+### datamoon-online-mysqlapi
+
+The Go API writes startup, migration, catalog, request rejection and operation
+failure events to stdout. On the VM:
+
+```bash
+journalctl -u datamoon-api.service --since "15 minutes ago" --no-pager -o cat
+curl -fsS http://127.0.0.1:3000/ready
+```
+
+Persistent value changes are represented by database audit tables, not by
+verbose request logs. Keep migration status, readiness, catalog hash/status,
+idempotency rejection, authorization failure and database error events. Future
+metrics should cover API latency percentiles, pool saturation and cleanup
+batch results without recording payloads.
+
+### datamoon-online-server
+
+The Server uses structured_logger.gd, log_tag.gd and stdout. Journald collects
+the worker logs:
+
+```bash
+journalctl -u datamoon-server@overworld.service \
+  -u datamoon-server@dungeon-1.service \
+  --since "15 minutes ago" --no-pager -o cat
+```
+
+Operational events are grouped by SYSTEM, SESSION, COMBAT, DATAMOON,
+INVENTORY, PROGRESSION, SAVE, PARTY, GUILD, CHAT and TIME. Keep
+startup/readiness, handoff and lease transitions, combat rejection or
+reconciliation summaries, reward/inventory operation IDs, evolution outcomes,
+moderation actions, dungeon lifecycle and health/observability failures.
+Existing DEBUG events are for bounded diagnosis and are filtered by the
+default INFO level. Future investigations should add a temporary structured
+event with a removal criterion, never a permanent per-frame or per-attack
+trace.
+
+The server health endpoint is local-only:
+
+```bash
+curl -fsS http://127.0.0.1:5001/health
+```
+
+Use the worker-specific port from its environment when the port differs.
+
+### datamoon-online-web
+
+Web and the isolated mailer emit structured JSON to their systemd journals:
+
+```bash
+journalctl -u datamoon-web.service \
+  -u datamoon-mailer.service \
+  --since "15 minutes ago" --no-pager -o cat
+curl -fsS http://127.0.0.1:3101/health
+```
+
+Keep startup/health, rate-limit, authentication lifecycle, support action
+metadata, transactional mail success/failure and legal acceptance events.
+Support and account logs may contain ticket IDs, actor IDs and operation
+outcomes, but never support message bodies, e-mail addresses or token values.
+Future alerts should derive from these bounded event names and counters rather
+than from request dumps.
+
+### datamoon-online-sprites
+
+Sprites is an asset repository and has no runtime service or operational log.
+Asset import warnings belong to the local editor output and should be fixed or
+ignored through the asset pipeline; do not commit editor logs, test exports,
+old asset copies or debug renders.
+
+### Log severity and retention
+
+INFO is for durable lifecycle and business-operation transitions, WARN for
+rejected, degraded or recoverable behavior, and ERROR for failed operations
+requiring attention. DEBUG is temporary diagnosis only. VM journald is
+compressed and capped at 200 MB with seven-day retention; durable economic and
+administrative audits follow the database retention policy of 180 days. This
+separation prevents high-volume combat or movement traces from inflating the
+database.

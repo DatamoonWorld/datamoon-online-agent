@@ -15,6 +15,30 @@ Quests should:
 - create repeatable goals;
 - connect lore, combat, and economy.
 
+## Canon Narrative Placement
+
+The starter Devmoon quests introduce the canon gradually. They should not
+reveal the full history of the Adormecido, Voss, NULL Protocol or Data Bleed
+before those events become relevant in the story.
+
+- Q1 presents Digital Center as the bridge between the human world and
+  Dataworld. Node terminology remains Devmoon's technical vocabulary.
+- Q2 explains that Datamoons are hybrid life forms born from the dreams of the
+  Ser da Lua, without resolving the entity's true name or origin in Oberon.
+- Q3 teaches the three Data Types, the first Link and combat equipment.
+- Q4 introduces Moonlight Forest, NODE-01's first natural region, through the
+  Slimmoon population and basic ecology.
+- Q5 introduces Nocmoon, territorial behavior and the first signs that the
+  region contains more than ordinary wildlife.
+- Q6 presents Moonlight Depths as the first dungeon and the first place where
+  unstable energy and deeper regional mysteries become visible. The current
+  runtime ID is `moonlight_depths`.
+- Q7 explains Link progression and the Code -> Nex -> Omega structure. The
+  truth about Glitch Controlado remains a later revelation.
+
+These are documentation-level dialogue directions. Localized Client strings
+and quest JSON are not changed by this contract update.
+
 ---
 
 ## Quest Identity

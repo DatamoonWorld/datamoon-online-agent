@@ -12,6 +12,11 @@ Todas as espécies de Datamoons descendem, direta ou indiretamente, dos sonhos d
 
 Eles constituem a principal forma de vida do Mundo dos Datamoons e desempenham papel fundamental em seu equilíbrio.
 
+O catalogo oficial de especies e formas conhecidas se chama **Moonpedia**.
+Moonpedia distingue o roster canonico do conteudo atualmente disponivel no
+runtime. Uma forma pode ser conhecida na historia e ainda nao possuir assets,
+JSON completo ou fluxo jogavel.
+
 ---
 
 # Origem dos Datamoons
@@ -317,3 +322,20 @@ Datamoons são criaturas híbridas biológicas e digitais originadas dos sonhos 
 Eles evoluem através de suas experiências, influências e vínculos, formando a principal forma de vida do Mundo dos Datamoons.
 
 Sua existência representa a união entre informação, imaginação e vida.
+
+## Roster canonico conhecido
+
+O roster atual possui 25 formas conhecidas, organizadas nas familias e formas
+descritas em `datamoon-world/Datamoon World Creatures.txt`:
+
+- Datacore: Devmoon; Rabbimoon, Lepurmoon e Milamoon; Slimmoon, Slimmoon
+  Fighter Mode e Slimmoon Warrior Mode; Woolymoon, Agnusmoon e Pecoramoon.
+- Glitch: Nocmoon, Kainemoon e Bathorymoon; Cleomoon, Cleomoon Chained Mode e
+  Cleomoon Unleashed Mode; Sidmoon, Willowmoon e Jestmoon.
+- Patch: Umimoon, Yokomoon e Tayomoon; Naiadmoon, PondHawkmoon e
+  WarHawkermoon.
+
+Essas formas sao canonicas no universo, mas nao devem ser tratadas como
+implementadas apenas por aparecerem no roster. O runtime deve receber cada
+forma somente quando seus contratos de especie, assets, cenas, combate,
+evolucao e persistencia estiverem prontos.

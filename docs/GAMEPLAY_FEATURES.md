@@ -5,8 +5,10 @@ Online. Ele descreve o objetivo de cada sistema e o que o projeto oferece hoje,
 sem classificar prioridade, maturidade ou versao de entrega.
 
 Status, pendencias e ordem de implementacao pertencem exclusivamente a
-`FIRST_BETA_ROADMAP.md`. Ao expandir uma mecanica, primeiro completar seu desenho
-aqui e depois transformar as partes aprovadas em tarefas no roadmap.
+`FIRST_BETA_ROADMAP.md`. Este documento nao e um backlog: ele registra o desenho
+funcional aprovado e o inventario funcional observado no codigo. Ao expandir
+uma mecanica, primeiro completar seu desenho aqui e depois transformar as partes
+aprovadas em tarefas no roadmap.
 
 ## Archive
 
@@ -273,7 +275,7 @@ Bits para auxiliar jogadores e controlar inflacao.
 - catalogo de venda, recompra, limites, variacao de estoque e regras por mapa
   ainda precisam ser definidos.
 
-## Datapedia
+## Moonpedia
 
 ### Definicao
 
@@ -282,13 +284,38 @@ preservando misterio quando uma entrada nao deve revelar todos os dados.
 
 ### O Que Existe Hoje
 
-- catalogo publico Web chamado temporariamente de Moonpedia;
+- catalogo publico Web chamado Moonpedia;
 - listagem numerada e pagina individual por Datamoon;
 - identidade, sistema, stage, stats, crescimento, skills e formulas;
 - assets e animacoes apresentados pela Web;
+- roster canonico documentado com 25 formas conhecidas;
+- separacao entre formas conhecidas na Moonpedia e formas disponiveis no
+  runtime;
 - nenhuma integracao com progresso individual de descoberta/unlock;
-- rota, textos e codigo ainda usam o nome Moonpedia;
+- rota, textos e codigo usam o nome Moonpedia;
 - versao dentro do Client ainda nao existe.
+
+## Nodes E Acesso Regional
+
+### Definicao
+
+Nodes organizam macro-regioes de Dataworld. `space_id` continua identificando
+o espaco runtime especifico; `node_id` organiza mapas, dungeons, portais e
+sub-regioes sem substituir o espaco autoritativo.
+
+### O Que Existe Hoje
+
+- catalogo autoritativo de `NODE-01` no Server;
+- `moonlight_forest` e `moonlight_depths` associados ao `NODE-01`;
+- Digital Center preservado fora do Node como Datacenter;
+- sub-regioes catalogadas de Moonlight Forest e Moonlight Depths;
+- portal principal do Digital Center bloqueado ate a conclusao de
+  `starter_combat_creatures`, que libera a primeira luta com Slimmoon;
+- portal de retorno e portal da dungeon associados ao `NODE-01`;
+- validacao autoritativa do desbloqueio no Server e visibilidade correspondente
+  no Client;
+- nenhum `node_id` persistido em personagem ou replicado por frame;
+- descoberta de novos Nodes continua dependente de quests e dialogos aprovados.
 
 ## Party
 

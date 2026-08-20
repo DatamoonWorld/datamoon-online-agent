@@ -158,8 +158,9 @@ Stalls emit the structured log `Enemy navigation stall detected` and increment
 `enemy_navigation_stuck_total`. Successful alternate waypoints increment
 `enemy_navigation_recovery_waypoint_total`; labels contain species and
 navigation mode, while entity-specific position and target remain only in logs
-to avoid high-cardinality metrics. With `debug_draw` enabled, the active path is
-yellow and a temporary recovery waypoint is orange.
+to avoid high-cardinality metrics. Navigation diagnostics are available through
+the structured stall and recovery events; visual path drawing is not part of a
+worker runtime.
 
 ## Adding A New Species AI
 
@@ -250,9 +251,9 @@ collision during migration.
 - A new map is incomplete until its authoritative navigation region is present;
   enemies deliberately stop and report a configuration error without one.
 
-Set `EnemyBrain.debug_draw` only in a local graphical Server run to display the
-soft wander boundary, hard leash and current navigation target. Keep it disabled
-in headless workers.
+The authoritative navigation region and structured stall/recovery events are the
+diagnostic sources for worker AI. Temporary graphical path drawing is not part
+of the runtime contract.
 
 ### Client vegetation and authoritative blockers
 

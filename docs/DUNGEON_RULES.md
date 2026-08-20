@@ -189,7 +189,7 @@ Do not let dungeon rewards trivialize overworld progression.
 
 ### Equipment progression rewards
 
-`moonlight_cavern` is the reference configuration for this reward contract.
+`moonlight_depths` is the reference configuration for this reward contract.
 
 The current dungeon grants one `Upgrade Chip` on eligible completion and rolls
 an independent 5% chance to grant one `Alternate Chip`. These materials are

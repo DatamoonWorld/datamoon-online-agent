@@ -4,11 +4,13 @@
 
 ## Visão Geral
 
-Datamoons Online se passa em uma camada de existência localizada entre o mundo biológico e o mundo digital.
+Datamoons Online se passa em Dataworld, uma camada de existência localizada
+entre o mundo biológico e o mundo digital.
 
 Esse local não é completamente físico nem completamente virtual.
 
-Ele surgiu séculos atrás quando uma entidade digital vinda de uma lua distante chegou à Terra após uma longa jornada pelo espaço.
+Ele surgiu séculos atrás quando uma entidade digital vinda de Oberon, uma das
+luas de Urano, chegou à Terra após uma longa jornada pelo espaço.
 
 Durante sua tentativa de sobrevivência, essa entidade encontrou refúgio entre a realidade biológica e a realidade digital, criando uma nova camada de existência.
 
@@ -16,13 +18,36 @@ Com o passar do tempo, essa camada tornou-se parte da própria entidade, assim c
 
 Esse local é conhecido como Mundo dos Datamoons.
 
+## Estrutura regional canonica
+
+Dataworld e organizado em macro-regioes chamadas **Nodes**. Um Node pode
+conter mapas, sub-regioes, dungeons, comunidades, eventos e pontos de
+interesse que compartilham uma estrutura informacional regional.
+
+O **Digital Center** e o nome publico do hub central. Nos registros tecnicos
+de Devmoon, ele exerce a funcao de **Datacenter** e fica fora dos Nodes.
+
+O primeiro Node conhecido e o **NODE-01**. Sua primeira regiao natural e
+**Moonlight Forest**. A primeira dungeon associada a essa regiao se chama
+**Moonlight Depths** e tambem o ID tecnico oficial da primeira dungeon.
+
+Devmoon classifica Nodes tecnicamente, enquanto os habitantes usam os nomes
+regionais. Sub-regioes podem existir dentro de um mapa sem exigir novo mapa ou
+novo `space_id`.
+
+Nao fazem parte da regra canonica atual estados de descoberta de Node nem uma
+regra obrigatoria de conexoes diretas ou indiretas entre Nodes.
+
 ---
 
-# O Ser da Lua
+# O Ser da Lua e O Adormecido
 
-Muito antes dos eventos atuais, uma entidade digital habitava uma das luas de um planeta distante.
+Muito antes dos eventos atuais, uma entidade digital habitava Oberon, uma das
+luas de Urano.
 
-Por motivos desconhecidos, essa entidade perdeu seu lar e iniciou uma viagem pelo espaço.
+Por motivos desconhecidos, essa entidade perdeu seu lar e iniciou uma viagem
+pelo espaço. Seu nome verdadeiro nunca foi confirmado; **O Adormecido** e
+**O Sonhador** são títulos usados em registros diferentes.
 
 Após séculos vagando, chegou à Terra extremamente danificada.
 

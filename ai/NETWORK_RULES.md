@@ -159,6 +159,32 @@ When a change can break compatibility, document it and deploy carefully.
   corrected visually over time; increasing snapshot frequency is not a fix for
   invalid prediction rules.
 
+### Movement Module Boundaries
+
+The movement flow is intentionally split without changing its public facade:
+
+- Server `movement_contract.gd` owns wire keys, command validation and direction
+  normalization shared by `ControlSession`, `movement_authority` and
+  `worldstate`;
+- Server `ControlSession` owns per-peer command ordering, ACK progress, locks and
+  bounded pending input;
+- Server `movement_authority` owns the fixed physics-tick simulation and remains
+  the only writer of authoritative movement;
+- Server `worldstate` owns interest selection, per-peer baselines, deltas and
+  snapshot versions;
+- Client `movement_contract.gd` mirrors the wire keys and normalization used by
+  prediction and snapshot consumption;
+- Client `movement_controller` owns local input, prediction, replay and
+  reconciliation for the controlled entity;
+- Client `worldmap` owns snapshot materialization, interpolation and rendering of
+  remote entities.
+
+The fixed tick is the simulation clock. Input ticks identify commands and ACKs;
+they never grant catch-up distance or extra movement. Snapshot ticks identify
+renderable world history and are rejected when older than the latest accepted
+snapshot. This keeps future batching, interest management and latency metrics
+compatible with the current ENet flow without adding a second authority.
+
 ---
 
 ## Chunk And Interest Rules

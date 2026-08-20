@@ -29,7 +29,7 @@ autoritativo de IA; ela nao redefine a especie.
 - sistema `Datacore`, `Patch` ou `Glitch`;
 - estagio `Code`, `Nex` ou `Omega`;
 - ID do sprite;
-- numero e disponibilidade na Datapedia;
+- numero e disponibilidade na Moonpedia;
 - descricao oficial.
 
 ### Stats E Crescimento

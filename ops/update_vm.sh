@@ -80,6 +80,7 @@ for repo in "${REPOS[@]}"; do
 done
 for repo in "${GODOT_REPOS[@]}"; do validate_godot_repo "$repo"; done
 node "$ROOT/datamoon-online-agent/ops/check_catalog_sync.cjs"
+node "$ROOT/datamoon-online-agent/ops/check_movement_contract.cjs"
 pushd "$ROOT/datamoon-online-web" >/dev/null
 npm ci --omit=dev --ignore-scripts --no-audit --no-fund
 npm run check

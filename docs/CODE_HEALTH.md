@@ -84,6 +84,26 @@ parametrizada resolve com clareza.
 - Baseline/delta e budget por peer limitam snapshots.
 - Correcao visual nao pode mascarar divergencia autoritativa crescente.
 
+## Fronteiras De Fragmentacao
+
+As extracoes devem preservar as fachadas publicas e mover apenas uma
+responsabilidade coesa:
+
+- Client `worldstate_buffer.gd`: fila, rejeicao por tick e interpolacao de
+  snapshots remotos.
+- Client `movement_action_timing.gd`: duracoes derivadas de frames/payloads e
+  consultas puras da predicao de movimento.
+- Server `snapshot_interest.gd`: candidatos, prioridade e budget de entidades
+  por peer.
+- API `game_write_authorization.go`: ownership e fences compartilhados pelas
+  escritas de personagem/Datamoon.
+- API `guild_policy.go`: normalizacao, permissoes e auditoria de Guild.
+
+`rpc_surface`, fachadas de portal, loaders de catalogo e brains de IA nao devem
+ser partidos apenas por tamanho. Eles continuam sendo pontos de contrato ou
+coordenacao; uma nova extracao exige consumidor real, testes de comportamento e
+reducao comprovada de acoplamento.
+
 ## Observabilidade
 
 - INFO para transicoes relevantes, bloqueios, erros e operacoes administrativas.
