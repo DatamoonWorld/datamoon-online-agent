@@ -650,6 +650,21 @@ Use `Finish Move Cycle` for simple looping jumps such as Slimmoon. Prefer a
 variable timing. Loading, character-control handoff and session reset must clear
 pending visual actions before applying a new baseline.
 
+### Combat Text Presentation
+
+Combat text is a short-lived Client visual effect, not a replicated gameplay
+entity. The Server sends the authoritative impact position, damage value,
+critical flag and HP version. The Client updates the target's displayed health
+when the target is locally available, then creates the floating text in a
+map-owned `CombatTextLayer` at the impact position.
+
+The text must not be parented to the damaged entity. This keeps it visible when
+the entity enters its death lifecycle or is despawned and prevents the number
+from following a target that moved after the authoritative impact. The layer
+is recreated with the active map and is cleared naturally on map replacement.
+Combat text animation, opacity and z-index are presentation-only and do not
+change damage authority or HP reconciliation.
+
 Enemy XP and Link EXP use an explicit object contract:
 
 ```json

@@ -158,6 +158,10 @@ When a change can break compatibility, document it and deploy carefully.
 - Large divergence may hard-snap the simulation root. Small divergence is
   corrected visually over time; increasing snapshot frequency is not a fix for
   invalid prediction rules.
+- Remote world rendering keeps one snapshot interval of interpolation history
+  in the current PBE Client. This preserves smoothing while limiting the
+  visible delay for combat; do not remove interpolation globally without
+  measuring packet loss and snapshot jitter first.
 
 ### Movement Module Boundaries
 
