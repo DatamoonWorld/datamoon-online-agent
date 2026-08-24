@@ -28,14 +28,17 @@
 
 ## Ataque basico e lifecycle
 
-- Ataque basico:    `7 frames; impacto no frame 5; janela de impacto de 3 frames`
+- Ataque basico:    `8 frames; impacto nos frames 5-8; mesma hitbox`
     -- Movimento:   `START: livre 100%; IMPACT: BLOQUEADO; RECOVERY: BLOQUEADO`
     -- FPS:         `12`
     -- Alcance:     `10`
+- Move:             `6 frames`
+    -- FPS:         `12`
+    -- Ao parar:    `interrompe imediatamente e entra em Idle`
 - Spawn:            `8 frames`
     -- Movimento:   `BLOQUEADO`
     -- FPS:         `12`
-- Death:            `14 frames`
+- Death:            `14 frames; frame 8 dura 166ms; demais frames duram 83ms`
     -- Movimento:   `BLOQUEADO`
     -- FPS:         `12`
 

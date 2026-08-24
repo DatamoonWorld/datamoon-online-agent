@@ -591,6 +591,11 @@ control animation duration. Therefore the interval between attack starts is
 `animation duration + attack_speed`. Interrupted attacks do not start this
 recovery interval.
 
+An action may optionally define `frame_durations` with one duration in seconds
+per frame. When the array is complete, the Server sums those values for the
+authoritative duration instead of assuming every frame has `1 / fps` seconds.
+This supports authored holds such as Slimmoon's death frame 8.
+
 The resolved frame contract and `action_start_input_tick` are included in
 `combat_action_started`. Client and Server derive the movement phase from the
 same input tick, animation FPS and physics tick rate. Locked phases still
