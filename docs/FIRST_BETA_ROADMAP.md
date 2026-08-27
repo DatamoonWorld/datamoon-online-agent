@@ -87,7 +87,7 @@ pacote comemorativo serao preservadas conforme os termos publicados.
 ## Dependencias Visuais
 
 - Mapas e tilesets finais de Digital Center, Moonlight Forest e Moonlight
-  Cavern.
+  Depths.
 - Sprites, colisao, spawn, death, ataques e skills de Slimmoon e Nocmoon.
 - Sprites e animacoes de Slimmoon Fighter Mode e Warrior Mode.
 - Camadas da criacao de personagem: body, skin, hair, eyes, shirt, pants,

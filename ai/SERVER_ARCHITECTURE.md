@@ -36,6 +36,23 @@ flowchart LR
 - mantem estado quente em memoria;
 - persiste somente eventos e checkpoints necessarios pela API.
 
+### Mapas E Workers
+
+- `MainMap` e um host estavel com os containers de entidades e o mapa-base;
+- cenas estaticas sao carregadas pelo `map_zone_loader.gd` conforme o escopo do
+  worker, sem incorporar todos os mapas no arquivo `main_map.tscn`;
+- workers `zone` usam `DATAMOON_ZONE_ID` e workers `instance` usam
+  `DATAMOON_INSTANCE_GROUP` para selecionar suas cenas;
+- `nodes.json` e a fonte autoritativa de `space_id`, tipo, Node, cena e escopo
+  do worker; o Client mantem somente o mapeamento visual necessario para
+  apresentar o espaco ativo;
+- `space_id` continua identificando o espaco de runtime e nao e substituido por
+  `zone_id`;
+- a troca de mapa continua exigindo `space_ready`; handoff e dungeon continuam
+  sendo responsabilidades do Server e do Portal Manager;
+- novos mapas devem ser adicionados ao catalogo do loader e associados a um
+  unico escopo de worker antes de serem publicados.
+
 ### MySQL API
 
 - e a unica interface de banco usada pelos outros servicos;

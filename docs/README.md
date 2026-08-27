@@ -25,6 +25,8 @@
 - `ECONOMY.md`: Bits, itens, equipamentos, Trade e Vendor;
 - `ENEMY_AI.md`: personalidade, navegacao, spawn e leash;
 - `DUNGEON_RULES.md`: instancia, Party, boss e rewards;
+- `WORLD_ROUTING_AUDIT.md`: contrato atual, validacoes e riscos de portais,
+  Nodes, mapas e dungeons;
 - `QUEST_DESIGN.md`: contrato de quests;
 - `QUEST_AUTHORING_TEMPLATE.md`: modelo JSON de quests;
 - `CHARACTER_CREATION.md`: criacao atomica e aparencia;

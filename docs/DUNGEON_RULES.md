@@ -53,6 +53,11 @@ The client may display:
 
 The client must not own dungeon truth.
 
+Each dungeon template belongs to a Node through its `node_id` and uses a
+cataloged static scene on the instance worker. The active runtime space is not
+the template ID: it is `dungeon:<template_id>:<serial>`. The template defines
+content and rules; the serial identifies the isolated live instance.
+
 ---
 
 ## Entry Rules
@@ -139,7 +144,10 @@ Bosses reuse the regular species scene, sprites and animations. Their encounter
 definition applies server-authoritative multipliers after normal species/level
 stats are resolved. Do not fork a second Datamoon scene only to increase stats.
 
-The Client receives only the resulting boss identity and authoritative state.
+Boss behavior can be declared as HP-threshold phases in the dungeon template.
+The server applies the active phase to skill availability, skill cooldowns and
+AI tuning; the Client receives only the resulting boss identity and
+authoritative state.
 Its centered top HUD is presentation: it appears while the tracked boss is
 alive, in the same space and within configured range, and disappears when those
 conditions stop being true.

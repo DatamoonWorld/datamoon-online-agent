@@ -23,9 +23,17 @@ deve concentrar treino, evolucao, incubacao ou melhoria de stats.
 - armazenamento e ativacao do Datamoon selecionado;
 - persistencia da selecao ativa;
 - recálculo seguro de HP, MP, Link e equipamentos durante a troca;
+- forma evolutiva sempre normalizada para `Code` ao armazenar ou retirar;
+- cooldowns de skills preservados por `skill_id`, inclusive quando a skill
+  pertence a uma forma que nao esta ativa;
 - bloqueio da interacao durante combate;
 - rollback quando a persistencia da troca falha;
 - janela e NPC preservados, mas sem fonte ativa na v0.04.
+
+O Archive nao persiste `active_form_id`. Evolucao e um estado temporario da
+sessao: desbloqueios, Link, XP, efeitos persistentes e cooldowns continuam
+associados ao Datamoon, enquanto a entidade recriada sempre inicia na forma
+base. A retirada restaura HP e MP ao maximo por regra do servico.
 
 ## Hatchery
 
@@ -306,14 +314,16 @@ sub-regioes sem substituir o espaco autoritativo.
 ### O Que Existe Hoje
 
 - catalogo autoritativo de `NODE-01` no Server;
+- `nodes.json` concentra os espacos, cenas, Nodes e escopos de worker; o loader
+  do Server e derivado desse catalogo;
 - `moonlight_forest` e `moonlight_depths` associados ao `NODE-01`;
-- Digital Center preservado fora do Node como Datacenter;
+- Digital Center preservado fora do Node como hub externo;
 - sub-regioes catalogadas de Moonlight Forest e Moonlight Depths;
 - portal principal do Digital Center bloqueado ate a conclusao de
   `starter_combat_creatures`, que libera a primeira luta com Slimmoon;
 - portal de retorno e portal da dungeon associados ao `NODE-01`;
 - validacao autoritativa do desbloqueio no Server e visibilidade correspondente
-  no Client;
+  no Client a partir da metadata replicada do portal;
 - nenhum `node_id` persistido em personagem ou replicado por frame;
 - descoberta de novos Nodes continua dependente de quests e dialogos aprovados.
 
@@ -378,6 +388,8 @@ boss autoritativo e retorno seguro ao mundo.
 
 - selecao por portal e reserva de Party;
 - worker separado de instancia;
+- cena de dungeon definida pelo catalogo de espacos e estado isolado por
+  `dungeon:<template>:<serial>`;
 - handoff e retorno ao portal de origem;
 - limite diario com reset configurado;
 - mobs e boss definidos por dados;

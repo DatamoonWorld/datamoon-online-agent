@@ -75,14 +75,24 @@ profile timeout and emits a counter plus structured warning.
 
 ## Current Personalities
 
+Bosses may use the reusable `BossPhaseController` instead of a separate scene.
+The current Moonlight Depths Nocmoon has three HP phases: `territorial` keeps
+skills disabled, `pressured` enables Fang Strike with a 10-second cooldown, and
+`enraged` keeps it enabled with a 6-second cooldown. Phase overrides also make
+perception and repositioning more frequent. The server remains authoritative;
+the client only presents the replicated boss state.
+
 ### Slimmoon
 
-- Calm Slimmoons wander and ignore nearby players.
+- Calm Slimmoons wander and do not initiate combat.
+- Their natural perception uses a bounded line-of-sight scan against authored
+  ground blockers. Seeing a valid player Datamoon or receiving damage activates
+  `PANIC` for that member only.
 - Damage activates `PANIC` only for the attacked Slimmoon.
-- The attacked member flees while the target remains inside
-  `engagement_radius` measured from that Slimmoon; nearby Slimmoons keep their
-  own state. This lets panic continue across the navigation field while the
-  player keeps pursuing it.
+- The attacked member flees while the attacker remains inside
+  `engagement_radius` and visible. Nearby Slimmoons keep their own state. A
+  short observation pause at each safe destination lets the creature check
+  whether the attacker is still pursuing it before selecting another route.
 - Each member samples distant points from its entire authored NavigationRegion
   and scores them by distance from the threat, travel distance and directional
   continuity. Local separation prevents multiple members from selecting the
@@ -94,16 +104,24 @@ profile timeout and emits a counter plus structured warning.
   Once the alert clears, the regular hard leash returns it home safely.
 - The individual alert enters cooldown outside engagement range and calms after
   `calm_delay`.
+- `evade` is not part of normal flee steering; it is reserved for an actual
+  navigation stall or hard-leash return.
 
 ### Nocmoon
 
-- Calm Nocmoons wander and scan using the scene-authored `AwarenessArea`.
+- Calm Nocmoons wander and scan using the scene-authored `AwarenessArea` as
+  echolocation; ground line of sight does not limit this perception.
 - Detection or damage activates `AGGRO` for the whole spawn group.
 - Every member pursues the same active Datamoon and independently selects a
-  valid skill/basic attack based on range and cooldown.
+  valid skill/basic attack based on range and cooldown. Damage can immediately
+  switch the group's target; passive scans only switch to a materially closer
+  target, preventing target oscillation.
 - New members finish spawn and inherit active aggro.
 - Leaving `engagement_radius` starts cooldown; after `calm_delay`, the group
   clears its target and returns home.
+- Members approach small deterministic positions around the target while out
+  of attack range. This preserves a minimum formation distance without
+  changing the authoritative hitbox result or enabling dynamic avoidance.
 
 ## Spawn Configuration
 
@@ -131,6 +149,9 @@ profile timeout and emits a counter plus structured warning.
 - `reset_distance`: absolute hard leash; it must be at least the engagement
   radius.
 - `calm_delay`: hysteresis before clearing an alarm after the target leaves.
+- `flee_observation_pause`: pause at a selected flee destination before
+  checking the threat again.
+- `group_formation_radius`: target-ring radius for social melee profiles.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
 - `ai_profile`: entry in `enemy_ai_profiles.json`; defaults to `ai_behavior`.
@@ -144,6 +165,11 @@ roaming hops. Fleeing species may tune `flee_candidate_samples`,
 `flee_direction_inertia`. `engagement_anchor` chooses whether an individual
 alert measures retention from the spawn-group center or from the member itself.
 Values remain data-driven without duplicating species behavior code.
+
+The current Nocmoon melee contract uses an AI attack range of 20 pixels, which
+matches its compact server hitbox and allows the group formation to attack
+without occupying the exact same point. This is content data, not a client
+prediction rule.
 
 Navigation progress is watched independently from path validity. While an enemy
 requests movement, the brain samples its real displacement. If it moves less

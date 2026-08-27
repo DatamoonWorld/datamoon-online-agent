@@ -203,6 +203,21 @@ Networking should respect that by favoring:
 - joining snapshots for newly relevant areas;
 - minimal data for distant or irrelevant entities.
 
+## Map Loading Scope
+
+- Map scene residency is a worker concern, not a client authority concern.
+- A zone worker loads only the static scenes assigned to its configured zone;
+  an instance worker loads the scenes assigned to its instance group.
+- `space_id` remains the wire and runtime identity used by portals, snapshots,
+  persistence-safe returns and `space_ready` validation.
+- The Client may load only the active visual scene, while the Server keeps all
+  static collision and navigation data required by entities in that worker
+  scope.
+- Adding a map requires an entry in the Server `nodes.json` space catalog, a
+  worker scope and validation of navigation/collision resources; the Client
+  keeps only a presentation registry for visual scenes. Do not add every map
+  to `main_map.tscn`.
+
 Do not design systems that assume all players always receive all world state.
 
 ---

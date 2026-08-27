@@ -91,6 +91,8 @@ The server must own or validate:
 - damage application;
 - buffs and debuffs;
 - cooldown legality;
+- cooldown persistence by skill identity across form changes and session
+  recreation;
 - status effects;
 - death or incapacity states;
 - reward outcomes;
@@ -659,9 +661,10 @@ pending visual actions before applying a new baseline.
 
 Combat text is a short-lived Client visual effect, not a replicated gameplay
 entity. The Server sends the authoritative impact position, damage value,
-critical flag and HP version. The Client updates the target's displayed health
-when the target is locally available, then creates the floating text in a
-map-owned `CombatTextLayer` at the impact position.
+critical flag, HP version, hit kind, effect id and target faction. The Client
+updates the target's displayed health when the target is locally available,
+then creates the floating text in a map-owned `CombatTextLayer` at the impact
+position.
 
 The text must not be parented to the damaged entity. This keeps it visible when
 the entity enters its death lifecycle or is despawned and prevents the number
@@ -669,6 +672,29 @@ from following a target that moved after the authoritative impact. The layer
 is recreated with the active map and is cleared naturally on map replacement.
 Combat text animation, opacity and z-index are presentation-only and do not
 change damage authority or HP reconciliation.
+
+The presentation contract is shared by the local Datamoon, enemies and
+Datamoons owned by other players:
+
+- fixed attack and skill damage travels upward and to the right on a short
+  curved path;
+- normal fixed damage uses the 6 px game font; critical fixed damage uses 12 px;
+- damage received by a friendly target uses a restrained red; critical damage
+  received uses a stronger red;
+- Poison damage travels upward and to the left in light purple (`#d7a0ff`) with
+  a dark outline (`#4b176b`);
+- Bleed damage travels upward and to the left in light red (`#ff9999`) with a
+  dark outline (`#8d0021`);
+- Burn damage travels upward and to the left in medium orange (`#d9782f`) with
+  a dark outline (`#5c2700`);
+- periodic debuff damage always uses the 6 px font, even when a source carries
+  a critical flag.
+
+The Server classifies the target instead of relying on the local peer's entity
+name. This keeps colors consistent when a player receives damage from another
+player's Datamoon and prevents Client-side faction guesses from changing the
+meaning of a combat event. Combat text is intentionally not used for shield
+absorption that leaves HP unchanged.
 
 Enemy XP and Link EXP use an explicit object contract:
 

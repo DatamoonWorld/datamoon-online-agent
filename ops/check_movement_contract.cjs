@@ -3,7 +3,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const root = process.env.DATAMOON_ROOT || path.resolve(__dirname, "../..");
+const workspaceRoot = path.resolve(__dirname, "../../..");
+const legacyRoot = path.resolve(__dirname, "../..");
+const root = process.env.DATAMOON_ROOT || (
+  fs.existsSync(path.join(legacyRoot, "datamoon-online-server"))
+    ? legacyRoot
+    : path.join(workspaceRoot, "datamoon_online")
+);
 const serverFile = path.join(
   root,
   "datamoon-online-server",

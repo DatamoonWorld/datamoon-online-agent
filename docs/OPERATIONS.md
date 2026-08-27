@@ -37,6 +37,10 @@ available for a future capacity increase.
   startup fails when one is missing, short or duplicated.
 - Each Godot service receives only its corresponding token through
   `DATAMOON_INTERNAL_API_TOKEN`.
+- Gateway worker routing is registry-first and fails closed when the registry
+  cannot provide a healthy worker. The fixed overworld route is available only
+  when `DATAMOON_ALLOW_OVERWORLD_FALLBACK=true`; keep it disabled in PBE and
+  production unless a deliberate, time-bounded recovery is being performed.
 - Database, API, Auth and observability ports are blocked from the public network.
 - Public ports are TCP `80/443` and worker UDP `5000/5010/5020`. Gateway port
   `5100` is loopback TCP behind Nginx and must not be exposed publicly.
@@ -723,6 +727,22 @@ curl -fsS http://127.0.0.1:5001/health
 ```
 
 Use the worker-specific port from its environment when the port differs.
+
+Map scene loading is scoped by worker. A normal zone worker loads the scenes
+assigned to `DATAMOON_ZONE_ID`; an instance worker loads the scenes assigned to
+`DATAMOON_INSTANCE_GROUP`. The `MainMap` host no longer embeds every map scene,
+so a startup check must confirm the expected scope was loaded:
+
+```bash
+journalctl -u datamoon-server@overworld.service \
+  --since "10 minutes ago" --no-pager -o cat |
+grep -E 'Worker map|world_maps|Server started|Worker registry status'
+```
+
+Before a planned restart, confirm the graceful-drain event reports
+`"checkpoint_clean":true`. A false value means the process had runtime writes
+pending and the maintenance should be investigated before being considered
+successful.
 
 ### datamoon-online-web
 

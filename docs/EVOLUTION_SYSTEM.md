@@ -85,7 +85,9 @@ On successful transform:
 - HP is restored to full.
 - MP is restored to full.
 - Buffs remain active.
-- Skill cooldowns reset.
+- Skill cooldowns remain active by `skill_id`, even when the skill is not
+  present in the destination form; they are restored when that skill becomes
+  active again.
 - equipment and Link modifiers are recalculated before HP and MP are filled;
 - the persistent hotbar layout remains, while skill actions are resolved again
   from the active form's combat slots.
@@ -93,6 +95,18 @@ On successful transform:
 Regress follows the same resource, cooldown and hotbar rules. Death performs
 an automatic Regress to Code without healing the defeated Datamoon; the normal
 revive lifecycle owns the later resource restoration.
+
+## Archive Rules
+
+- Archive storage never persists `active_form_id`.
+- A Datamoon stored from `Nex` or `Omega` is normalized to its base `Code`
+  runtime form before the old entity is discarded.
+- A Datamoon retrieved from the Archive is spawned in its base `Code` form.
+- Unlocks, Link, XP, persistent effects and skill cooldowns remain attached to
+  the Datamoon instance.
+- HP and MP are restored to their maximum values when a Datamoon is retrieved.
+- A failed swap rolls back the persistence operation and may restore the
+  previous runtime entity without losing its temporary form.
 
 ---
 
