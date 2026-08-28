@@ -87,8 +87,8 @@ aprovadas. Novos Datamoons sao obtidos por incubacao; nao existe captura direta.
 - nunca registrar segredo, senha, token, ticket ou conteudo de Chat;
 - manter INFO para transicoes e DEBUG para diagnostico temporario;
 - medir antes de otimizar ou adicionar infraestrutura de escala;
-- manter a decisao vigente de validacao funcional manual, gates estaticos e logs
-  estruturados, sem arquivos de testes automatizados;
+- manter a decisao vigente de validacao funcional manual, gates estaticos, testes
+  automatizados de contrato quando existirem e logs estruturados;
 - usar `apply_patch` em alteracoes manuais e commits separados por repositorio.
 
 ## Leitura Por Dominio

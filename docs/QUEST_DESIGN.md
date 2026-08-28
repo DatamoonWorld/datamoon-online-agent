@@ -21,6 +21,11 @@ The starter Devmoon quests introduce the canon gradually. They should not
 reveal the full history of the Adormecido, Voss, NULL Protocol or Data Bleed
 before those events become relevant in the story.
 
+All seven current starter Devmoon quests are authored with
+`category: main` and `repeatable: false`. They form one persistent narrative
+chain; future optional content must use `side` or a recurring category rather
+than relying on the category fallback.
+
 - Q1 presents Digital Center as the bridge between the human world and
   Dataworld. Node terminology remains Devmoon's technical vocabulary.
 - Q2 explains that Datamoons are hybrid life forms born from the dreams of the
@@ -66,6 +71,7 @@ The current structure already supports:
 - `id`
 - `title`
 - `description`
+- `category`
 - `giver_npc_id`
 - `turn_in_npc_id`
 - `repeatable`
@@ -73,6 +79,11 @@ The current structure already supports:
 - `requires_quests`
 - `objectives`
 - `rewards`
+
+`category` is content metadata and may be `main`, `side`, `daily`, `weekly`,
+`event` or `battle_pass`. The runtime exposes the category and availability to
+the Client. `one_time`, legacy `repeatable`, `daily` and `weekly` are active;
+event and battle-pass cycles remain reserved for a later system.
 
 New quest work should preserve this explicit, inspectable format.
 
@@ -179,6 +190,51 @@ Do not use repeatables when:
 - the reward is too strong for infinite repetition;
 - the objective can be botted easily;
 - the loop bypasses the main progression systems.
+
+## Party Credit Rules
+
+Quest credit is determined by objective type, never by the Client:
+
+- `collect_item`: each character must collect the items personally. Item drops
+  are granted only to the character credited with the kill.
+- `kill_enemy_type`: every online member of the same Party in the same
+  `space_id` and worker receives kill progress.
+- `complete_dungeon`: progress is granted when the dungeon instance is
+  completed, to the members that receive the completion event. Killing the boss
+  alone does not complete this objective.
+- `talk_to_npc`: only the character performing the validated interaction gets
+  progress.
+
+A quest that must specifically require a boss kill should use
+`kill_enemy_type` with the boss's authoritative type. It must not rely on the
+dungeon completion event.
+
+## Availability Policies
+
+Quest categories and availability are intentionally separate. Recurring content
+uses an explicit policy such as:
+
+```json
+"category": "daily",
+"availability_mode": "daily"
+```
+
+The Server derives the current cycle key from UTC and persists it with the
+character quest run. A unique `(character, quest, cycle_key)` identity prevents
+duplicate rewards after retries or reconnects. Daily quests reset at the same
+configured UTC hour as dungeons (currently 03:00 UTC). Weekly quests use the
+same boundary and start on Monday. The Client receives `cycle_key` and
+`next_reset_at_unix`, but never decides availability from its own clock.
+
+Definitions without `availability_mode` inherit `daily` or `weekly` from their
+category. New recurring content should still declare the mode explicitly.
+Old cycle rows remain auditable in MySQL, while runtime snapshots request only
+`permanent` plus the current daily and weekly keys.
+
+Recommended categories are `main` for the narrative chain, `side` for optional
+content, `daily` and `weekly` for reset-based loops, `event` for bounded world
+windows, and `battle_pass` for season-owned progression. These categories do
+not bypass normal Server validation or reward idempotency.
 
 ---
 

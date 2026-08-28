@@ -8,6 +8,10 @@
 - `CODE_HEALTH.md`: qualidade, performance e criterio de limpeza;
 - `LEGAL_AND_PRIVACY.md`: conta, beta, termos e dados;
 - `OPERATIONS.md`: deploy, seguranca, logs e operacao da VM.
+- `CATALOG_AND_LOCALIZATION.md`: autoridade dos catalogos, sincronizacao e
+  contrato de idiomas.
+- `FULL_AUDIT_2026-08.md`: auditoria transversal dos repositorios, contratos,
+  desempenho e pendencias de beta.
 
 ## Universo
 
@@ -29,6 +33,7 @@
   Nodes, mapas e dungeons;
 - `QUEST_DESIGN.md`: contrato de quests;
 - `QUEST_AUTHORING_TEMPLATE.md`: modelo JSON de quests;
+- `SOCIAL_SYSTEM.md`: Friends, Party, Guild, Chat e acoes contextuais;
 - `CHARACTER_CREATION.md`: criacao atomica e aparencia;
 - `WORLD_EVENTS.md`: eventos autoritativos e Anomalias.
 

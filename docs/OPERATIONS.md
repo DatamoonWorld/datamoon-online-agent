@@ -412,11 +412,11 @@ character join and worker presence. Credentials and tickets must never appear.
 Use `sudo tail -f /var/log/nginx/access.log /var/log/nginx/error.log` for TLS and
 upgrade failures.
 
-There are no automated functional test files. Source gates are Godot headless
-import, Go formatting/vet/build, Node syntax, Bash syntax and semantic equality
-of gameplay item fields between Server and MySQL API catalogs. Presentation-only
-item fields may differ. Gameplay acceptance is manual and must be supported by
-structured event logs.
+Automated contract tests exist in the MySQL API, while gameplay acceptance is
+still manual. Source gates are Godot headless import, Go formatting/vet/build,
+Go tests, Node syntax, Bash syntax and semantic equality of gameplay item fields
+between Server and MySQL API catalogs. Presentation-only item fields may
+differ. Manual gameplay acceptance must be supported by structured event logs.
 
 ### Manual social validation
 

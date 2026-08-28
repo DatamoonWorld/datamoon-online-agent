@@ -46,6 +46,7 @@ the file to the server catalog.
   "quests": [
     {
       "id": "template_zone_step_01",
+      "category": "main",
       "title": "Quest title shown to the player",
       "description": "Clear instruction describing what to do and where to return.",
       "giver_npc_id": "template_quest_npc",
@@ -126,6 +127,7 @@ the intended sequence explicit and prevents skipping an intermediate quest.
 - `title`: short player-facing title.
 - `description`: actionable instruction, including location or return NPC when
   useful.
+- `category`: `main`, `side`, `daily`, `weekly`, `event` or `battle_pass`.
 - `giver_npc_id`: exact `npc_id` that may accept the quest.
 - `turn_in_npc_id`: exact `npc_id` that may complete the quest.
 - `repeatable`: keep `false` for the initial story chain.
@@ -133,6 +135,19 @@ the intended sequence explicit and prevents skipping an intermediate quest.
 - `requires_quests`: ids that must already be completed.
 - `objectives`: one or more server-observable objectives.
 - `rewards`: economically reviewed rewards applied during completion.
+
+For recurring content, add an explicit availability mode:
+
+```json
+"category": "daily",
+"availability_mode": "daily"
+```
+
+`daily` resets at the same UTC boundary as dungeons. `weekly` resets on Monday
+at that boundary. The Server derives the cycle key and the next reset; the
+Client must only display the returned snapshot. `event` and `battle_pass` are
+catalog categories reserved for a future cycle owner and are not functional
+content yet.
 
 ### Objective
 
@@ -203,6 +218,10 @@ locked -> available -> active -> ready_to_turn_in -> completed
 - `ready_to_turn_in`: all objectives are complete.
 - `completed`: turn-in and reward operation succeeded.
 
+Daily and weekly quests use the same lifecycle once per server-derived cycle.
+Their persisted identity is `(character, quest, cycle_key)`, so a new cycle
+creates a new run without allowing duplicate completion in the same cycle.
+
 Completion is server-authoritative. The client displays snapshots and sends
 requests, but it does not decide progress or rewards.
 
@@ -221,7 +240,12 @@ Before testing each quest:
 9. Verify turn-in fails at the wrong NPC and before completion.
 10. Verify rewards and collected-item consumption happen only once.
 11. Verify the next quest becomes available.
+
 12. Run the server catalog validation before deployment.
+
+For combat quests, also verify the Party credit rule: item ownership remains
+with the killer, while `kill_enemy_type` progress is shared only with online
+members in the same `space_id` and worker.
 
 ## Dialogue Quest Contract
 

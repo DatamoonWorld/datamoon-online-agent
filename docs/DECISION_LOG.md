@@ -64,6 +64,8 @@ pertencem a `FIRST_BETA_ROADMAP.md`.
   repath distribuido, leash suave, estado de evade e snap apenas emergencial.
 - Conteudo e data-driven. IDs em JSON, cenas e API devem ser validados entre os
   catalogos antes de deploy.
+- Quests `daily` e `weekly` usam chave de ciclo derivada pelo Server; daily
+  compartilha o reset UTC das dungeons e weekly inicia na segunda-feira.
 - Equipamentos gerados persistem stats no item; progresso sensivel e rewards
   usam operacoes idempotentes e auditoria.
 - Link representa o vinculo com o Datamoon e controla a porcentagem dos stats
@@ -76,8 +78,9 @@ pertencem a `FIRST_BETA_ROADMAP.md`.
 
 ## Conta, Web E Operacao
 
-- Mute e slow mode sao persistentes; antispam bloqueia a quinta mensagem em
-  dois segundos. Nao existe chat-ban e o conteudo normal do chat nao e logado.
+- Mute e slow mode sao persistentes; antispam bloqueia a quinta mensagem ou a
+  terceira repeticao em dois segundos. Nao existe chat-ban e o conteudo normal
+  do chat nao e logado.
 - Logs estruturados vao para stdout/journald; arquivos JSONL duplicados ficam
   desativados. INFO registra transicoes, bloqueios e erros, nao cada movimento.
 - Auditorias persistentes cobrem economia e operacoes administrativas; retencao

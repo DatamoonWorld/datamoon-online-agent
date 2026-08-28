@@ -65,6 +65,8 @@ Eggs, equipamentos, materiais e itens futuros.
 
 - catalogo de receitas em JSON;
 - validacao autoritativa de ingredientes, quantidades e inventario;
+- custo de BITs definido no catalogo e debitado atomicamente quando a receita
+  estiver habilitada;
 - consumo e concessao dentro de operacao transacional e idempotente;
 - motor de receitas compartilhado com Cooking;
 - suporte a resultados com metadata;
@@ -82,6 +84,7 @@ outros consumiveis relacionados a preparacao do jogador.
 
 - receitas de Cooking separadas por profissao no catalogo compartilhado;
 - validacao e processamento autoritativos;
+- custo de BITs lido do catalogo, sem permitir override pelo Client;
 - Cooking EXP e nivel de Cooking persistentes;
 - consumo e producao transacionais;
 - alimentos que aplicam buffs temporarios;
@@ -140,7 +143,10 @@ politica de faccoes ou economia propria neste desenho.
 - mensagem da Guild;
 - canal de Chat da Guild;
 - operacoes e eventos administrativos auditados;
-- sistema preservado, mas sem fonte ativa do item de criacao na v0.04.
+- limite de 30 membros, nomes unicos de 3 a 10 caracteres e consumo atomico do
+  `guild_deploy_drive` na criacao;
+- item de criacao continua dependente de uma fonte de gameplay, que sera o NPC
+  de Guild quando essa interface entrar no jogo.
 
 ## Equipamentos
 
@@ -336,12 +342,18 @@ Grupo temporario para jogar com amigos em mapas e dungeons.
 ### O Que Existe Hoje
 
 - convite e membership;
+- Friends persistentes com convites, aceite/recusa, presenca e limite de 20;
+- convite de Party por Friends, Guild ou nome clicavel no Chat;
 - propagacao versionada entre workers;
 - reserva integral para dungeon;
 - preservacao durante handoff;
 - HUD remota acinzentada sem texto `OFFLINE`;
 - remocao depois de offline definitivo;
-- rollback quando a transferencia falha.
+- rollback quando a transferencia falha;
+- credito de quest de abate limitado ao mesmo worker e `space_id`;
+- XP compartilhado atualmente limitado a membros online no worker local.
+
+O fluxo detalhado e os pontos de revisao estao em `PARTY_AUDIT.md`.
 
 ## Chat E Moderacao
 
@@ -352,13 +364,25 @@ Chat, nao o acesso completo a conta.
 
 ### O Que Existe Hoje
 
-- canais World, Private, Party e Guild;
+- canais Local, World, Private, Party e Guild;
+- abas All, Guild, Local, World, Party, Whisper e System;
+- nomes de remetentes com menu contextual para Friends, Party, Guild e Whisper;
+- mensagens normais limitadas a 240 caracteres e persistidas por retencao curta;
+- whisper persistente para destinatario offline;
+- comandos de Party, Guild e Friend removidos do parser do Client;
+- comandos administrativos removidos do Chat e mantidos somente nas rotas
+  protegidas para ferramenta futura;
 - mute/unmute administrativo persistente;
 - slow/normal mode persistente por canal;
-- quinta mensagem em dois segundos bloqueada com timeout de 2.000 ms;
+- quinta mensagem ou terceira repeticao em dois segundos bloqueada com timeout
+  de 2.000 ms;
 - feedback de tempo restante;
 - administradores definidos por conta;
 - conteudo das mensagens nao e gravado nos logs de auditoria.
+- Ctrl + clique direito anexa itens do inventario/equipamentos ao rascunho,
+  limitado a dois itens por mensagem;
+- o vinculo usa snapshot publico validado pelo Server e abre o tooltip padrao
+  com Ctrl + clique esquerdo, sem expor dados privados do inventario.
 
 ## Quests
 
@@ -373,9 +397,16 @@ desbloqueio de sistemas.
 - objetivos de conversa, derrota e conclusao de dungeon;
 - progresso persistente;
 - turn-in e rewards idempotentes;
-- sete quests iniciais ligadas ao Devmoon;
+- sete quests iniciais ligadas ao Devmoon, todas na categoria `main` e formando
+  uma cadeia narrativa nao repetivel;
 - rewards de EXP, itens e desbloqueios;
-- suporte futuro a quests de Guild, evento, Link MAX e interacao com sistemas.
+- categorias de quest expostas no snapshot (`main`, `side`, `daily`, `weekly`, `event`, `battle_pass`);
+- kills compartilhadas somente entre membros da Party no mesmo worker e `space_id`;
+- itens de combate entregues somente ao personagem que realizou o kill;
+- dungeon creditada pela conclusao da instancia, separada da morte do boss;
+- ciclos daily e weekly ativos com chave derivada pelo Server e reset alinhado
+  as dungeons (daily em 03:00 UTC e weekly na segunda-feira); event e battle
+  pass continuam reservados para sistemas futuros.
 
 ## Dungeons E Bosses
 
