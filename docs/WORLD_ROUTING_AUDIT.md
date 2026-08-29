@@ -38,6 +38,17 @@ Ele nao autoriza portal, mapa ou dungeon.
 7. Timeout, conclusao, saida, desconexao e remocao da Party limpam a instancia
    e retornam o jogador por um ponto seguro.
 
+## Persistencia De Localizacao
+
+- `space_id` de mapas normais conhecidos e persistido no logout junto da
+  posicao do personagem.
+- Espacos com prefixo `dungeon:` nunca sao persistidos; o login retorna ao
+  ponto seguro/retorno do mundo.
+- Espacos de evento devem usar prefixo `event:` ou declarar
+  `persist_character_location: false` no catalogo de espacos.
+- O bloqueio de portal controla acesso ao mapa, nao apaga a ultima localizacao
+  valida de um personagem que ja esta nele.
+
 ## Validacoes Aplicadas
 
 - espacos precisam de cena existente, worker e escopo validos;
