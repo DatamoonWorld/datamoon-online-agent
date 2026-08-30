@@ -69,15 +69,19 @@ acoes contextuais.
   o `message_id` permite deduplicacao no Client;
 - o relay entre workers transporta nome, `sender_character_id` e `message_id`.
 - com `Ctrl` + clique direito em um item do Inventario ou equipamento equipado,
-  o jogador anexa um vinculo ao rascunho da mensagem; cada mensagem aceita no
-  maximo dois itens;
+  o jogador insere o nome visivel e anexa um vinculo ao rascunho da mensagem;
+  cada mensagem aceita no maximo dois itens. O vinculo acompanha edicoes no
+  texto e e removido se o nome inserido for alterado ou apagado;
 - o Server valida a posse atual pelo `inventory_item_id` e substitui a referencia
-  por um snapshot publico contendo apenas item, raridade, upgrade e stats;
+  por um snapshot publico contendo item, nome, descricao, raridade, sprite,
+  upgrade e stats. Tipos de catalogo como `material_craft` sao normalizados
+  para o tipo publico `material`;
 - o snapshot e persistido junto da mensagem e continua disponivel durante a
   retencao mesmo que o item seja alterado ou removido depois;
-- no Client, `Ctrl` + clique esquerdo no nome vinculado abre o tooltip padrao em
-  modo somente leitura. Dono, slot, quantidade, id do inventario e metadata
-  privada nunca sao enviados ao Chat.
+- no Client, `Ctrl` + clique no nome vinculado abre o mesmo tooltip do
+  Inventario em modo somente leitura, incluindo descricao e stats publicos.
+  Dono, slot, quantidade, id do inventario e metadata privada nunca sao
+  enviados ao Chat.
 
 ### Retencao e logs
 

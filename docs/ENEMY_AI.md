@@ -90,10 +90,15 @@ the client only presents the replicated boss state.
   `PANIC` for that member only.
 - Damage activates `PANIC` only for the attacked Slimmoon.
 - The attacked member flees while the attacker remains inside
-  `engagement_radius` and visible. Nearby Slimmoons keep their own state. A
-  0.5-second observation pause when it first sees the attacker and at each
-  safe destination lets the creature face the attacker and check whether it is
+  `engagement_radius`. Nearby Slimmoons keep their own state. A 1-second
+  observation pause when it first sees the attacker and at each safe
+  destination lets the creature face the attacker and check whether it is
   still being pursued before selecting another route.
+- A short `flee_lost_sight_grace` keeps the current panic route when a raycast
+  flickers or a blocker briefly interrupts visibility. At a safe destination,
+  the explicit one-second check is authoritative: if the attacker is not
+  visible, the Slimmoon returns to `WANDER`; if it is visible, it selects a new
+  escape route. This prevents repeated flee/wander transitions and zig-zagging.
 - Each member samples distant points from its entire authored NavigationRegion
   and scores them by distance from the threat, travel distance and directional
   continuity. Local separation prevents multiple members from selecting the
@@ -153,6 +158,8 @@ the client only presents the replicated boss state.
 - `calm_delay`: hysteresis before clearing an alarm after the target leaves.
 - `flee_observation_pause`: pause at a selected flee destination before
   checking the threat again.
+- `flee_lost_sight_grace`: temporary visibility-loss tolerance while traveling
+  to the current flee destination.
 - `group_formation_radius`: target-ring radius for social melee profiles.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
