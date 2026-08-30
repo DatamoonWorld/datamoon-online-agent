@@ -38,7 +38,7 @@
 - Spawn:            `8 frames`
     -- Movimento:   `BLOQUEADO`
     -- FPS:         `12`
-- Death:            `14 frames; frame 8 dura 166ms; demais frames duram 83ms`
+- Death:            `14 frames; todos os frames duram 83ms`
     -- Movimento:   `BLOQUEADO`
     -- FPS:         `12`
 

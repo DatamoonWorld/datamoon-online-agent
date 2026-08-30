@@ -91,8 +91,9 @@ the client only presents the replicated boss state.
 - Damage activates `PANIC` only for the attacked Slimmoon.
 - The attacked member flees while the attacker remains inside
   `engagement_radius` and visible. Nearby Slimmoons keep their own state. A
-  short observation pause at each safe destination lets the creature check
-  whether the attacker is still pursuing it before selecting another route.
+  0.5-second observation pause when it first sees the attacker and at each
+  safe destination lets the creature face the attacker and check whether it is
+  still being pursued before selecting another route.
 - Each member samples distant points from its entire authored NavigationRegion
   and scores them by distance from the threat, travel distance and directional
   continuity. Local separation prevents multiple members from selecting the
@@ -117,8 +118,9 @@ the client only presents the replicated boss state.
   switch the group's target; passive scans only switch to a materially closer
   target, preventing target oscillation.
 - New members finish spawn and inherit active aggro.
-- Leaving `engagement_radius` starts cooldown; after `calm_delay`, the group
-  clears its target and returns home.
+- Leaving `engagement_radius` or the authored navigation field clears the
+  group's target immediately and starts the return-home behavior without
+  waiting for `calm_delay`.
 - Members approach small deterministic positions around the target while out
   of attack range. This preserves a minimum formation distance without
   changing the authoritative hitbox result or enabling dynamic avoidance.

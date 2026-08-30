@@ -596,7 +596,8 @@ recovery interval.
 An action may optionally define `frame_durations` with one duration in seconds
 per frame. When the array is complete, the Server sums those values for the
 authoritative duration instead of assuming every frame has `1 / fps` seconds.
-This supports authored holds such as Slimmoon's death frame 8.
+This supports authored holds when a future animation requires them; Slimmoon's
+death animation currently uses the same `83ms` duration for all frames.
 
 The resolved frame contract and `action_start_input_tick` are included in
 `combat_action_started`. Client and Server derive the movement phase from the
