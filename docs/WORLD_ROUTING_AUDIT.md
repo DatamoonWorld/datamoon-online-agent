@@ -38,6 +38,19 @@ Ele nao autoriza portal, mapa ou dungeon.
 7. Timeout, conclusao, saida, desconexao e remocao da Party limpam a instancia
    e retornam o jogador por um ponto seguro.
 
+## Handshake De Transicao
+
+- O Client bloqueia o input durante a troca de mapa e envia `space_ready` apenas
+  depois de carregar a cena e aplicar o primeiro snapshot.
+- O Server descarta movimento e combate enquanto aguarda esse sinal, evitando
+  que comandos antigos sejam reproduzidos depois do teleporte.
+- Em transicoes locais, o Server envia a confirmacao `SPACE_READY`; o Client
+  somente entao executa o resync final e libera o input.
+- Handoffs entre workers continuam usando o loading handshake de entrada, que
+  controla o spawn e a liberacao do jogo no worker de destino.
+- `Client space loading started`, `Client space loading ready` e `Client space
+  loading timed out` registram o tempo e o worker para diagnostico.
+
 ## Persistencia De Localizacao
 
 - `space_id` de mapas normais conhecidos e persistido no logout junto da
