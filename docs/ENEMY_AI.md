@@ -84,26 +84,19 @@ the client only presents the replicated boss state.
 
 ### Slimmoon
 
-- Calm Slimmoons wander and do not initiate combat.
-- Their natural perception uses a bounded line-of-sight scan against authored
-  ground blockers. Seeing a valid player Datamoon or receiving damage activates
-  `PANIC` for that member only.
-- Damage activates `PANIC` only for the attacked Slimmoon.
+- Calm Slimmoons wander and do not initiate combat or use natural perception.
+- Damage is the only trigger that activates `PANIC`, and it affects only the
+  attacked Slimmoon.
 - The attacked member flees while the attacker remains inside
   `engagement_radius`. Nearby Slimmoons keep their own state. A 1-second
-  observation pause when it first sees the attacker and at each safe
-  destination lets the creature face the attacker and check whether it is
-  still being pursued before selecting another route.
+  observation pause at each safe destination lets the creature face the
+  attacker and check whether it is still being pursued before selecting
+  another route.
 - A short `flee_lost_sight_grace` keeps the current panic route when a raycast
   flickers or a blocker briefly interrupts visibility. At a safe destination,
   the explicit one-second check is authoritative: if the attacker is not
-  visible, the Slimmoon returns to `WANDER`; if it is visible, it selects a new
-  escape route. After losing an attacker, the target is kept as a short-term
-  threat memory for wander route selection, so the next route avoids crossing
-  back through the attacker's area. Natural perception is never suppressed:
-  seeing a valid player again activates panic as expected for a fearful species.
-  This prevents repeated boundary zig-zagging without making the Slimmoon
-  ignore the player.
+  visible or leaves the engagement radius, the Slimmoon returns to `WANDER`; if
+  it remains a threat, it selects a new escape route.
 - Each member samples distant points from its entire authored NavigationRegion
   and scores them by distance from the threat, travel distance and directional
   continuity. Local separation prevents multiple members from selecting the
@@ -165,6 +158,9 @@ the client only presents the replicated boss state.
   checking the threat again.
 - `flee_lost_sight_grace`: temporary visibility-loss tolerance while traveling
   to the current flee destination.
+- A navigation boundary during `FLEE` invalidates the current destination
+  immediately and causes a new flee point to be selected; it does not trigger
+  `RETURN_HOME` or an emergency reset.
 - `group_formation_radius`: target-ring radius for social melee profiles.
 - `ai_behavior`: registered personality. Unknown ids use the defensive fallback
   and emit a server warning.
