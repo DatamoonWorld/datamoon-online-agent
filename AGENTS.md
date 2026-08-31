@@ -87,6 +87,13 @@ aprovadas. Novos Datamoons sao obtidos por incubacao; nao existe captura direta.
 - nunca registrar segredo, senha, token, ticket ou conteudo de Chat;
 - manter INFO para transicoes e DEBUG para diagnostico temporario;
 - medir antes de otimizar ou adicionar infraestrutura de escala;
+- para gameplay de MMORPG, priorizar estados explicitos, autoridade do Server,
+  histerese, tolerancia de rede, configuracao data-driven e comportamento
+  estavel antes de qualquer correcao baseada em cooldown ou caso especial;
+- evitar ciclos de reacquisition, oscilacao e teleporte artificial sem bloquear
+  a fantasia da especie: memorias de ameaca devem orientar a proxima decisao e
+  ser liberadas por uma mudanca real de contexto, enquanto a percepcao continua
+  respeitando a personalidade autoritativa da entidade;
 - manter a decisao vigente de validacao funcional manual, gates estaticos, testes
   automatizados de contrato quando existirem e logs estruturados;
 - usar `apply_patch` em alteracoes manuais e commits separados por repositorio.

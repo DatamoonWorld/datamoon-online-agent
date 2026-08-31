@@ -98,7 +98,12 @@ the client only presents the replicated boss state.
   flickers or a blocker briefly interrupts visibility. At a safe destination,
   the explicit one-second check is authoritative: if the attacker is not
   visible, the Slimmoon returns to `WANDER`; if it is visible, it selects a new
-  escape route. This prevents repeated flee/wander transitions and zig-zagging.
+  escape route. After losing an attacker, the target is kept as a short-term
+  threat memory for wander route selection, so the next route avoids crossing
+  back through the attacker's area. Natural perception is never suppressed:
+  seeing a valid player again activates panic as expected for a fearful species.
+  This prevents repeated boundary zig-zagging without making the Slimmoon
+  ignore the player.
 - Each member samples distant points from its entire authored NavigationRegion
   and scores them by distance from the threat, travel distance and directional
   continuity. Local separation prevents multiple members from selecting the
@@ -170,8 +175,8 @@ AI profiles own alert scope, perception cadence, return watchdogs, emergency
 timeout, evade time, sleep checks, soft-boundary ratios, flee steering and
 lightweight movement separation. `wander_min_distance_ratio` prevents trivial
 roaming hops. Fleeing species may tune `flee_candidate_samples`,
-`flee_min_travel_distance`, `flee_cutoff_margin`, `flee_spread_degrees` and
-`flee_direction_inertia`. `engagement_anchor` chooses whether an individual
+`flee_min_travel_distance`, `flee_spread_degrees` and `flee_direction_inertia`.
+`engagement_anchor` chooses whether an individual
 alert measures retention from the spawn-group center or from the member itself.
 Values remain data-driven without duplicating species behavior code.
 
